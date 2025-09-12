@@ -1,0 +1,26 @@
+{
+    "doctype": "DocType",
+    "name": "HA POS Setting",
+    "module": "havano_pos_addson",
+    "fields": [
+        {
+            "fieldname": "ha_pos_settings_on",
+            "fieldtype": "Check",
+            "label": "HA POS Settings On",
+            "default": 0
+        },
+        {
+            "fieldname": "ha_on_pres_enter",
+            "fieldtype": "Select",
+            "label": "On Press Enter",
+            "options": "\nMove to Next Row\nMove to Qty",
+            "default": "Move to Next Row"
+        }
+    ],
+    "permissions": [
+        {
+            "role": "All",
+            "permlevel": 0
+        }
+    ]
+}
