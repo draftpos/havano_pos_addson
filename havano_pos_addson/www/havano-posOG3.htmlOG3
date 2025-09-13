@@ -502,85 +502,6 @@
         display: flex;
         justify-content: space-between;
     }
-    
-    /* Quantity Popup Styles */
-    .ha-quantity-popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        z-index: 2000;
-        width: 300px;
-        display: none;
-    }
-    
-    .ha-quantity-popup.active {
-        display: block;
-    }
-    
-    .ha-quantity-popup h3 {
-        margin-top: 0;
-        color: var(--navyblue);
-        text-align: center;
-    }
-    
-    .ha-quantity-input {
-        width: 100%;
-        padding: 12px;
-        font-size: 18px;
-        text-align: center;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-        margin: 15px 0;
-        box-sizing: border-box;
-    }
-    
-    .ha-quantity-input:focus {
-        border-color: var(--orange-color);
-        outline: none;
-    }
-    
-    .ha-quantity-popup-buttons {
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    .ha-quantity-popup-btn {
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-    
-    .ha-quantity-popup-confirm {
-        background: var(--success-color);
-        color: white;
-    }
-    
-    .ha-quantity-popup-cancel {
-        background: var(--accent-color);
-        color: white;
-    }
-    
-    .ha-popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1999;
-        display: none;
-    }
-    
-    .ha-popup-overlay.active {
-        display: block;
-    }
 </style>
 {% endblock %}
 
@@ -681,17 +602,6 @@
 <!-- Search dropdown -->
 <div class="ha-item-search-dropdown" id="searchDropdown"></div>
 
-<!-- Quantity Popup -->
-<div class="ha-popup-overlay" id="quantityPopupOverlay"></div>
-<div class="ha-quantity-popup" id="quantityPopup">
-    <h3>Enter Quantity</h3>
-    <input type="number" class="ha-quantity-input" id="quantityInput" min="1" value="1" step="1">
-    <div class="ha-quantity-popup-buttons">
-        <button class="ha-quantity-popup-btn ha-quantity-popup-cancel" id="quantityPopupCancel">Cancel</button>
-        <button class="ha-quantity-popup-btn ha-quantity-popup-confirm" id="quantityPopupConfirm">Confirm</button>
-    </div>
-</div>
-
 <script>
 // Global variables
 let allItems = [];
@@ -703,7 +613,6 @@ let currentFocusIndex = -1;
 let isInSearchMode = false;
 let currentSearchTerm = '';
 let currentSearchResults = [];
-let currentRowForQuantity = null; // Track which row to update with quantity
 
 // DOM elements
 const itemsTableBody = document.getElementById('itemsTableBody');
@@ -716,11 +625,6 @@ const priceListSelect = document.getElementById('pricelist');
 const btnPayment = document.getElementById('btnPayment');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const tableContainer = document.querySelector('.table-responsive');
-const quantityPopup = document.getElementById('quantityPopup');
-const quantityPopupOverlay = document.getElementById('quantityPopupOverlay');
-const quantityInput = document.getElementById('quantityInput');
-const quantityPopupConfirm = document.getElementById('quantityPopupConfirm');
-const quantityPopupCancel = document.getElementById('quantityPopupCancel');
 
 // Initialize the POS when DOM is loaded
 document.addEventListener('DOMContentLoaded', initPOS);
@@ -787,106 +691,10 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
-// Show quantity popup
-function showQuantityPopup(row = null) {
-    // Determine which row to update
-    if (!row) {
-        // If no row specified, try to find the active row
-        const activeRow = document.querySelector('.item-row-active');
-        if (activeRow) {
-            currentRowForQuantity = activeRow;
-        } else {
-            // If no active row, use the row with the focused input
-            const focusedInput = document.activeElement;
-            if (focusedInput && focusedInput.closest('tr')) {
-                currentRowForQuantity = focusedInput.closest('tr');
-            } else {
-                // If no focused input, use the last row with items
-                const rows = itemsTableBody.querySelectorAll('tr');
-                if (rows.length > 0) {
-                    currentRowForQuantity = rows[rows.length - 1];
-                } else {
-                    // If no rows, add a new one
-                    addNewRow();
-                    const newRows = itemsTableBody.querySelectorAll('tr');
-                    currentRowForQuantity = newRows[newRows.length - 1];
-                }
-            }
-        }
-    } else {
-        currentRowForQuantity = row;
-    }
-    
-    // Get current quantity value
-    const currentQty = currentRowForQuantity.querySelector('.item-qty').value;
-    quantityInput.value = currentQty || '1';
-    
-    // Show popup and overlay
-    quantityPopup.classList.add('active');
-    quantityPopupOverlay.classList.add('active');
-    
-    // Focus and select text in the input
-    setTimeout(() => {
-        quantityInput.focus();
-        quantityInput.select();
-    }, 10);
-}
-
-// Hide quantity popup
-function hideQuantityPopup() {
-    quantityPopup.classList.remove('active');
-    quantityPopupOverlay.classList.remove('active');
-    currentRowForQuantity = null;
-}
-
-// Apply quantity from popup
-function applyQuantityFromPopup() {
-    if (!currentRowForQuantity) return;
-    
-    const qtyValue = parseFloat(quantityInput.value);
-    if (isNaN(qtyValue) || qtyValue <= 0) {
-        showToast('Please enter a valid quantity', 'error');
-        quantityInput.focus();
-        quantityInput.select();
-        return;
-    }
-    
-    // Update the quantity in the row
-    const qtyInput = currentRowForQuantity.querySelector('.item-qty');
-    qtyInput.value = qtyValue;
-    
-    // Trigger change event to update amount
-    const event = new Event('change', { bubbles: true });
-    qtyInput.dispatchEvent(event);
-    
-    // Hide the popup
-    hideQuantityPopup();
-    
-    // Focus back on the quantity field
-    qtyInput.focus();
-    qtyInput.select();
-}
-
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
     btnPayment.addEventListener('click', saveSalesInvoice);
-    
-    // Quantity popup events
-    quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);
-    quantityPopupCancel.addEventListener('click', hideQuantityPopup);
-    quantityPopupOverlay.addEventListener('click', hideQuantityPopup);
-    
-    // Handle Enter key in quantity popup
-    quantityInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            applyQuantityFromPopup();
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            hideQuantityPopup();
-        }
-    });
     
     // Event delegation for dynamic elements
     document.addEventListener('click', function(e) {
@@ -910,13 +718,6 @@ function bindEvents() {
         if (e.target.closest('.ha-function-key')) {
             const action = e.target.closest('.ha-function-key').dataset.action;
             handleFunctionKey(action);
-        }
-        
-        // Set active row when clicking on any row element
-        if (e.target.closest('tr')) {
-            const rows = itemsTableBody.querySelectorAll('tr');
-            rows.forEach(row => row.classList.remove('item-row-active'));
-            e.target.closest('tr').classList.add('item-row-active');
         }
     });
     
@@ -964,13 +765,6 @@ function bindEvents() {
             if (e.target.classList.contains('ha-item-input') || 
                 e.target.classList.contains('item-code')) {
                 activeItemField = e.target;
-            }
-            
-            // Set active row when focusing on a field in a row
-            if (e.target.closest('tr')) {
-                const rows = itemsTableBody.querySelectorAll('tr');
-                rows.forEach(row => row.classList.remove('item-row-active'));
-                e.target.closest('tr').classList.add('item-row-active');
             }
         }
     });
@@ -1023,13 +817,6 @@ function bindEvents() {
         // Enter key to move to next field/row or confirm selection
         if (e.key === 'Enter') {
             const activeElement = document.activeElement;
-            
-            // Handle Enter in quantity popup
-            if (quantityPopup.classList.contains('active')) {
-                e.preventDefault();
-                applyQuantityFromPopup();
-                return;
-            }
             
             // Handle Enter in search dropdown
             if (searchDropdown.style.display === 'block') {
@@ -1153,13 +940,6 @@ function bindEvents() {
         
         // Escape key to close dropdown and exit search mode
         if (e.key === 'Escape') {
-            // First close quantity popup if open
-            if (quantityPopup.classList.contains('active')) {
-                e.preventDefault();
-                hideQuantityPopup();
-                return;
-            }
-            
             searchDropdown.style.display = 'none';
             isInSearchMode = false;
             
@@ -1591,7 +1371,19 @@ function updateTotals() {
 function handleFunctionKey(action) {
     const actions = {
         payment: () => saveSalesInvoice(),
-        quantity: () => showQuantityPopup(),
+        quantity: () => {
+            const rows = itemsTableBody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                const qtyInput = lastRow.querySelector('.item-qty');
+                qtyInput.focus();
+                qtyInput.select();
+                
+                // Update current focus index
+                const fields = getFocusableFields();
+                currentFocusIndex = fields.indexOf(qtyInput);
+            }
+        },
         discount: () => showToast('Discount feature coming soon', 'success'),
         options: () => showToast('Options menu coming soon', 'success'),
         return: () => showToast('Return process coming soon', 'success')
