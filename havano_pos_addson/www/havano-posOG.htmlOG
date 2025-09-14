@@ -4,11 +4,40 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     /* Container and layout styles */
-    .container { padding-left: 0; padding-right: 0; }
-    html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+    #itemsTableBody tr td .item-amount,
+    #itemsTableBody .item-qty {
+        text-align: center;
+    }
+    
+    .container { 
+        padding-left: 0; 
+        padding-right: 0; 
+        margin-left: 0 !important; 
+        margin-right: 0 !important; 
+        width: 100% !important;
+    }
+    
+    html, body { 
+        height: 100%; 
+        width: 100%; 
+        margin: 0; 
+        padding: 0; 
+        overflow: auto;
+    }
+    
     .header-container, .page-header, .footer-container, 
-    footer, nav, .page-header, .footer-info { display: none !important; }
-    body, .page-content { padding: 0 !important; margin: 0 !important; height: 100%; width: 100%; background-color: #f5f7fa; }
+    footer, nav, .page-header, .footer-info { 
+        display: none !important; 
+    }
+    
+    body, .page-content { 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        height: 100%; 
+        width: 100%; 
+        background-color: #f5f7fa; 
+        overflow: hidden;
+    }
     
     /* Color variables */
     :root {
@@ -24,14 +53,15 @@
         --success-color: #28a745;
     }
     
-    /* Main container */
+    /* Main container - FIXED SCROLLING */
     .ha-pos-container {
-        height: calc(100% - 40px);
+        height: 100vh;
         width: 100%;
         padding: 0;
         margin: 0;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
     
     /* Header */
@@ -43,16 +73,26 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
     }
     
-    /* Main card */
+    /* Main card - FIXED SCROLLING */
     .ha-pos-card {
         background-color: white;
         box-shadow: var(--box-shadow);
         padding: 15px;
         margin-bottom: 0;
         flex: 1;
-        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    /* Scrollable content area */
+    .ha-scrollable-content {
+        flex: 1;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
     }
@@ -94,13 +134,13 @@
     .ha-items-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
+        margin-top: 1px;
         border: 1px solid #ddd;
     }
     
     .ha-items-table th {
         background-color: var(--navyblue);
-        padding: 8px 5px;
+        padding: 5px 3px;
         text-align: left;
         font-weight: 600;
         color: white;
@@ -108,7 +148,7 @@
     }
     
     .ha-items-table td {
-        padding: 5px;
+        padding: 3px;
         border: 1px solid #ddd;
     }
     
@@ -119,7 +159,7 @@
     .ha-items-table input, 
     .ha-items-table select {
         width: 100%;
-        padding: 5px;
+        padding: 3px;
         border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 14px;
@@ -141,7 +181,7 @@
     }
     
     .ha-search-result-item {
-        padding: 10px 15px;
+        padding: 5px 10px;
         border-bottom: 1px solid #eee;
         cursor: pointer;
         display: flex;
@@ -181,11 +221,11 @@
         max-width: 200px;
         color: white;
         border: none;
-        padding: 8px 12px;
+        padding: 4px 6px;
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
-        margin-top: 15px;
+        margin-top: 5px;
         display: flex;
         align-items: center;
         transition: background 0.2s;
@@ -203,13 +243,13 @@
         left: 0;
         width: 100%;
         background: var(--navyblue);
-        padding: 5px 15px;
+        padding: 3px 6px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
         z-index: 1000;
-        height: 40px;
+        height: 30px;
     }
     
     .ha-function-keys {
@@ -221,7 +261,7 @@
         background: var(--orange-color);
         color: white;
         border: none;
-        padding: 6px 10px;
+        padding: 3px 5px;
         border-radius: 4px;
         cursor: pointer;
         font-weight: 600;
@@ -243,7 +283,7 @@
         background: var(--accent-color);
         color: white;
         border: none;
-        padding: 6px 10px;
+        padding: 3px 5px;
         border-radius: 4px;
         cursor: pointer;
         font-weight: 600;
@@ -393,8 +433,6 @@
         .ha-item-search-dropdown { width: 300px; }
     }
 
-
-
     .item-row-active {
         background-color: #e8f4fc !important;
         box-shadow: 0 0 0 2px #4a90e2 inset;
@@ -403,13 +441,6 @@
     .search-mode-active .ha-item-search-dropdown {
         display: block !important;
     }
-
-
-
-
-
-
-
 
     /* Additional styles for focus management */
     .item-row-active {
@@ -422,22 +453,22 @@
     }
     
     /* Scrollbar styling for better visibility */
-    .table-responsive::-webkit-scrollbar {
+    .ha-scrollable-content::-webkit-scrollbar {
         width: 12px;
         height: 12px;
     }
     
-    .table-responsive::-webkit-scrollbar-track {
+    .ha-scrollable-content::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 10px;
     }
     
-    .table-responsive::-webkit-scrollbar-thumb {
+    .ha-scrollable-content::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 10px;
     }
     
-    .table-responsive::-webkit-scrollbar-thumb:hover {
+    .ha-scrollable-content::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
     
@@ -458,77 +489,212 @@
     .ha-item-search-dropdown::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
+
+    .mt-4, .my-4 {
+        margin-top: 0rem !important;
+    }
+    
+    .container {
+        margin: auto;
+    }
+    
+    .ha-total-add-button-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    /* Quantity Popup Styles - Updated for Number Pad */
+    .ha-quantity-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        z-index: 2000;
+        width: 320px;
+        display: none;
+    }
+    
+    .ha-quantity-popup.active {
+        display: block;
+    }
+    
+    .ha-quantity-popup h3 {
+        margin-top: 0;
+        color: var(--navyblue);
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
+    }
+    
+    .ha-quantity-display {
+        width: 100%;
+        padding: 15px;
+        font-size: 24px;
+        text-align: center;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        background: #f9f9f9;
+        font-weight: bold;
+    }
+    
+    .ha-numpad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .ha-numpad-btn {
+        padding: 15px;
+        font-size: 18px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #f9f9f9;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .ha-numpad-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    .ha-numpad-btn:active {
+        background: #d0d0d0;
+        transform: scale(0.95);
+    }
+    
+    .ha-numpad-clear {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    .ha-numpad-clear:hover {
+        background: #ffcdd2;
+    }
+    
+    .ha-numpad-backspace {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .ha-numpad-backspace:hover {
+        background: #ffe0b2;
+    }
+    
+    .ha-quantity-popup-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    
+    .ha-quantity-popup-btn {
+        padding: 12px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        flex: 1;
+        transition: all 0.2s;
+    }
+    
+    .ha-quantity-popup-confirm {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .ha-quantity-popup-confirm:hover {
+        background: #218838;
+    }
+    
+    .ha-quantity-popup-cancel {
+        background: var(--accent-color);
+        color: white;
+    }
+    
+    .ha-quantity-popup-cancel:hover {
+        background: #c0392b;
+    }
+    
+    .ha-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1999;
+        display: none;
+    }
+    
+    .ha-popup-overlay.active {
+        display: block;
+    }
 </style>
 {% endblock %}
 
 {% block page_content %}
 <div class="ha-pos-container">
-    <!-- Status Bar -->
-    <div class="ha-status-bar">
-        <div class="ha-status-item">
-            <div class="ha-status-indicator"></div>
-            <span>Connected</span>
-        </div>
-        <div class="ha-status-item">
-            <i class="fas fa-user"></i>
-            <span id="userName">{{ frappe.session.user }}</span>
-        </div>
-        <div class="ha-status-item">
-            <i class="fas fa-store"></i>
-            <span id="posProfile">Default POS</span>
-        </div>
-    </div>
-    
     <div class="ha-pos-card">
-        <div class="ha-form-row">
-            <div class="ha-form-group">
-                <label for="customer">Customer</label>
-                <select id="customer" class="form-select">
-                    <option value="">Select Customer</option>
-                </select>
+        <!-- Scrollable content area -->
+        <div class="ha-scrollable-content">
+            <div class="ha-form-row">
+                <div class="ha-form-group">
+                    <label for="customer">Customer</label>
+                    <select id="customer" class="form-select">
+                        <option value="">Select Customer</option>
+                    </select>
+                </div>
+                
+                <div class="ha-form-group">
+                    <label for="pricelist">Price List</label>
+                    <select id="pricelist" class="form-select">
+                        <option value="">Select Price List</option>
+                    </select>
+                </div>
+                
+                <div class="ha-form-group">
+                    <label for="sub_total">Total</label>
+                    <input type="text" id="sub_total" class="form-control" value="0.00" readonly>
+                </div>
             </div>
             
-            <div class="ha-form-group">
-                <label for="pricelist">Price List</label>
-                <select id="pricelist" class="form-select">
-                    <option value="">Select Price List</option>
-                </select>
+            <div class="table-responsive">
+                <table class="ha-items-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">Item Code</th>
+                            <th width="25%">Item Name</th>
+                            <th width="8%">UOM</th>
+                            <th width="8%">Qty</th>
+                            <th width="10%">Rate</th>
+                            <th width="12%">Amount</th>
+                            <th width="4%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <!-- Rows will be added dynamically -->
+                    </tbody>
+                </table>
             </div>
             
-            <div class="ha-form-group">
-                <label for="sub_total">Sub Total</label>
-                <input type="text" id="sub_total" class="form-control" value="0.00" readonly>
+            <div class="ha-total-add-button-container">
+                <button class="ha-add-item-btn" id="btnAddRow">
+                    <i class="fas fa-plus me-2"></i>Add Item
+                </button>
+                <div>
+                    <span>Total</span>
+                    <span class="ha-total-value" id="totalAmount">$0.00</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="table-responsive" style="flex: 1; overflow: auto;">
-            <table class="ha-items-table">
-                <thead>
-                    <tr>
-                        <th width="15%">Item Code</th>
-                        <th width="25%">Item Name</th>
-                        <th width="8%">UOM</th>
-                        <th width="8%">Stock</th>
-                        <th width="8%">Qty</th>
-                        <th width="10%">Rate</th>
-                        <th width="12%">Amount</th>
-                        <th width="4%">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="itemsTableBody">
-                    <!-- Rows will be added dynamically -->
-                </tbody>
-            </table>
-        </div>
-        
-        <button class="ha-add-item-btn" id="btnAddRow">
-            <i class="fas fa-plus me-2"></i>Add Item
-        </button>
-        
-        <div class="ha-totals-section">
-            <div class="ha-total-group">
-                <div class="ha-total-label">Sub Total:</div>
-                <div class="ha-total-value" id="totalAmount">$0.00</div>
+            
+            <div class="ha-totals-section">
             </div>
         </div>
     </div>
@@ -570,23 +736,47 @@
 <!-- Search dropdown -->
 <div class="ha-item-search-dropdown" id="searchDropdown"></div>
 
-
-
-
-
+<!-- Quantity Popup with Number Pad -->
+<div class="ha-popup-overlay" id="quantityPopupOverlay"></div>
+<div class="ha-quantity-popup" id="quantityPopup">
+    <h3>Enter Quantity</h3>
+    <div class="ha-quantity-display" id="quantityDisplay">1</div>
+    
+    <div class="ha-numpad">
+        <button class="ha-numpad-btn" data-value="1">1</button>
+        <button class="ha-numpad-btn" data-value="2">2</button>
+        <button class="ha-numpad-btn" data-value="3">3</button>
+        <button class="ha-numpad-btn" data-value="4">4</button>
+        <button class="ha-numpad-btn" data-value="5">5</button>
+        <button class="ha-numpad-btn" data-value="6">6</button>
+        <button class="ha-numpad-btn" data-value="7">7</button>
+        <button class="ha-numpad-btn" data-value="8">8</button>
+        <button class="ha-numpad-btn" data-value="9">9</button>
+        <button class="ha-numpad-btn ha-numpad-clear" id="quantityClear">C</button>
+        <button class="ha-numpad-btn" data-value="0">0</button>
+        <button class="ha-numpad-btn ha-numpad-backspace" id="quantityBackspace">⌫</button>
+    </div>
+    
+    <div class="ha-quantity-popup-buttons">
+        <button class="ha-quantity-popup-btn ha-quantity-popup-cancel" id="quantityPopupCancel">Cancel</button>
+        <button class="ha-quantity-popup-btn ha-quantity-popup-confirm" id="quantityPopupConfirm">Confirm</button>
+    </div>
+</div>
 
 <script>
-// Global variables
+// Global variables (same as before)
 let allItems = [];
+let allSettings = [];
 let allCustomers = [];
 let allPriceLists = [];
 let activeItemField = null;
 let currentFocusIndex = -1;
-let isInSearchMode = false; // Track if we're in search mode
-let currentSearchTerm = ''; // Track current search term
-let currentSearchResults = []; // Store current search results
+let isInSearchMode = false;
+let currentSearchTerm = '';
+let currentSearchResults = [];
+let currentRowForQuantity = null;
 
-// DOM elements
+// DOM elements (same as before)
 const itemsTableBody = document.getElementById('itemsTableBody');
 const totalAmount = document.getElementById('totalAmount');
 const subTotal = document.getElementById('sub_total');
@@ -597,6 +787,13 @@ const priceListSelect = document.getElementById('pricelist');
 const btnPayment = document.getElementById('btnPayment');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const tableContainer = document.querySelector('.table-responsive');
+const quantityPopup = document.getElementById('quantityPopup');
+const quantityPopupOverlay = document.getElementById('quantityPopupOverlay');
+const quantityDisplay = document.getElementById('quantityDisplay');
+const quantityPopupConfirm = document.getElementById('quantityPopupConfirm');
+const quantityPopupCancel = document.getElementById('quantityPopupCancel');
+const quantityClear = document.getElementById('quantityClear');
+const quantityBackspace = document.getElementById('quantityBackspace');
 
 // Initialize the POS when DOM is loaded
 document.addEventListener('DOMContentLoaded', initPOS);
@@ -607,7 +804,6 @@ function initPOS() {
     loadInitialData();
     addNewRow(); // Add first row
     showToast('POS System Ready', 'success');
-    
     // Set initial focus to customer field
     setTimeout(() => {
         customerSelect.focus();
@@ -615,6 +811,30 @@ function initPOS() {
         currentFocusIndex = fields.indexOf(customerSelect);
     }, 100);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Cache DOM elements
 function cacheDOM() {
@@ -664,10 +884,146 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
+// Show quantity popup with number pad
+function showQuantityPopup(row = null) {
+    // Determine which row to update
+    if (!row) {
+        // If no row specified, try to find the active row
+        const activeRow = document.querySelector('.item-row-active');
+        if (activeRow) {
+            currentRowForQuantity = activeRow;
+        } else {
+            // If no active row, use the row with the focused input
+            const focusedInput = document.activeElement;
+            if (focusedInput && focusedInput.closest('tr')) {
+                currentRowForQuantity = focusedInput.closest('tr');
+            } else {
+                // If no focused input, use the last row with items
+                const rows = itemsTableBody.querySelectorAll('tr');
+                if (rows.length > 0) {
+                    currentRowForQuantity = rows[rows.length - 1];
+                } else {
+                    // If no rows, add a new one
+                    addNewRow();
+                    const newRows = itemsTableBody.querySelectorAll('tr');
+                    currentRowForQuantity = newRows[newRows.length - 1];
+                }
+            }
+        }
+    } else {
+        currentRowForQuantity = row;
+    }
+    
+    // Get current quantity value
+    const currentQty = currentRowForQuantity.querySelector('.item-qty').value;
+    quantityDisplay.textContent = currentQty || '1';
+    
+    // Show popup and overlay
+    quantityPopup.classList.add('active');
+    quantityPopupOverlay.classList.add('active');
+}
+
+// Hide quantity popup
+function hideQuantityPopup() {
+    quantityPopup.classList.remove('active');
+    quantityPopupOverlay.classList.remove('active');
+    currentRowForQuantity = null;
+}
+
+// Apply quantity from popup
+function applyQuantityFromPopup() {
+    if (!currentRowForQuantity) return;
+    
+    const qtyValue = parseFloat(quantityDisplay.textContent);
+    if (isNaN(qtyValue) || qtyValue <= 0) {
+        showToast('Please enter a valid quantity', 'error');
+        return;
+    }
+    
+    // Update the quantity in the row
+    const qtyInput = currentRowForQuantity.querySelector('.item-qty');
+    qtyInput.value = qtyValue;
+    
+    // Trigger change event to update amount
+    const event = new Event('change', { bubbles: true });
+    qtyInput.dispatchEvent(event);
+    
+    // Hide the popup
+    hideQuantityPopup();
+    
+    // Focus back on the quantity field
+    qtyInput.focus();
+    qtyInput.select();
+}
+
+// Handle number pad button clicks
+function handleNumpadInput(value) {
+    let currentValue = quantityDisplay.textContent;
+    
+    if (value === 'clear') {
+        quantityDisplay.textContent = '0';
+    } else if (value === 'backspace') {
+        if (currentValue.length > 1) {
+            quantityDisplay.textContent = currentValue.slice(0, -1);
+        } else {
+            quantityDisplay.textContent = '0';
+        }
+    } else {
+        // Regular number input
+        if (currentValue === '0') {
+            quantityDisplay.textContent = value;
+        } else {
+            quantityDisplay.textContent += value;
+        }
+    }
+}
+
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
     btnPayment.addEventListener('click', saveSalesInvoice);
+    
+    // Quantity popup events
+    quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);
+    quantityPopupCancel.addEventListener('click', hideQuantityPopup);
+    quantityPopupOverlay.addEventListener('click', hideQuantityPopup);
+    
+    // Number pad events
+    document.querySelectorAll('.ha-numpad-btn[data-value]').forEach(button => {
+        button.addEventListener('click', () => {
+            handleNumpadInput(button.getAttribute('data-value'));
+        });
+    });
+    
+    quantityClear.addEventListener('click', () => {
+        handleNumpadInput('clear');
+    });
+    
+    quantityBackspace.addEventListener('click', () => {
+        handleNumpadInput('backspace');
+    });
+    
+    // Handle Enter key in quantity popup
+    document.addEventListener('keydown', function(e) {
+        if (quantityPopup.classList.contains('active')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyQuantityFromPopup();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                hideQuantityPopup();
+            } else if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+                handleNumpadInput(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                handleNumpadInput('backspace');
+            } else if (e.key === 'Delete' || e.key === 'Clear') {
+                e.preventDefault();
+                handleNumpadInput('clear');
+            }
+        }
+    });
     
     // Event delegation for dynamic elements
     document.addEventListener('click', function(e) {
@@ -691,6 +1047,13 @@ function bindEvents() {
         if (e.target.closest('.ha-function-key')) {
             const action = e.target.closest('.ha-function-key').dataset.action;
             handleFunctionKey(action);
+        }
+        
+        // Set active row when clicking on any row element
+        if (e.target.closest('tr')) {
+            const rows = itemsTableBody.querySelectorAll('tr');
+            rows.forEach(row => row.classList.remove('item-row-active'));
+            e.target.closest('tr').classList.add('item-row-active');
         }
     });
     
@@ -739,6 +1102,13 @@ function bindEvents() {
                 e.target.classList.contains('item-code')) {
                 activeItemField = e.target;
             }
+            
+            // Set active row when focusing on a field in a row
+            if (e.target.closest('tr')) {
+                const rows = itemsTableBody.querySelectorAll('tr');
+                rows.forEach(row => row.classList.remove('item-row-active'));
+                e.target.closest('tr').classList.add('item-row-active');
+            }
         }
     });
     
@@ -747,12 +1117,6 @@ function bindEvents() {
         // If search dropdown is visible and mouse is over it, allow scrolling
         if (searchDropdown.style.display === 'block' && 
             e.target.closest('.ha-item-search-dropdown')) {
-            // Let the native scroll behavior handle it
-            return;
-        }
-        
-        // If mouse is over the table container, allow scrolling
-        if (e.target.closest('.table-responsive')) {
             // Let the native scroll behavior handle it
             return;
         }
@@ -774,22 +1138,24 @@ function bindEvents() {
             return;
         }
         
-        if (e.target.closest('.table-responsive')) {
-            return;
-        }
-        
         // Prevent default for other elements if needed
         // e.preventDefault();
     }, { passive: true });
     
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
+        // Skip if quantity popup is active (handled separately)
+        if (quantityPopup.classList.contains('active')) return;
+        
         // Function keys
         if (e.key === 'F1' || e.key === 'F2') {
             e.preventDefault();
             saveSalesInvoice();
         }
-        else if (e.key === 'F5') handleFunctionKey('quantity');
+        else if (e.key === 'F5') {
+            e.preventDefault();
+            handleFunctionKey('quantity');
+        }
         else if (e.key === 'F7') handleFunctionKey('discount');
         else if (e.key === 'F10') handleFunctionKey('options');
         else if (e.key === 'F12') handleFunctionKey('return');
@@ -806,9 +1172,12 @@ function bindEvents() {
                     activeResult.click();
                     searchDropdown.style.display = 'none';
                     isInSearchMode = false;
-                    
-                    // Move to next field after selection
-                    moveToNextField();
+
+                    if (allSettings.length > 0 && allSettings[0].ha_on_pres_enter === "nextrow") {
+                        addNewRow();
+                    } else {
+                        moveToNextField();
+                    }
                 }
             }
             // Handle Enter in item code field - FIRST ENTER SHOWS SEARCH
@@ -881,6 +1250,7 @@ function bindEvents() {
             // Handle Enter in quantity field
             else if (activeElement.classList.contains('item-qty')) {
                 e.preventDefault();
+                
                 const row = activeElement.closest('tr');
                 const nextRow = row.nextElementSibling;
                 
@@ -992,7 +1362,7 @@ function navigateTableRows(direction) {
         const nextRow = rows[index];
         
         // Find the same type of input in the next row
-        const currentInputType = document.activeElement.className.split(' ')[0]; // Get the first class name
+        const currentInputType = document.activeElement.className.split(' ')[0];
         const nextInput = nextRow.querySelector('.' + currentInputType);
         
         if (nextInput) {
@@ -1051,22 +1421,6 @@ function moveToPreviousField() {
     if (fields[currentFocusIndex].tagName === 'INPUT') {
         fields[currentFocusIndex].select();
     }
-}
-
-// Load initial data
-function loadInitialData() {
-    showLoading();
-    
-    // Load customers
-    loadCustomers(function() {
-        // Load price lists
-        loadPriceLists(function() {
-            // Load all items
-            loadAllItems(function() {
-                hideLoading();
-            });
-        });
-    });
 }
 
 // Load customers
@@ -1278,9 +1632,6 @@ function addNewRow() {
             <input type="text" class="item-uom form-control" value="Nos" readonly>
         </td>
         <td>
-            <input type="text" class="item-stock form-control" value="0" readonly>
-        </td>
-        <td>
             <input type="number" class="item-qty form-control" value="1" min="1">
         </td>
         <td>
@@ -1350,19 +1701,7 @@ function updateTotals() {
 function handleFunctionKey(action) {
     const actions = {
         payment: () => saveSalesInvoice(),
-        quantity: () => {
-            const rows = itemsTableBody.querySelectorAll('tr');
-            if (rows.length > 0) {
-                const lastRow = rows[rows.length - 1];
-                const qtyInput = lastRow.querySelector('.item-qty');
-                qtyInput.focus();
-                qtyInput.select();
-                
-                // Update current focus index
-                const fields = getFocusableFields();
-                currentFocusIndex = fields.indexOf(qtyInput);
-            }
-        },
+        quantity: () => showQuantityPopup(),
         discount: () => showToast('Discount feature coming soon', 'success'),
         options: () => showToast('Options menu coming soon', 'success'),
         return: () => showToast('Return process coming soon', 'success')
@@ -1407,7 +1746,7 @@ function saveSalesInvoice() {
         return;
     }
     
-    showLoading();
+    // showLoading();
     
     // Create sales invoice
     frappe.call({
@@ -1425,16 +1764,7 @@ function saveSalesInvoice() {
                 // Reset form
                 itemsTableBody.innerHTML = '';
                 addNewRow();
-                customerSelect.value = '';
-                priceListSelect.value = '';
                 updateTotals();
-                
-                // Print the invoice if needed
-                if (response.message.name) {
-                    setTimeout(() => {
-                        window.open(`/printview?doctype=Sales%20Invoice&name=${response.message.name}&format=POS%20Print`, '_blank');
-                    }, 1000);
-                }
             }
         },
         error: function(err) {
@@ -1444,7 +1774,151 @@ function saveSalesInvoice() {
     });
 }
 
+
+
+
+
+function loadInitialData() {
+    showLoading();
+    
+    // First load settings, then customers and price lists
+    loadPosSettings(function(settings) {
+        // Store settings for later use
+        allSettings = settings;
+        
+        // Now load customers and price lists
+        loadCustomers(function() {
+            loadPriceLists(function() {
+                // Set default values after all dropdowns are populated
+                if (allSettings.length > 0) {
+                    setDefaultValues(allSettings[0]);
+                }
+                
+                // Finally load items
+                loadAllItems(function() {
+                    hideLoading();
+                });
+            });
+        });
+    });
+}
+
+// Load POS settings - MODIFIED to accept callback
+function loadPosSettings(callback) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "HA POS Setting",
+            fields: ["ha_pos_settings_on", "ha_on_pres_enter", "default_customer", "default_price_list"],
+            limit: 2
+        },
+        callback: function(response) {
+            if (response.message) {
+                if (callback) callback(response.message);
+            } else {
+                showToast('Failed to load POS settings', 'error');
+                if (callback) callback([]);
+            }
+        },
+        error: function(error) {
+            showToast('Error loading POS settings', 'error');
+            if (callback) callback([]);
+        }
+    });
+}
+
+// Set default values from settings - MODIFIED to handle cases where options don't exist yet
+function setDefaultValues(data) {
+    if (!data) return;
+    
+    // Set default customer
+    if (data.default_customer) {
+        // Try to find the customer option
+        const customerOption = Array.from(customerSelect.options).find(
+            option => option.value === data.default_customer
+        );
+        
+        if (customerOption) {
+            customerSelect.value = data.default_customer;
+        } else {
+            // If customer doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Customer",
+                    name: data.default_customer
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const customer = response.message;
+                        const option = document.createElement('option');
+                        option.value = customer.name;
+                        option.textContent = customer.customer_name || customer.name;
+                        customerSelect.appendChild(option);
+                        customerSelect.value = customer.name;
+                    }
+                }
+            });
+        }
+    }
+    
+    // Set default price list
+    if (data.default_price_list) {
+        // Try to find the price list option
+        const priceListOption = Array.from(priceListSelect.options).find(
+            option => option.value === data.default_price_list
+        );
+        
+        if (priceListOption) {
+            priceListSelect.value = data.default_price_list;
+        } else {
+            // If price list doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Price List",
+                    name: data.default_price_list
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const priceList = response.message;
+                        const option = document.createElement('option');
+                        option.value = priceList.name;
+                        option.textContent = priceList.price_list_name || priceList.name;
+                        priceListSelect.appendChild(option);
+                        priceListSelect.value = priceList.name;
+                    }
+                }
+            });
+        }
+    }
+}
+
+
+// Adjust main styles
+function adjustMainStyles() {
+    const mainElement = document.querySelector('main.container.my-4');
+    if (mainElement) {
+        // Replace class 'container' with 'container-fluid'
+        mainElement.classList.replace('container', 'container-fluid');
+
+        // Set styles
+        mainElement.style.setProperty('margin', '0', 'important');
+        mainElement.style.setProperty('padding', '0', 'important');
+        mainElement.style.setProperty('width', '100%', 'important');
+    }
+}
+
+
+
+
+
 // Make save function globally available for testing
 window.saveSalesInvoice = saveSalesInvoice;
+
+// Run when window loads
+window.onload = function() {
+    adjustMainStyles();
+};
 </script>
 {% endblock %}

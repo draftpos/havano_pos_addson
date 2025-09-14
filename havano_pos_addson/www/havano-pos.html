@@ -503,7 +503,7 @@
         justify-content: space-between;
     }
     
-    /* Quantity Popup Styles */
+    /* Quantity Popup Styles - Updated for Number Pad */
     .ha-quantity-popup {
         position: fixed;
         top: 50%;
@@ -514,7 +514,7 @@
         border-radius: 8px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         z-index: 2000;
-        width: 300px;
+        width: 320px;
         display: none;
     }
     
@@ -526,35 +526,82 @@
         margin-top: 0;
         color: var(--navyblue);
         text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
     }
     
-    .ha-quantity-input {
+    .ha-quantity-display {
         width: 100%;
-        padding: 12px;
-        font-size: 18px;
+        padding: 15px;
+        font-size: 24px;
         text-align: center;
         border: 2px solid #ddd;
         border-radius: 4px;
-        margin: 15px 0;
+        margin-bottom: 15px;
         box-sizing: border-box;
+        background: #f9f9f9;
+        font-weight: bold;
     }
     
-    .ha-quantity-input:focus {
-        border-color: var(--orange-color);
-        outline: none;
+    .ha-numpad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .ha-numpad-btn {
+        padding: 15px;
+        font-size: 18px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #f9f9f9;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .ha-numpad-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    .ha-numpad-btn:active {
+        background: #d0d0d0;
+        transform: scale(0.95);
+    }
+    
+    .ha-numpad-clear {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+    
+    .ha-numpad-clear:hover {
+        background: #ffcdd2;
+    }
+    
+    .ha-numpad-backspace {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .ha-numpad-backspace:hover {
+        background: #ffe0b2;
     }
     
     .ha-quantity-popup-buttons {
         display: flex;
         justify-content: space-between;
+        gap: 10px;
     }
     
     .ha-quantity-popup-btn {
-        padding: 10px 15px;
+        padding: 12px 15px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         font-weight: 600;
+        flex: 1;
+        transition: all 0.2s;
     }
     
     .ha-quantity-popup-confirm {
@@ -562,9 +609,17 @@
         color: white;
     }
     
+    .ha-quantity-popup-confirm:hover {
+        background: #218838;
+    }
+    
     .ha-quantity-popup-cancel {
         background: var(--accent-color);
         color: white;
+    }
+    
+    .ha-quantity-popup-cancel:hover {
+        background: #c0392b;
     }
     
     .ha-popup-overlay {
@@ -681,11 +736,27 @@
 <!-- Search dropdown -->
 <div class="ha-item-search-dropdown" id="searchDropdown"></div>
 
-<!-- Quantity Popup -->
+<!-- Quantity Popup with Number Pad -->
 <div class="ha-popup-overlay" id="quantityPopupOverlay"></div>
 <div class="ha-quantity-popup" id="quantityPopup">
     <h3>Enter Quantity</h3>
-    <input type="number" class="ha-quantity-input" id="quantityInput" min="1" value="1" step="1">
+    <div class="ha-quantity-display" id="quantityDisplay">1</div>
+    
+    <div class="ha-numpad">
+        <button class="ha-numpad-btn" data-value="1">1</button>
+        <button class="ha-numpad-btn" data-value="2">2</button>
+        <button class="ha-numpad-btn" data-value="3">3</button>
+        <button class="ha-numpad-btn" data-value="4">4</button>
+        <button class="ha-numpad-btn" data-value="5">5</button>
+        <button class="ha-numpad-btn" data-value="6">6</button>
+        <button class="ha-numpad-btn" data-value="7">7</button>
+        <button class="ha-numpad-btn" data-value="8">8</button>
+        <button class="ha-numpad-btn" data-value="9">9</button>
+        <button class="ha-numpad-btn ha-numpad-clear" id="quantityClear">C</button>
+        <button class="ha-numpad-btn" data-value="0">0</button>
+        <button class="ha-numpad-btn ha-numpad-backspace" id="quantityBackspace">⌫</button>
+    </div>
+    
     <div class="ha-quantity-popup-buttons">
         <button class="ha-quantity-popup-btn ha-quantity-popup-cancel" id="quantityPopupCancel">Cancel</button>
         <button class="ha-quantity-popup-btn ha-quantity-popup-confirm" id="quantityPopupConfirm">Confirm</button>
@@ -693,7 +764,7 @@
 </div>
 
 <script>
-// Global variables
+// Global variables (same as before)
 let allItems = [];
 let allSettings = [];
 let allCustomers = [];
@@ -703,9 +774,9 @@ let currentFocusIndex = -1;
 let isInSearchMode = false;
 let currentSearchTerm = '';
 let currentSearchResults = [];
-let currentRowForQuantity = null; // Track which row to update with quantity
+let currentRowForQuantity = null;
 
-// DOM elements
+// DOM elements (same as before)
 const itemsTableBody = document.getElementById('itemsTableBody');
 const totalAmount = document.getElementById('totalAmount');
 const subTotal = document.getElementById('sub_total');
@@ -718,9 +789,11 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 const tableContainer = document.querySelector('.table-responsive');
 const quantityPopup = document.getElementById('quantityPopup');
 const quantityPopupOverlay = document.getElementById('quantityPopupOverlay');
-const quantityInput = document.getElementById('quantityInput');
+const quantityDisplay = document.getElementById('quantityDisplay');
 const quantityPopupConfirm = document.getElementById('quantityPopupConfirm');
 const quantityPopupCancel = document.getElementById('quantityPopupCancel');
+const quantityClear = document.getElementById('quantityClear');
+const quantityBackspace = document.getElementById('quantityBackspace');
 
 // Initialize the POS when DOM is loaded
 document.addEventListener('DOMContentLoaded', initPOS);
@@ -738,6 +811,30 @@ function initPOS() {
         currentFocusIndex = fields.indexOf(customerSelect);
     }, 100);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Cache DOM elements
 function cacheDOM() {
@@ -787,7 +884,7 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
-// Show quantity popup
+// Show quantity popup with number pad
 function showQuantityPopup(row = null) {
     // Determine which row to update
     if (!row) {
@@ -819,17 +916,11 @@ function showQuantityPopup(row = null) {
     
     // Get current quantity value
     const currentQty = currentRowForQuantity.querySelector('.item-qty').value;
-    quantityInput.value = currentQty || '1';
+    quantityDisplay.textContent = currentQty || '1';
     
     // Show popup and overlay
     quantityPopup.classList.add('active');
     quantityPopupOverlay.classList.add('active');
-    
-    // Focus and select text in the input
-    setTimeout(() => {
-        quantityInput.focus();
-        quantityInput.select();
-    }, 10);
 }
 
 // Hide quantity popup
@@ -843,11 +934,9 @@ function hideQuantityPopup() {
 function applyQuantityFromPopup() {
     if (!currentRowForQuantity) return;
     
-    const qtyValue = parseFloat(quantityInput.value);
+    const qtyValue = parseFloat(quantityDisplay.textContent);
     if (isNaN(qtyValue) || qtyValue <= 0) {
         showToast('Please enter a valid quantity', 'error');
-        quantityInput.focus();
-        quantityInput.select();
         return;
     }
     
@@ -867,6 +956,28 @@ function applyQuantityFromPopup() {
     qtyInput.select();
 }
 
+// Handle number pad button clicks
+function handleNumpadInput(value) {
+    let currentValue = quantityDisplay.textContent;
+    
+    if (value === 'clear') {
+        quantityDisplay.textContent = '0';
+    } else if (value === 'backspace') {
+        if (currentValue.length > 1) {
+            quantityDisplay.textContent = currentValue.slice(0, -1);
+        } else {
+            quantityDisplay.textContent = '0';
+        }
+    } else {
+        // Regular number input
+        if (currentValue === '0') {
+            quantityDisplay.textContent = value;
+        } else {
+            quantityDisplay.textContent += value;
+        }
+    }
+}
+
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
@@ -877,14 +988,40 @@ function bindEvents() {
     quantityPopupCancel.addEventListener('click', hideQuantityPopup);
     quantityPopupOverlay.addEventListener('click', hideQuantityPopup);
     
+    // Number pad events
+    document.querySelectorAll('.ha-numpad-btn[data-value]').forEach(button => {
+        button.addEventListener('click', () => {
+            handleNumpadInput(button.getAttribute('data-value'));
+        });
+    });
+    
+    quantityClear.addEventListener('click', () => {
+        handleNumpadInput('clear');
+    });
+    
+    quantityBackspace.addEventListener('click', () => {
+        handleNumpadInput('backspace');
+    });
+    
     // Handle Enter key in quantity popup
-    quantityInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            applyQuantityFromPopup();
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            hideQuantityPopup();
+    document.addEventListener('keydown', function(e) {
+        if (quantityPopup.classList.contains('active')) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyQuantityFromPopup();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                hideQuantityPopup();
+            } else if (e.key >= '0' && e.key <= '9') {
+                e.preventDefault();
+                handleNumpadInput(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                handleNumpadInput('backspace');
+            } else if (e.key === 'Delete' || e.key === 'Clear') {
+                e.preventDefault();
+                handleNumpadInput('clear');
+            }
         }
     });
     
@@ -1007,6 +1144,9 @@ function bindEvents() {
     
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
+        // Skip if quantity popup is active (handled separately)
+        if (quantityPopup.classList.contains('active')) return;
+        
         // Function keys
         if (e.key === 'F1' || e.key === 'F2') {
             e.preventDefault();
@@ -1023,13 +1163,6 @@ function bindEvents() {
         // Enter key to move to next field/row or confirm selection
         if (e.key === 'Enter') {
             const activeElement = document.activeElement;
-            
-            // Handle Enter in quantity popup
-            if (quantityPopup.classList.contains('active')) {
-                e.preventDefault();
-                applyQuantityFromPopup();
-                return;
-            }
             
             // Handle Enter in search dropdown
             if (searchDropdown.style.display === 'block') {
@@ -1153,13 +1286,6 @@ function bindEvents() {
         
         // Escape key to close dropdown and exit search mode
         if (e.key === 'Escape') {
-            // First close quantity popup if open
-            if (quantityPopup.classList.contains('active')) {
-                e.preventDefault();
-                hideQuantityPopup();
-                return;
-            }
-            
             searchDropdown.style.display = 'none';
             isInSearchMode = false;
             
@@ -1295,22 +1421,6 @@ function moveToPreviousField() {
     if (fields[currentFocusIndex].tagName === 'INPUT') {
         fields[currentFocusIndex].select();
     }
-}
-
-// Load initial data
-function loadInitialData() {
-    showLoading();
-    loadPosSettings();
-    // Load customers
-    loadCustomers(function() {
-        // Load price lists
-        loadPriceLists(function() {
-            // Load all items
-            loadAllItems(function() {
-                hideLoading();
-            });
-        });
-    });
 }
 
 // Load customers
@@ -1654,8 +1764,6 @@ function saveSalesInvoice() {
                 // Reset form
                 itemsTableBody.innerHTML = '';
                 addNewRow();
-                customerSelect.value = '';
-                priceListSelect.value = '';
                 updateTotals();
             }
         },
@@ -1666,8 +1774,37 @@ function saveSalesInvoice() {
     });
 }
 
-// Load POS settings
-function loadPosSettings() {
+
+
+
+
+function loadInitialData() {
+    showLoading();
+    
+    // First load settings, then customers and price lists
+    loadPosSettings(function(settings) {
+        // Store settings for later use
+        allSettings = settings;
+        
+        // Now load customers and price lists
+        loadCustomers(function() {
+            loadPriceLists(function() {
+                // Set default values after all dropdowns are populated
+                if (allSettings.length > 0) {
+                    setDefaultValues(allSettings[0]);
+                }
+                
+                // Finally load items
+                loadAllItems(function() {
+                    hideLoading();
+                });
+            });
+        });
+    });
+}
+
+// Load POS settings - MODIFIED to accept callback
+function loadPosSettings(callback) {
     frappe.call({
         method: "frappe.client.get_list",
         args: {
@@ -1677,54 +1814,86 @@ function loadPosSettings() {
         },
         callback: function(response) {
             if (response.message) {
-                allSettings = response.message;
-                if (allSettings.length > 0) {
-                    setDefaultValues(allSettings[0]);
-                }
+                if (callback) callback(response.message);
             } else {
                 showToast('Failed to load POS settings', 'error');
+                if (callback) callback([]);
             }
         },
         error: function(error) {
             showToast('Error loading POS settings', 'error');
+            if (callback) callback([]);
         }
     });
 }
 
-// Set default values from settings
+// Set default values from settings - MODIFIED to handle cases where options don't exist yet
 function setDefaultValues(data) {
     if (!data) return;
     
     // Set default customer
     if (data.default_customer) {
-        const customerOptionExists = Array.from(customerSelect.options).some(
+        // Try to find the customer option
+        const customerOption = Array.from(customerSelect.options).find(
             option => option.value === data.default_customer
         );
         
-        if (!customerOptionExists) {
-            const option = document.createElement('option');
-            option.value = data.default_customer;
-            option.textContent = data.default_customer;
-            customerSelect.appendChild(option);
+        if (customerOption) {
+            customerSelect.value = data.default_customer;
+        } else {
+            // If customer doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Customer",
+                    name: data.default_customer
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const customer = response.message;
+                        const option = document.createElement('option');
+                        option.value = customer.name;
+                        option.textContent = customer.customer_name || customer.name;
+                        customerSelect.appendChild(option);
+                        customerSelect.value = customer.name;
+                    }
+                }
+            });
         }
-        customerSelect.value = data.default_customer;
     }
     
     // Set default price list
     if (data.default_price_list) {
-        const priceListOptionExists = Array.from(priceListSelect.options).some(
+        // Try to find the price list option
+        const priceListOption = Array.from(priceListSelect.options).find(
             option => option.value === data.default_price_list
         );
         
-        if (!priceListOptionExists) {
-            const option = document.createElement('option');
-            option.value = data.default_price_list;
-            option.textContent = data.default_price_list;
-            priceListSelect.appendChild(option);
+        if (priceListOption) {
+            priceListSelect.value = data.default_price_list;
+        } else {
+            // If price list doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Price List",
+                    name: data.default_price_list
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const priceList = response.message;
+                        const option = document.createElement('option');
+                        option.value = priceList.name;
+                        option.textContent = priceList.price_list_name || priceList.name;
+                        priceListSelect.appendChild(option);
+                        priceListSelect.value = priceList.name;
+                    }
+                }
+            });
         }
-        priceListSelect.value = data.default_price_list;
     }
 }
+
 
 // Adjust main styles
 function adjustMainStyles() {
@@ -1739,6 +1908,10 @@ function adjustMainStyles() {
         mainElement.style.setProperty('width', '100%', 'important');
     }
 }
+
+
+
+
 
 // Make save function globally available for testing
 window.saveSalesInvoice = saveSalesInvoice;
