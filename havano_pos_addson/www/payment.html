@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Interface</title>
+    <style>
+        /* Scoped styles for payment interface only */
+        .ha-pos-payment-wrapper {
+            --ha-primary-color: #2c3e50;
+            --ha-secondary-color: #3498db;
+            --ha-success-color: #2ecc71;
+            --ha-warning-color: #f39c12;
+            --ha-danger-color: #e74c3c;
+            --ha-light-color: #ecf0f1;
+            --ha-dark-color: #34495e;
+            --ha-border-radius: 8px;
+            --ha-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* background: linear-gradient(135deg, #2c3e50, #4a69bd); */
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+        
+        .ha-pos-payment-container {
+            width: auto;
+            background-color: #fff;
+            border-radius: var(--ha-border-radius);
+            box-shadow: var(--ha-box-shadow);
+            overflow: hidden;
+        }
+        
+        .ha-pos-payment-header {
+            background-color: var(--ha-primary-color);
+            color: white;
+            text-align: center;
+            padding: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--ha-light-color);
+        }
+        
+        .ha-pos-payment-amount-due {
+            text-align: center;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--ha-primary-color);
+            background-color: var(--ha-light-color);
+            border-bottom: 1px solid #bdc3c7;
+        }
+        
+        .ha-pos-payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 4px 20px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .ha-pos-payment-method {
+            display: flex;
+            gap: 4px;
+            padding: 12px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .ha-pos-payment-method:hover {
+            background-color: #f0f7ff;
+            border-color: var(--ha-secondary-color);
+        }
+        
+        .ha-pos-payment-amount {
+            font-weight: bold;
+            color: var(--ha-primary-color);
+        }
+        
+        .ha-pos-payment-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .ha-pos-payment-keypad-button {
+            padding: 16px;
+            border: none;
+            border-radius: 6px;
+            background-color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ha-pos-payment-keypad-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        
+        .ha-pos-payment-keypad-button.ha-pos-payment-special {
+            background-color: var(--ha-danger-color);
+            color: white;
+        }
+        
+        .ha-pos-payment-keypad-button.ha-pos-payment-special:hover {
+            background-color: #c0392b;
+        }
+        
+        .ha-pos-payment-keypad-button.ha-pos-payment-action {
+            background-color: var(--ha-secondary-color);
+            color: white;
+        }
+        
+        .ha-pos-payment-keypad-button.ha-pos-payment-action:hover {
+            background-color: #2980b9;
+        }
+        
+        .ha-pos-payment-transaction-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background-color: var(--ha-dark-color);
+            color: white;
+        }
+        
+        .ha-pos-payment-summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .ha-pos-payment-summary-label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #ecf0f1;
+        }
+        
+        .ha-pos-payment-summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .ha-pos-payment-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .ha-pos-payment-action-button {
+            padding: 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .ha-pos-payment-action-button.ha-pos-payment-save {
+            background-color: var(--ha-success-color);
+            color: white;
+        }
+        
+        .ha-pos-payment-action-button.ha-pos-payment-save:hover {
+            background-color: #27ae60;
+        }
+        
+        .ha-pos-payment-action-button.ha-pos-payment-print {
+            background-color: var(--ha-warning-color);
+            color: white;
+        }
+        
+        .ha-pos-payment-action-button.ha-pos-payment-print:hover {
+            background-color: #d35400;
+        }
+        
+        .ha-pos-payment-active-payment {
+            background-color: #e1f0ff !important;
+            border-color: var(--ha-secondary-color) !important;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+        }
+        
+        .ha-pos-payment-footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #7f8c8d;
+            background-color: var(--ha-light-color);
+            border-top: 1px solid #bdc3c7;
+        }
+        .ha-pos-payment-sections{
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- This wrapper ensures styles don't affect the rest of the page -->
+    <div class="ha-pos-payment-wrapper">
+        <div class="ha-pos-payment-container">
+            <div class="ha-pos-payment-header">Payment</div>
+            <div class="ha-pos-payment-sections">
+                <div>
+                    <div class="ha-pos-payment-amount-due">50.00</div>
+                    <div class="ha-pos-payment-methods">
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>1 CASH</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>2 CHECK</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>3 C / CARD</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>4 AMEX</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>5 DINERS</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                        <div class="ha-pos-payment-method" onclick="selectPayment(this)">
+                            <span>6 EFTPOS</span><span class="ha-pos-payment-amount">0.00</span>
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <div class="ha-pos-payment-transaction-summary">
+                        <div class="ha-pos-payment-summary-item">
+                            <div class="ha-pos-payment-summary-label">Rounding $</div>
+                            <div class="ha-pos-payment-summary-value">0.00</div>
+                        </div>
+                        <div class="ha-pos-payment-summary-item">
+                            <div class="ha-pos-payment-summary-label">Change $</div>
+                            <div class="ha-pos-payment-summary-value">-50.00</div>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div>
+                    <div class="ha-pos-payment-keypad">
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(7)">7</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(8)">8</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(9)">9</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(4)">4</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(5)">5</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(6)">6</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(1)">1</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(2)">2</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(3)">3</button>
+                        <button class="ha-pos-payment-keypad-button ha-pos-payment-special" onclick="toggleSign()">+/-</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="appendNumber(0)">0</button>
+                        <button class="ha-pos-payment-keypad-button" onclick="setAmount(100)">100</button>
+                        <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="backspace()">Back</button>
+                        <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="clearAmount()">Clear</button>
+                        <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="cancelPayment()">Cancel</button>
+                    </div>
+
+                    <div class="ha-pos-payment-action-buttons">
+                        <button class="ha-pos-payment-action-button ha-pos-payment-save" onclick="savePayment()">Save</button>
+                        <button class="ha-pos-payment-action-button ha-pos-payment-print" onclick="printReceipt()">Print (F3)</button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- <div class="ha-pos-payment-footer">
+                POS System v1.0 | © 2023 Restaurant POS Solutions
+            </div> -->
+        </div>
+    </div>
+
+    <script>
+        let currentAmount = 0;
+        let selectedPayment = null;
+        
+        function selectPayment(element) {
+            // Remove active class from all payment methods
+            const methods = document.querySelectorAll('.ha-pos-payment-method');
+            methods.forEach(method => method.classList.remove('ha-pos-payment-active-payment'));
+            
+            // Add active class to selected payment method
+            element.classList.add('ha-pos-payment-active-payment');
+            selectedPayment = element;
+            
+            // Update payment amount if an amount has been entered
+            if (currentAmount > 0) {
+                const amountElement = element.querySelector('.ha-pos-payment-amount');
+                amountElement.textContent = currentAmount.toFixed(2);
+                updateChange();
+            }
+        }
+        
+        function appendNumber(number) {
+            // Convert current amount to string to manipulate digits
+            let amountStr = currentAmount.toString();
+            
+            // Handle decimal points
+            if (amountStr.includes('.')) {
+                const decimalPart = amountStr.split('.')[1];
+                if (decimalPart.length < 2) {
+                    amountStr += number.toString();
+                }
+            } else {
+                amountStr += number.toString();
+            }
+            
+            // Convert back to number and update
+            currentAmount = parseFloat(amountStr);
+            updateDisplay();
+        }
+        
+        function setAmount(amount) {
+            currentAmount = amount;
+            updateDisplay();
+        }
+        
+        function toggleSign() {
+            currentAmount = -currentAmount;
+            updateDisplay();
+        }
+        
+        function backspace() {
+            // Convert to string and remove last character
+            let amountStr = currentAmount.toString();
+            if (amountStr.length > 1) {
+                amountStr = amountStr.slice(0, -1);
+                currentAmount = amountStr ? parseFloat(amountStr) : 0;
+            } else {
+                currentAmount = 0;
+            }
+            updateDisplay();
+        }
+        
+        function clearAmount() {
+            currentAmount = 0;
+            updateDisplay();
+        }
+        
+        function cancelPayment() {
+            currentAmount = 0;
+            selectedPayment = null;
+            
+            // Remove active class from all payment methods
+            const methods = document.querySelectorAll('.ha-pos-payment-method');
+            methods.forEach(method => {
+                method.classList.remove('ha-pos-payment-active-payment');
+                const amountElement = method.querySelector('.ha-pos-payment-amount');
+                amountElement.textContent = '0.00';
+            });
+            
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            // Update the amount due display
+            document.querySelector('.ha-pos-payment-amount-due').textContent = currentAmount.toFixed(2);
+            
+            // Update the selected payment method if any
+            if (selectedPayment) {
+                const amountElement = selectedPayment.querySelector('.ha-pos-payment-amount');
+                amountElement.textContent = currentAmount.toFixed(2);
+            }
+            
+            updateChange();
+        }
+        
+        function updateChange() {
+            const totalDue = 50.00; // Static for this example
+            const change = currentAmount - totalDue;
+            document.querySelector('.ha-pos-payment-transaction-summary .ha-pos-payment-summary-value:last-child').textContent = change.toFixed(2);
+        }
+        
+        function savePayment() {
+            if (!selectedPayment) {
+                alert('Please select a payment method first');
+                return;
+            }
+            
+            if (currentAmount <= 0) {
+                alert('Please enter a valid payment amount');
+                return;
+            }
+            
+            alert(`Payment of $${currentAmount.toFixed(2)} processed successfully!`);
+            cancelPayment(); // Reset the interface
+        }
+        
+        function printReceipt() {
+            alert('Printing receipt...');
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Number keys
+            if (event.key >= '0' && event.key <= '9') {
+                appendNumber(parseInt(event.key));
+            }
+            
+            // F3 for print
+            if (event.key === 'F3') {
+                event.preventDefault();
+                printReceipt();
+            }
+            
+            // Escape for cancel
+            if (event.key === 'Escape') {
+                cancelPayment();
+            }
+            
+            // Backspace for backspace function
+            if (event.key === 'Backspace') {
+                backspace();
+            }
+        });
+    </script>
+</body>
+</html>

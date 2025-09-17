@@ -1,0 +1,102 @@
+    #itemsTableBody tr td .item-amount,
+    #itemsTableBody .item-qty {
+        text-align: center;
+    }
+    
+    .container { 
+        padding-left: 0; 
+        padding-right: 0; 
+        margin-left: 0 !important; 
+        margin-right: 0 !important; 
+        width: 100% !important;
+    }
+    
+    html, body { 
+        height: 100%; 
+        width: 100%; 
+        margin: 0; 
+        padding: 0; 
+        overflow: auto;
+        font-size: 12px !important;
+    }
+    
+    .header-container, .page-header, .footer-container, 
+    footer, nav, .page-header, .footer-info { 
+        display: none !important; 
+    }
+    
+    body, .page-content { 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        height: 100%; 
+        width: 100%; 
+        background-color: #f5f7fa; 
+        overflow: hidden;
+    }
+
+
+
+
+
+
+    
+    html, body { 
+        height: 100%; 
+        width: 100%; 
+        margin: 0; 
+        padding: 0; 
+        font-size: 12px !important;
+    }
+    
+    .header-container, .page-header, .footer-container, 
+    footer, nav, .page-header, .footer-info { 
+        display: none !important; 
+    }
+    
+
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #4a6491;
+        --navyblue: #002855;
+        --accent-color: #e74c3c;
+        --light-bg: #f8f9fa;
+        --orange-color: #ff9800;
+        --dark-text: #2c3e50;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        --success-color: #28a745;
+    }
+ 
+
+    .ha-header-form-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 5px;
+        margin-top: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .ha-header-form-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+   
+    }
+    
+    .ha-header-form-group label {
+        margin-bottom: 0;
+        font-weight: 600;
+        color: var(--dark-text);
+        min-width: 80px;
+        text-align: right;
+    }
+    
+    .ha-header-form-group select, 
+    .ha-header-form-group input {
+        flex: 1;
+        padding: 4px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }

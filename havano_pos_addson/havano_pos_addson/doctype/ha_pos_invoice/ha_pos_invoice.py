@@ -42,9 +42,19 @@ def create_sales_invoice(customer, items, price_list=None):
     # Insert and submit the invoice
     invoice.insert()
     invoice.submit()
-    
+
+
+    payment_summary = frappe.new_doc("Ha Pos Payment Summary")
+    payment_summary.customer = customer
+    payment_summary.sales_invoice_link = invoice
+    payment_summary.payment_method = "1100 - Cash In Hand - ESH"
+    payment_summary.account = "1100 - Cash In Hand - ESH"
+    payment_summary.amount = 400.3 
+    # payment_summary.user = user
+
+    payment_summary.insert()
+        
     return {
         "name": invoice.name,
         "total": invoice.grand_total
     }
-    

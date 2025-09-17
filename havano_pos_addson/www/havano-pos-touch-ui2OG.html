@@ -1,0 +1,17 @@
+{% extends "templates/web.html" %}
+
+{% include "havano_pos_addson/www/template-parts/havano-pos-header.html" %}
+{% include "havano_pos_addson/www/template-parts/general.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-table-items-touchui.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-quantity-popup-touchui.html" %}
+<br>
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-group-items-touchui.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-footer-touchui.html" %}
+
+{% block page_content %}
+<script src="./static/v1/js/general.js"></script>
+<script src="./static/v1/js/non-touch-ui/havano-pos-non-touch-ui.js" defer></script>
+<script src="./static/v1/js/non-touch-ui/havano-pos-non-touch-ui-add-item-forms.js" defer></script>
+<script src="./static/v1/js/touch-ui/havano-pos-group-items-section-touch-ui.js" defer></script>
+<!-- <script src="./static//v1//js/non-touch-ui/havano-pos-non-touch-ui.js"></script> -->
+{% endblock %}

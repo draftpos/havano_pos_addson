@@ -1,0 +1,238 @@
+        /* Overlay styles */
+        .ha-pos-payment-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            visibility: hidden;
+        }
+
+        /* Modal styles */
+        .ha-pos-payment-overlay-modal {
+            background-color: white;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            width: 600px; /* Adjust as needed */
+        }
+
+        /* Close button styles */
+        .ha-pos-payment-overlay-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #333;
+        }
+
+        /* Scoped styles for payment interface only */
+        .ha-pos-payment-wrapper {
+            --ha-primary-color: #2c3e50;
+            --ha-secondary-color: #3498db;
+            --ha-success-color: #2ecc71;
+            --ha-warning-color: #f39c12;
+            --ha-danger-color: #e74c3c;
+            --ha-light-color: #ecf0f1;
+            --ha-dark-color: #34495e;
+            --ha-border-radius: 8px;
+            --ha-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+
+        .ha-pos-payment-container {
+            width: auto;
+            background-color: #fff;
+            border-radius: var(--ha-border-radius);
+            box-shadow: var(--ha-box-shadow);
+            overflow: hidden;
+        }
+
+        .ha-pos-payment-header {
+            background-color: var(--ha-primary-color);
+            color: white;
+            text-align: center;
+            padding: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--ha-light-color);
+        }
+
+        .ha-pos-payment-amount-due {
+            text-align: center;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--ha-primary-color);
+            background-color: var(--ha-light-color);
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .ha-pos-payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 4px 20px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .ha-pos-payment-method {
+            display: flex;
+            gap: 4px;
+            padding: 12px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .ha-pos-payment-method:hover {
+            background-color: #f0f7ff;
+            border-color: var(--ha-secondary-color);
+        }
+
+        .ha-pos-payment-amount {
+            font-weight: bold;
+            color: var(--ha-primary-color);
+        }
+
+        .ha-pos-payment-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .ha-pos-payment-keypad-button {
+            padding: 16px;
+            border: none;
+            border-radius: 6px;
+            background-color: #fff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .ha-pos-payment-keypad-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .ha-pos-payment-keypad-button.ha-pos-payment-special {
+            background-color: var(--ha-danger-color);
+            color: white;
+        }
+
+        .ha-pos-payment-keypad-button.ha-pos-payment-special:hover {
+            background-color: #c0392b;
+        }
+
+        .ha-pos-payment-keypad-button.ha-pos-payment-action {
+            background-color: var(--ha-secondary-color);
+            color: white;
+        }
+
+        .ha-pos-payment-keypad-button.ha-pos-payment-action:hover {
+            background-color: #2980b9;
+        }
+
+        .ha-pos-payment-transaction-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background-color: var(--ha-dark-color);
+            color: white;
+        }
+
+        .ha-pos-payment-summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ha-pos-payment-summary-label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #ecf0f1;
+        }
+
+        .ha-pos-payment-summary-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .ha-pos-payment-action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .ha-pos-payment-action-button {
+            padding: 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ha-pos-payment-action-button.ha-pos-payment-save {
+            background-color: var(--ha-success-color);
+            color: white;
+        }
+
+        .ha-pos-payment-action-button.ha-pos-payment-save:hover {
+            background-color: #27ae60;
+        }
+
+        .ha-pos-payment-action-button.ha-pos-payment-print {
+            background-color: var(--ha-warning-color);
+            color: white;
+        }
+
+        .ha-pos-payment-action-button.ha-pos-payment-print:hover {
+            background-color: #d35400;
+        }
+
+        .ha-pos-payment-active-payment {
+            background-color: #e1f0ff !important;
+            border-color: var(--ha-secondary-color) !important;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+        }
+
+        .ha-pos-payment-footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #7f8c8d;
+            background-color: var(--ha-light-color);
+            border-top: 1px solid #bdc3c7;
+        }
+
+        .ha-pos-payment-sections {
+            display: flex;
+            justify-content: center;
+        }

@@ -1,0 +1,156 @@
+.ha-table-responsive{
+    height: 700px !important;
+    overflow-y: auto;
+    background-color: red;
+}
+#itemsTableBody tr td .item-amount,
+    #itemsTableBody .item-qty {
+        text-align: center;
+    }
+    
+    /* Items table */
+    .ha-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1px;
+        border: 1px solid #ddd;
+    }
+    
+    .ha-items-table th {
+        background-color: var(--navyblue);
+        padding: 5px 3px;
+        text-align: left;
+        font-weight: 600;
+        color: white;
+        border: 1px solid #ddd;
+    }
+    
+    .ha-items-table td {
+        padding: 3px;
+        border: 1px solid #ddd;
+    }
+    
+    .ha-items-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .ha-items-table input, 
+    .ha-items-table select {
+        width: 100%;
+        padding: 3px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        margin: 0;
+    }
+    
+    /* Search dropdown */
+    .ha-item-search-dropdown {
+        position: absolute;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        z-index: 1000;
+        box-shadow: var(--box-shadow);
+        display: none;
+        width: 400px;
+    }
+    
+    .ha-search-result-item {
+        padding: 5px 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .ha-search-result-item:hover {
+        background-color: #e8f4fc;
+    }
+    
+    .ha-search-result-active {
+        background-color: #d1e7ff;
+    }
+    
+    .ha-item-code {
+        font-weight: 600;
+        color: var(--secondary-color);
+        font-size: 12px;
+    }
+    
+    .ha-item-name {
+        flex: 1;
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    
+    .ha-item-price {
+        color: var(--dark-text);
+        font-weight: 600;
+        font-size: 12px;
+    }
+    
+    /* Add item button */
+    .ha-add-item-btn {
+        background: var(--orange-color);
+        max-width: 200px;
+        color: white;
+        border: none;
+        padding: 4px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+        font-size: 14px;
+    }
+    
+    .ha-add-item-btn:hover {
+        background: #e68900;
+    }
+    
+    
+    
+    /* Totals section */
+    .ha-totals-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px dashed #ddd;
+    }
+    
+    .ha-total-group {
+        min-width: 200px;
+        text-align: right;
+    }
+    
+    .ha-total-label {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: 5px;
+    }
+    
+    .ha-total-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--secondary-color);
+    }
+    
+    
+
+    .form-field-active {
+        background-color: #fff8e1;
+        border: 2px solid #ffc107 !important;
+    }
+
+    .ha-total-add-button-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    

@@ -1,780 +1,4 @@
-{% extends "templates/web.html" %}
-
-{% block style %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-    /* Container and layout styles */
-    #itemsTableBody tr td .item-amount,
-    #itemsTableBody .item-qty {
-        text-align: center;
-    }
-    
-    .container { 
-        padding-left: 0; 
-        padding-right: 0; 
-        margin-left: 0 !important; 
-        margin-right: 0 !important; 
-        width: 100% !important;
-    }
-    
-    html, body { 
-        height: 100%; 
-        width: 100%; 
-        margin: 0; 
-        padding: 0; 
-        overflow: auto;
-        font-size: 12px !important;
-    }
-    
-    .header-container, .page-header, .footer-container, 
-    footer, nav, .page-header, .footer-info { 
-        display: none !important; 
-    }
-    
-    body, .page-content { 
-        padding: 0 !important; 
-        margin: 0 !important; 
-        height: 100%; 
-        width: 100%; 
-        background-color: #f5f7fa; 
-        overflow: hidden;
-    }
-    
-    /* Color variables */
-    :root {
-        --primary-color: #2c3e50;
-        --secondary-color: #4a6491;
-        --navyblue: #002855;
-        --accent-color: #e74c3c;
-        --light-bg: #f8f9fa;
-        --orange-color: #ff9800;
-        --dark-text: #2c3e50;
-        --border-radius: 8px;
-        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        --success-color: #28a745;
-    }
-    
-    /* Main container - FIXED SCROLLING */
-    .ha-pos-container {
-        height: 100vh;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    
-    /* Header */
-    .ha-pos-header {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        padding: 12px 20px;
-        margin-bottom: 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-shrink: 0;
-    }
-    
-    /* Main card - FIXED SCROLLING */
-    .ha-pos-card {
-        background-color: white;
-        box-shadow: var(--box-shadow);
-        padding: 15px;
-        margin-bottom: 0;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        height: 100%;
-    }
-    
-    /* Scrollable content area */
-    .ha-scrollable-content {
-        flex: 1;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Form elements */
-    .ha-form-row {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-    
-    .ha-form-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex: 1;
-        min-width: 100px;
-    }
-    
-    .ha-form-group label {
-        margin-bottom: 0;
-        font-weight: 600;
-        color: var(--dark-text);
-        min-width: 80px;
-        text-align: right;
-    }
-    
-    .ha-form-group select, 
-    .ha-form-group input {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-    
-    /* Items table */
-    .ha-items-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1px;
-        border: 1px solid #ddd;
-    }
-    
-    .ha-items-table th {
-        background-color: var(--navyblue);
-        padding: 5px 3px;
-        text-align: left;
-        font-weight: 600;
-        color: white;
-        border: 1px solid #ddd;
-    }
-    
-    .ha-items-table td {
-        padding: 3px;
-        border: 1px solid #ddd;
-    }
-    
-    .ha-items-table tr:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .ha-items-table input, 
-    .ha-items-table select {
-        width: 100%;
-        padding: 3px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        margin: 0;
-    }
-    
-    /* Search dropdown */
-    .ha-item-search-dropdown {
-        position: absolute;
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: white;
-        z-index: 1000;
-        box-shadow: var(--box-shadow);
-        display: none;
-        width: 400px;
-    }
-    
-    .ha-search-result-item {
-        padding: 5px 10px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .ha-search-result-item:hover {
-        background-color: #e8f4fc;
-    }
-    
-    .ha-search-result-active {
-        background-color: #d1e7ff;
-    }
-    
-    .ha-item-code {
-        font-weight: 600;
-        color: var(--secondary-color);
-        font-size: 12px;
-    }
-    
-    .ha-item-name {
-        flex: 1;
-        margin-left: 10px;
-        font-size: 14px;
-    }
-    
-    .ha-item-price {
-        color: var(--dark-text);
-        font-weight: 600;
-        font-size: 12px;
-    }
-    
-    /* Add item button */
-    .ha-add-item-btn {
-        background: var(--orange-color);
-        max-width: 200px;
-        color: white;
-        border: none;
-        padding: 4px 6px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 5px;
-        display: flex;
-        align-items: center;
-        transition: background 0.2s;
-        font-size: 14px;
-    }
-    
-    .ha-add-item-btn:hover {
-        background: #e68900;
-    }
-    
-    /* Footer */
-    .ha-sticky-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--navyblue);
-        padding: 3px 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        height: 30px;
-    }
-    
-    .ha-function-keys {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .ha-function-key {
-        background: var(--orange-color);
-        color: white;
-        border: none;
-        padding: 3px 5px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        gap: 5px;
-        align-items: center;
-        min-width: 90px;
-        transition: all 0.2s;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        font-size: 12px;
-    }
-    
-    .ha-function-key:hover {
-        background: #e68900;
-        transform: translateY(-2px);
-    }
-    
-    .ha-logout-btn {
-        background: var(--accent-color);
-        color: white;
-        border: none;
-        padding: 3px 5px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        transition: all 0.2s;
-        font-size: 12px;
-    }
-    
-    .ha-logout-btn:hover {
-        background: #c0392b;
-    }
-    
-    /* Totals section */
-    .ha-totals-section {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 2px dashed #ddd;
-    }
-    
-    .ha-total-group {
-        min-width: 200px;
-        text-align: right;
-    }
-    
-    .ha-total-label {
-        font-weight: 600;
-        color: var(--dark-text);
-        margin-bottom: 5px;
-    }
-    
-    .ha-total-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--secondary-color);
-    }
-    
-    /* Utility classes */
-    .ha-relative { position: relative; }
-    .text-center { text-align: center; }
-    .item-stock-qty, .item-uom, .item-rate { text-align: center; }
-    
-    /* Status bar */
-    .ha-status-bar {
-        display: flex;
-        gap: 15px;
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-    
-    .ha-status-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .ha-status-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--success-color);
-    }
-
-    .form-field-active {
-        background-color: #fff8e1;
-        border: 2px solid #ffc107 !important;
-    }
-    
-    /* Toast notifications */
-    .ha-toast {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 6px;
-        background: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 1050;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    }
-    
-    .ha-toast.show {
-        transform: translateX(0);
-    }
-    
-    .ha-toast-success {
-        border-left: 4px solid var(--success-color);
-    }
-    
-    .ha-toast-error {
-        border-left: 4px solid var(--accent-color);
-    }
-    
-    .ha-toast-icon {
-        font-size: 20px;
-    }
-    
-    .ha-toast-success .ha-toast-icon {
-        color: var(--success-color);
-    }
-    
-    .ha-toast-error .ha-toast-icon {
-        color: var(--accent-color);
-    }
-    
-    /* Loading overlay */
-    .ha-loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255,255,255,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-        display: none;
-    }
-    
-    .ha-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--secondary-color);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    /* Responsive styles */
-    @media (max-width: 768px) {
-        .ha-function-keys { gap: 8px; }
-        .ha-function-key { min-width: 70px; padding: 5px 8px; font-size: 10px; }
-        .ha-form-row { flex-direction: column; gap: 15px; }
-        .ha-form-group { min-width: 100%; }
-        .ha-item-search-dropdown { width: 300px; }
-    }
-
-    .item-row-active {
-        background-color: #e8f4fc !important;
-        box-shadow: 0 0 0 2px #4a90e2 inset;
-    }
-    
-    .search-mode-active .ha-item-search-dropdown {
-        display: block !important;
-    }
-
-    /* Additional styles for focus management */
-    .item-row-active {
-        background-color: #e8f4fc !important;
-        box-shadow: 0 0 0 2px #4a90e2 inset;
-    }
-    
-    .search-mode-active .ha-item-search-dropdown {
-        display: block !important;
-    }
-    
-    /* Scrollbar styling for better visibility */
-    .ha-scrollable-content::-webkit-scrollbar {
-        width: 12px;
-        height: 12px;
-    }
-    
-    .ha-scrollable-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .ha-scrollable-content::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 10px;
-    }
-    
-    .ha-scrollable-content::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-    
-    .ha-item-search-dropdown::-webkit-scrollbar {
-        width: 8px;
-    }
-    
-    .ha-item-search-dropdown::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .ha-item-search-dropdown::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 10px;
-    }
-    
-    .ha-item-search-dropdown::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-
-    .mt-4, .my-4 {
-        margin-top: 0rem !important;
-    }
-    
-    .container {
-        margin: auto;
-    }
-    
-    .ha-total-add-button-container {
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    /* Quantity Popup Styles - Updated for Number Pad */
-    .ha-quantity-popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        z-index: 2000;
-        width: 320px;
-        display: none;
-    }
-    
-    .ha-quantity-popup.active {
-        display: block;
-    }
-    
-    .ha-quantity-popup h3 {
-        margin-top: 0;
-        color: var(--navyblue);
-        text-align: center;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-        margin-bottom: 15px;
-    }
-    
-    .ha-quantity-display {
-        width: 100%;
-        padding: 15px;
-        font-size: 24px;
-        text-align: center;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-        margin-bottom: 15px;
-        box-sizing: border-box;
-        background: #f9f9f9;
-        font-weight: bold;
-    }
-    
-    .ha-numpad {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .ha-numpad-btn {
-        padding: 15px;
-        font-size: 18px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #f9f9f9;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .ha-numpad-btn:hover {
-        background: #e0e0e0;
-    }
-    
-    .ha-numpad-btn:active {
-        background: #d0d0d0;
-        transform: scale(0.95);
-    }
-    
-    .ha-numpad-clear {
-        background: #ffebee;
-        color: #d32f2f;
-    }
-    
-    .ha-numpad-clear:hover {
-        background: #ffcdd2;
-    }
-    
-    .ha-numpad-backspace {
-        background: #fff3e0;
-        color: #f57c00;
-    }
-    
-    .ha-numpad-backspace:hover {
-        background: #ffe0b2;
-    }
-    
-    .ha-quantity-popup-buttons {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-    }
-    
-    .ha-quantity-popup-btn {
-        padding: 12px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 600;
-        flex: 1;
-        transition: all 0.2s;
-    }
-    
-    .ha-quantity-popup-confirm {
-        background: var(--success-color);
-        color: white;
-    }
-    
-    .ha-quantity-popup-confirm:hover {
-        background: #218838;
-    }
-    
-    .ha-quantity-popup-cancel {
-        background: var(--accent-color);
-        color: white;
-    }
-    
-    .ha-quantity-popup-cancel:hover {
-        background: #c0392b;
-    }
-    
-    .ha-popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1999;
-        display: none;
-    }
-    
-    .ha-popup-overlay.active {
-        display: block;
-    }
-</style>
-{% endblock %}
-
-{% block page_content %}
-<div class="ha-pos-container">
-    <div class="ha-pos-card">
-        <!-- Scrollable content area -->
-        <div class="ha-scrollable-content">
-            <div class="ha-form-row">
-                <div class="ha-form-group">
-                    <label for="customer">Customer</label>
-                    <select id="customer" class="form-select">
-                        <option value="">Select Customer</option>
-                    </select>
-                </div>
-                
-                <div class="ha-form-group">
-                    <label for="pricelist">Price List</label>
-                    <select id="pricelist" class="form-select">
-                        <option value="">Select Price List</option>
-                    </select>
-                </div>
-                
-                <div class="ha-form-group">
-                    <label for="sub_total">Total</label>
-                    <input type="text" id="sub_total" class="form-control" value="0.00" readonly>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="ha-items-table">
-                    <thead>
-                        <tr>
-                            <th width="15%">Item Code</th>
-                            <th width="25%">Item Name</th>
-                            <th width="8%">UOM</th>
-                            <th width="8%">Qty</th>
-                            <th width="10%">Rate</th>
-                            <th width="12%">Amount</th>
-                            <th width="4%">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="itemsTableBody">
-                        <!-- Rows will be added dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="ha-total-add-button-container">
-                <button class="ha-add-item-btn" id="btnAddRow">
-                    <i class="fas fa-plus me-2"></i>Add Item
-                </button>
-                <div>
-                    <span>Total</span>
-                    <span class="ha-total-value" id="totalAmount">$0.00</span>
-                </div>
-            </div>
-            
-            <div class="ha-totals-section">
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ha-sticky-footer">
-    <div class="ha-function-keys">
-        <button class="ha-function-key" data-action="payment" id="btnPayment">
-            <i class="fas fa-money-bill-wave"></i>
-            <span class="ha-key-label">Payment (F1)</span>
-        </button>
-        <button class="ha-function-key" data-action="options">
-            <i class="fas fa-cog"></i>
-            <span class="ha-key-label">Options (F10)</span>
-        </button>
-        <button class="ha-function-key" data-action="quantity">
-            <i class="fas fa-boxes"></i>
-            <span class="ha-key-label">Qty (F5)</span>
-        </button>
-        <button class="ha-function-key" data-action="return">
-            <i class="fas fa-undo"></i>
-            <span class="ha-key-label">Return (F12)</span>
-        </button>
-        <button class="ha-function-key" data-action="discount">
-            <i class="fas fa-tag"></i>
-            <span class="ha-key-label">Discount (F7)</span>
-        </button>
-
-         <a href="havano-pos-touch-ui.html">
-            <button class="ha-function-key" data-action="switch">
-                <i class="fas fa-tag"></i>
-                <span class="ha-key-label">Switch</span>
-            </button>
-        </a>
-
-        
-    </div>
-    <button class="ha-logout-btn" id="btnLogout">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-    </button>
-</div>
-
-<!-- Loading overlay -->
-<div class="ha-loading-overlay" id="loadingOverlay">
-    <div class="ha-spinner"></div>
-</div>
-
-<!-- Search dropdown -->
-<div class="ha-item-search-dropdown" id="searchDropdown"></div>
-
-<!-- Quantity Popup with Number Pad -->
-<div class="ha-popup-overlay" id="quantityPopupOverlay"></div>
-<div class="ha-quantity-popup" id="quantityPopup">
-    <h3>Enter Quantity</h3>
-    <div class="ha-quantity-display" id="quantityDisplay">1</div>
-    
-    <div class="ha-numpad">
-        <button class="ha-numpad-btn" data-value="1">1</button>
-        <button class="ha-numpad-btn" data-value="2">2</button>
-        <button class="ha-numpad-btn" data-value="3">3</button>
-        <button class="ha-numpad-btn" data-value="4">4</button>
-        <button class="ha-numpad-btn" data-value="5">5</button>
-        <button class="ha-numpad-btn" data-value="6">6</button>
-        <button class="ha-numpad-btn" data-value="7">7</button>
-        <button class="ha-numpad-btn" data-value="8">8</button>
-        <button class="ha-numpad-btn" data-value="9">9</button>
-        <button class="ha-numpad-btn ha-numpad-clear" id="quantityClear">C</button>
-        <button class="ha-numpad-btn" data-value="0">0</button>
-        <button class="ha-numpad-btn ha-numpad-backspace" id="quantityBackspace">⌫</button>
-    </div>
-    
-    <div class="ha-quantity-popup-buttons">
-        <button class="ha-quantity-popup-btn ha-quantity-popup-cancel" id="quantityPopupCancel">Cancel</button>
-        <button class="ha-quantity-popup-btn ha-quantity-popup-confirm" id="quantityPopupConfirm">Confirm</button>
-    </div>
-</div>
-
-<script>
-// Global variables (same as before)
+// Global variables
 let allItems = [];
 let allSettings = [];
 let allCustomers = [];
@@ -785,8 +9,10 @@ let isInSearchMode = false;
 let currentSearchTerm = '';
 let currentSearchResults = [];
 let currentRowForQuantity = null;
+let itemGroups = [];
+let currentItemGroup = null;
 
-// DOM elements (same as before)
+// DOM elements
 const itemsTableBody = document.getElementById('itemsTableBody');
 const totalAmount = document.getElementById('totalAmount');
 const subTotal = document.getElementById('sub_total');
@@ -796,7 +22,6 @@ const customerSelect = document.getElementById('customer');
 const priceListSelect = document.getElementById('pricelist');
 const btnPayment = document.getElementById('btnPayment');
 const loadingOverlay = document.getElementById('loadingOverlay');
-const tableContainer = document.querySelector('.table-responsive');
 const quantityPopup = document.getElementById('quantityPopup');
 const quantityPopupOverlay = document.getElementById('quantityPopupOverlay');
 const quantityDisplay = document.getElementById('quantityDisplay');
@@ -804,6 +29,13 @@ const quantityPopupConfirm = document.getElementById('quantityPopupConfirm');
 const quantityPopupCancel = document.getElementById('quantityPopupCancel');
 const quantityClear = document.getElementById('quantityClear');
 const quantityBackspace = document.getElementById('quantityBackspace');
+const itemGroupsContainer = document.getElementById('itemGroupsContainer');
+const groupItemsContainer = document.getElementById('groupItemsContainer');
+const quantityDisplaySidebar = document.getElementById('quantityDisplaySidebar');
+const quantitySidebarConfirm = document.getElementById('quantitySidebarConfirm');
+const quantitySidebarCancel = document.getElementById('quantitySidebarCancel');
+const quantitySidebarClear = document.getElementById('quantitySidebarClear');
+const quantitySidebarBackspace = document.getElementById('quantitySidebarBackspace');
 
 // Initialize the POS when DOM is loaded
 document.addEventListener('DOMContentLoaded', initPOS);
@@ -821,30 +53,6 @@ function initPOS() {
         currentFocusIndex = fields.indexOf(customerSelect);
     }, 100);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Cache DOM elements
 function cacheDOM() {
@@ -926,7 +134,9 @@ function showQuantityPopup(row = null) {
     
     // Get current quantity value
     const currentQty = currentRowForQuantity.querySelector('.item-qty').value;
-    quantityDisplay.textContent = currentQty || '1';
+    // quantityDisplay.textContent = currentQty || '0';
+    quantityDisplay.textContent = '0';
+    // quantityDisplaySidebar.textContent = currentQty || '1';
     
     // Show popup and overlay
     quantityPopup.classList.add('active');
@@ -991,15 +201,26 @@ function handleNumpadInput(value) {
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
-    btnPayment.addEventListener('click', saveSalesInvoice);
+    btnPayment.addEventListener('click', showPaymentDialog);
+    // btnPayment.addEventListener('click', saveSalesInvoice);
     
     // Quantity popup events
     quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);
     quantityPopupCancel.addEventListener('click', hideQuantityPopup);
     quantityPopupOverlay.addEventListener('click', hideQuantityPopup);
     
+    // Sidebar quantity events
+    // quantitySidebarConfirm.addEventListener('click', applyQuantityFromPopup);
+    // quantitySidebarCancel.addEventListener('click', hideQuantityPopup);
+    
     // Number pad events
     document.querySelectorAll('.ha-numpad-btn[data-value]').forEach(button => {
+        button.addEventListener('click', () => {
+            handleNumpadInput(button.getAttribute('data-value'));
+        });
+    });
+    
+    document.querySelectorAll('.ha-sidebar-numpad-btn[data-value]').forEach(button => {
         button.addEventListener('click', () => {
             handleNumpadInput(button.getAttribute('data-value'));
         });
@@ -1009,9 +230,17 @@ function bindEvents() {
         handleNumpadInput('clear');
     });
     
+    // quantitySidebarClear.addEventListener('click', () => {
+    //     handleNumpadInput('clear');
+    // });
+    
     quantityBackspace.addEventListener('click', () => {
         handleNumpadInput('backspace');
     });
+    
+    // quantitySidebarBackspace.addEventListener('click', () => {
+    //     handleNumpadInput('backspace');
+    // });
     
     // Handle Enter key in quantity popup
     document.addEventListener('keydown', function(e) {
@@ -1122,36 +351,6 @@ function bindEvents() {
         }
     });
     
-    // Mouse wheel event for scrolling
-    document.addEventListener('wheel', function(e) {
-        // If search dropdown is visible and mouse is over it, allow scrolling
-        if (searchDropdown.style.display === 'block' && 
-            e.target.closest('.ha-item-search-dropdown')) {
-            // Let the native scroll behavior handle it
-            return;
-        }
-        
-        // Prevent scrolling on other elements if needed
-        // e.preventDefault();
-    }, { passive: true });
-    
-    // Touch events for mobile scrolling
-    document.addEventListener('touchstart', function(e) {
-        // Store the initial touch position
-        this.touchStartY = e.touches[0].clientY;
-    }, { passive: true });
-    
-    document.addEventListener('touchmove', function(e) {
-        // Allow touch scrolling for search dropdown and table
-        if (searchDropdown.style.display === 'block' && 
-            e.target.closest('.ha-item-search-dropdown')) {
-            return;
-        }
-        
-        // Prevent default for other elements if needed
-        // e.preventDefault();
-    }, { passive: true });
-    
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
         // Skip if quantity popup is active (handled separately)
@@ -1160,7 +359,8 @@ function bindEvents() {
         // Function keys
         if (e.key === 'F1' || e.key === 'F2') {
             e.preventDefault();
-            saveSalesInvoice();
+            showPaymentDialog();
+            // saveSalesInvoice();
         }
         else if (e.key === 'F5') {
             e.preventDefault();
@@ -1523,6 +723,166 @@ function loadAllItems(callback) {
     });
 }
 
+// Load item groups
+function loadItemGroups(callback) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Item Group",
+            fields: ["name", "item_group_name"],
+            limit: 100
+        },
+        callback: function(response) {
+            if (response.message) {
+                itemGroups = response.message;
+                displayItemGroups(itemGroups.slice(0, 8)); // Show first 8 groups
+                if (callback) callback();
+            } else {
+                showToast('Failed to load item groups', 'error');
+                if (callback) callback();
+            }
+        },
+        error: function(error) {
+            showToast('Error loading item groups', 'error');
+            if (callback) callback();
+        }
+    });
+}
+
+// Display item groups
+function displayItemGroups(groups) {
+    itemGroupsContainer.innerHTML = '';
+    // itemGroupsContainer.style.backgroundColor = "blue";
+    
+    groups.forEach(group => {
+        const groupBtn = document.createElement('button');
+        groupBtn.className = 'ha-item-group-btn';
+        groupBtn.textContent = group.item_group_name || group.name;
+        groupBtn.dataset.groupName = group.name;
+        
+        groupBtn.addEventListener('click', () => {
+            // Set active group
+            document.querySelectorAll('.ha-item-group-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            groupBtn.classList.add('active');
+            
+            // Load items for this group
+            currentItemGroup = group.name;
+            loadItemsByGroup(group.name);
+        });
+        
+        itemGroupsContainer.appendChild(groupBtn);
+    });
+    
+    // Add "More" button if there are more than 8 groups
+    if (itemGroups.length > 8) {
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'ha-item-group-btn';
+        moreBtn.textContent = 'More...';
+        moreBtn.addEventListener('click', () => {
+            displayItemGroups(itemGroups); // Show all groups
+        });
+        itemGroupsContainer.appendChild(moreBtn);
+    }
+}
+
+// Load items by group
+function loadItemsByGroup(groupName) {
+    showLoading();
+    
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Item",
+            fields: ["name", "item_name", "description", "stock_uom", "valuation_rate"],
+            filters: { item_group: groupName },
+            limit: 100
+        },
+        callback: function(response) {
+            hideLoading();
+            if (response.message) {
+                displayGroupItems(response.message);
+            } else {
+                showToast('Failed to load items for this group', 'error');
+            }
+        },
+        error: function(error) {
+            hideLoading();
+            showToast('Error loading items for this group', 'error');
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// Display items in the group
+function displayGroupItems(items) {
+    groupItemsContainer.innerHTML = '';
+    
+    if (items.length === 0) {
+        groupItemsContainer.innerHTML = '<div class="text-center" style="grid-column: 1 / -1; padding: 20px;">No items found in this group</div>';
+        return;
+    }
+    
+    items.forEach(item => {
+        const itemBtn = document.createElement('div');
+        itemBtn.className = 'ha-group-item-btn';
+        // itemBtn.innerHTML = `
+        //     <span class="ha-item-code-small">${item.name}</span>
+        //     <span class="ha-item-name-small">${item.item_name || item.name}</span>
+        //     <span class="ha-item-price-small">$${(item.valuation_rate || 0).toFixed(2)}</span>
+        // `;
+
+            itemBtn.innerHTML = `
+            <span class="ha-item-code-small">${item.item_name}</span>
+        `;
+            
+        itemBtn.addEventListener('click', () => {
+            // Add this item to the items table
+            addItemToTable(item);
+            addNewRow();
+        });
+        
+        groupItemsContainer.appendChild(itemBtn);
+    });
+}
+
+// Add item to the items table
+function addItemToTable(item) {
+    // Check if we have an active row or need to create a new one
+    let targetRow = document.querySelector('.item-row-active');
+    
+    if (!targetRow) {
+        // If no active row, add a new row
+        addNewRow();
+        const rows = itemsTableBody.querySelectorAll('tr');
+        targetRow = rows[rows.length - 1];
+    }
+    
+    // Populate the row with item data
+    targetRow.querySelector('.item-code').value = item.name;
+    targetRow.querySelector('.item-name').value = item.item_name || item.name;
+    targetRow.querySelector('.item-uom').value = item.stock_uom || 'Nos';
+    targetRow.querySelector('.item-rate').value = (item.valuation_rate || 0).toFixed(2);
+    
+    // Calculate amount
+    updateItemAmount(targetRow.querySelector('.item-qty'));
+    
+    // Focus on the quantity field
+    targetRow.querySelector('.item-qty').focus();
+    targetRow.querySelector('.item-qty').select();
+}
+
 // Search items with type parameter (code or name)
 function searchItems(searchTerm, searchType = 'name') {
     frappe.call({
@@ -1756,7 +1116,7 @@ function saveSalesInvoice() {
         return;
     }
     
-    // showLoading();
+    showLoading();
     
     // Create sales invoice
     frappe.call({
@@ -1784,10 +1144,6 @@ function saveSalesInvoice() {
     });
 }
 
-
-
-
-
 function loadInitialData() {
     showLoading();
     
@@ -1799,14 +1155,17 @@ function loadInitialData() {
         // Now load customers and price lists
         loadCustomers(function() {
             loadPriceLists(function() {
-                // Set default values after all dropdowns are populated
-                if (allSettings.length > 0) {
-                    setDefaultValues(allSettings[0]);
-                }
-                
-                // Finally load items
-                loadAllItems(function() {
-                    hideLoading();
+                // Load item groups
+                loadItemGroups(function() {
+                    // Set default values after all dropdowns are populated
+                    if (allSettings.length > 0) {
+                        setDefaultValues(allSettings[0]);
+                    }
+                    
+                    // Finally load items
+                    loadAllItems(function() {
+                        hideLoading();
+                    });
                 });
             });
         });
@@ -1905,6 +1264,24 @@ function setDefaultValues(data) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function showPaymentDialog(){
+    alert("this is a payment");
+    frappe.message("Hello");
+}
+
 // Adjust main styles
 function adjustMainStyles() {
     const mainElement = document.querySelector('main.container.my-4');
@@ -1919,10 +1296,6 @@ function adjustMainStyles() {
     }
 }
 
-
-
-
-
 // Make save function globally available for testing
 window.saveSalesInvoice = saveSalesInvoice;
 
@@ -1930,5 +1303,3 @@ window.saveSalesInvoice = saveSalesInvoice;
 window.onload = function() {
     adjustMainStyles();
 };
-</script>
-{% endblock %}

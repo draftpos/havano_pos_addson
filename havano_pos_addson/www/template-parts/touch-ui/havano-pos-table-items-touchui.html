@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../static/v1/css/touch-ui/havano-pos-non-touchui-table-items.css">
+
+<div class="ha-table-responsive">
+    <table class="ha-items-table">
+        <thead>
+            <tr>
+                <th width="15%">Item Code</th>
+                <th width="25%">Item Name</th>
+                <th width="8%">UOM</th>
+                <th width="8%">Qty</th>
+                <th width="10%">Rate</th>
+                <th width="12%">Amount</th>
+                <th width="4%">Action</th>
+            </tr>
+        </thead>
+        <tbody class="itemsTableBody-class" id="itemsTableBody">
+            <!-- Rows will be added dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<div class="ha-total-add-button-container">
+    <button class="ha-add-item-btn" id="btnAddRow">
+        <i class="fas fa-plus me-2"></i>Add Item
+    </button>
+    <div>
+        <span>Total</span>
+        <span class="ha-total-value" id="totalAmount">$0.00</span>
+    </div>
+</div>
