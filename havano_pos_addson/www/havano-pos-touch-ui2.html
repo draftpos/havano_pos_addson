@@ -4,6 +4,8 @@
 
 
 {% block content %}
+
+{% include "havano_pos_addson/www/template-parts/havano-pos-payment-popup-common.html" %}
 {% include "havano_pos_addson/www/template-parts/havano-pos-header.html" %}
 {% include "havano_pos_addson/www/template-parts/general.html" %}
 {% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-table-items-touchui.html" %}
@@ -11,13 +13,16 @@
 {% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-group-items-touchui.html" %}
 {% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-footer-touchui.html" %}
 
- <script src="./static/v2/js/dom-cache.js"></script>
-<script src="./static/v2/js/ui.js"></script>
-<script src="./static/v2/js/data.js"></script>
-<script src="./static/v2/js/search.js"></script>
-<script src="./static/v2/js/invoice.js"></script>
-<script src="./static/v2/js/navigation.js"></script>
-<script src="./static/v2/js/events.js"></script>
-<script src="./static/v2/js/main.js"></script>
+<script src="./static/v2/js/touchui/globals.js"></script>
+<script src="./static/v2/js/touchui/dom-cache.js"></script>
+<script src="./static/v2/js/touchui/ui.js"></script>
+<script src="./static/v2/js/touchui/quantity-popup.js"></script>
+<script src="./static/v2/js/touchui/data.js"></script>
+<script src="./static/v2/js/touchui/item-groups.js"></script>
+<script src="./static/v2/js/touchui/search.js"></script>
+<script src="./static/v2/js/touchui/navigation.js"></script>
+<script src="./static/v2/js/touchui/invoice.js"></script>
+<script src="./static/v2/js/touchui/events.js"></script>
+<script src="./static/v2/js/touchui/main.js"></script>
 
 {% endblock %}

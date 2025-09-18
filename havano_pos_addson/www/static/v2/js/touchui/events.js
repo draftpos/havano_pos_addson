@@ -1,7 +1,7 @@
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
-    btnPayment.addEventListener('click', saveSalesInvoice);
+    btnPayment.addEventListener('click', showPaymentDialog);
     
     // Quantity popup events
     quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);
@@ -10,6 +10,12 @@ function bindEvents() {
     
     // Number pad events
     document.querySelectorAll('.ha-numpad-btn[data-value]').forEach(button => {
+        button.addEventListener('click', () => {
+            handleNumpadInput(button.getAttribute('data-value'));
+        });
+    });
+    
+    document.querySelectorAll('.ha-sidebar-numpad-btn[data-value]').forEach(button => {
         button.addEventListener('click', () => {
             handleNumpadInput(button.getAttribute('data-value'));
         });
@@ -140,7 +146,7 @@ function bindEvents() {
         // Function keys
         if (e.key === 'F1' || e.key === 'F2') {
             e.preventDefault();
-            saveSalesInvoice();
+            showPaymentDialog();
         }
         else if (e.key === 'F5') {
             e.preventDefault();
@@ -275,7 +281,7 @@ function bindEvents() {
         }
         
         // Escape key to close dropdown and exit search mode
-        if (e.key === 'Escape') {
+        if (e.key === 'Eescape') {
             searchDropdown.style.display = 'none';
             isInSearchMode = false;
             
@@ -316,17 +322,4 @@ function bindEvents() {
             positionDropdown(activeItemField);
         }
     });
-}
-
-// Handle function keys
-function handleFunctionKey(action) {
-    const actions = {
-        payment: () => saveSalesInvoice(),
-        quantity: () => showQuantityPopup(),
-        discount: () => showToast('Discount feature coming soon', 'success'),
-        options: () => showToast('Options menu coming soon', 'success'),
-        return: () => showToast('Return process coming soon', 'success')
-    };
-    
-    if (actions[action]) actions[action]();
 }

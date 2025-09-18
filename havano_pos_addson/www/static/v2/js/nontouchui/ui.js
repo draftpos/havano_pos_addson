@@ -73,7 +73,8 @@ function showQuantityPopup(row = null) {
     
     // Get current quantity value
     const currentQty = currentRowForQuantity.querySelector('.item-qty').value;
-    quantityDisplay.textContent = currentQty || '1';
+    // quantityDisplay.textContent = currentQty || '1';
+    quantityDisplay.textContent = '0';
     
     // Show popup and overlay
     quantityPopup.classList.add('active');
