@@ -141,7 +141,7 @@ function bindEvents() {
         // Function keys
         if (e.key === 'F1' || e.key === 'F2') {
             e.preventDefault();
-            saveSalesInvoice();
+            // saveSalesInvoice();
         }
         else if (e.key === 'F5') {
             e.preventDefault();

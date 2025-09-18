@@ -221,7 +221,7 @@
       <div class="ha-pos-payment-pop-body">
         <!-- Left side -->
         <div class="ha-pos-payment-pop-left">
-          <div class="ha-pos-payment-pop-total">10.00</div>
+          <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total">10.00</div>
 
           <div class="ha-pos-payment-pop-methods">
 
@@ -231,7 +231,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>1 CASH</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b id="ha-pos-payment-method-cash-amount">10</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -314,30 +314,30 @@
         <!-- Right side -->
         <div class="ha-pos-payment-pop-right">
           <div class="ha-pos-payment-pop-keypad">
-            <button class="ha-pos-payment-pop-btn">10</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">10</button>
             <button class="ha-pos-payment-pop-btn">Back</button>
             <button class="ha-pos-payment-pop-btn">Clear</button>
             <button class="ha-pos-payment-pop-btn" onclick="closePaymentPopup()">Cancel</button>
 
-            <button class="ha-pos-payment-pop-btn">7</button>
-            <button class="ha-pos-payment-pop-btn">8</button>
-            <button class="ha-pos-payment-pop-btn">9</button>
-            <button class="ha-pos-payment-pop-btn">10</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">7</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">8</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">9</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">10</button>
 
-            <button class="ha-pos-payment-pop-btn">4</button>
-            <button class="ha-pos-payment-pop-btn">5</button>
-            <button class="ha-pos-payment-pop-btn">6</button>
-            <button class="ha-pos-payment-pop-btn">20</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">4</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">5</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">6</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">20</button>
 
-            <button class="ha-pos-payment-pop-btn">1</button>
-            <button class="ha-pos-payment-pop-btn">2</button>
-            <button class="ha-pos-payment-pop-btn">3</button>
-            <button class="ha-pos-payment-pop-btn">50</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">1</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">2</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">3</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">50</button>
 
-            <button class="ha-pos-payment-pop-btn">0</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">0</button>
             <button class="ha-pos-payment-pop-btn">.</button>
             <button class="ha-pos-payment-pop-btn">+/-</button>
-            <button class="ha-pos-payment-pop-btn">100</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">100</button>
           </div>
 
           <div class="ha-pos-payment-pop-actions">
@@ -348,13 +348,3 @@
       </div>
     </div>
   </div>
-
-  <script>
-    function openPaymentPopup() {
-      document.getElementById("paymentOverlay").style.display = "flex";
-    }
-    function closePaymentPopup() {
-      document.getElementById("paymentOverlay").style.display = "none";
-    }
-  </script>
-
