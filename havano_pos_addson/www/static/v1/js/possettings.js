@@ -1,0 +1,126 @@
+// let allItems = [];
+let allSettings = [];
+const customerSelect = document.getElementById('customer');
+const priceListSelect = document.getElementById('pricelist');
+
+
+function loadInitialData() {
+    showLoading();
+    
+    // First load settings, then customers and price lists
+    loadPosSettings(function(settings) {
+        // Store settings for later use
+        allSettings = settings;
+        
+        // Now load customers and price lists
+        loadCustomers(function() {
+            loadPriceLists(function() {
+                // Set default values after all dropdowns are populated
+                if (allSettings.length > 0) {
+                    setDefaultValues(allSettings[0]);
+                }
+                
+                // Finally load items
+                loadAllItems(function() {
+                    hideLoading();
+                });
+            });
+        });
+    });
+}
+
+
+// Load POS settings - MODIFIED to accept callback
+function loadPosSettings(callback) {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "HA POS Setting",
+            fields: ["ha_pos_settings_on", "ha_on_pres_enter", "default_customer", "default_price_list"],
+            limit: 2
+        },
+        callback: function(response) {
+            if (response.message) {
+                if (callback) callback(response.message);
+            } else {
+                showToast('Failed to load POS settings', 'error');
+                if (callback) callback([]);
+            }
+        },
+        error: function(error) {
+            showToast('Error loading POS settings', 'error');
+            if (callback) callback([]);
+        }
+    });
+}
+
+// Set default values from settings - MODIFIED to handle cases where options don't exist yet
+function setDefaultValues(data) {
+    if (!data) return;
+    
+    // Set default customer
+    if (data.default_customer) {
+        // Try to find the customer option
+        const customerOption = Array.from(customerSelect.options).find(
+            option => option.value === data.default_customer
+        );
+        
+        if (customerOption) {
+            customerSelect.value = data.default_customer;
+        } else {
+            // If customer doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Customer",
+                    name: data.default_customer
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const customer = response.message;
+                        const option = document.createElement('option');
+                        option.value = customer.name;
+                        option.textContent = customer.customer_name || customer.name;
+                        customerSelect.appendChild(option);
+                        customerSelect.value = customer.name;
+                    }
+                }
+            });
+        }
+    }
+    
+    // Set default price list
+    if (data.default_price_list) {
+        // Try to find the price list option
+        const priceListOption = Array.from(priceListSelect.options).find(
+            option => option.value === data.default_price_list
+        );
+        
+        if (priceListOption) {
+            priceListSelect.value = data.default_price_list;
+        } else {
+            // If price list doesn't exist in options, try to load it
+            frappe.call({
+                method: "frappe.client.get",
+                args: {
+                    doctype: "Price List",
+                    name: data.default_price_list
+                },
+                callback: function(response) {
+                    if (response.message) {
+                        const priceList = response.message;
+                        const option = document.createElement('option');
+                        option.value = priceList.name;
+                        option.textContent = priceList.price_list_name || priceList.name;
+                        priceListSelect.appendChild(option);
+                        priceListSelect.value = priceList.name;
+                    }
+                }
+            });
+        }
+    }
+}
+
+
+
+loadInitialData();
