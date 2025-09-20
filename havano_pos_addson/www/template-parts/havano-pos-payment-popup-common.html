@@ -169,9 +169,13 @@
     }
     .ha-pos-payment-method-base-currency{
       display: flex;
+      align-items: center;
+      padding-bottom: 4px;
+      padding-top: 4px;
       gap: 3px;
       margin-top: 2px;
       margin-bottom: 2px;
+      cursor: pointer;
     }
     .ha-pos-payment-method-base-currency div,
     .ha-pos-payment-method-base-currency input{
@@ -221,7 +225,7 @@
       <div class="ha-pos-payment-pop-body">
         <!-- Left side -->
         <div class="ha-pos-payment-pop-left">
-          <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total">10.00</div>
+          <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total">0.00</div>
 
           <div class="ha-pos-payment-pop-methods">
 
@@ -229,11 +233,11 @@
 
             <div class="ha-pos-payment-pop-method">
               <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
+                <div class="ha-pos-payment-pop-method-label ha-pos-payment-method-cash-amount-container">
                   <span>1 CASH</span><br>
-                  <span>ZIG <b id="ha-pos-payment-method-cash-amount">10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
+                <input type="text" id="ha-pos-payment-method-cash-amount" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
             </div>
 
@@ -241,7 +245,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>2 CHECK</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -252,7 +256,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>3 C/ CARD</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -263,7 +267,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>4 AMEX</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -274,7 +278,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>5 DINNERS</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -285,7 +289,7 @@
               <div class="ha-pos-payment-method-base-currency">
                 <div class="ha-pos-payment-pop-method-label">
                   <span>6 EFTPOS</span><br>
-                  <span>ZIG <b>10</b></span>
+                  <span>ZIG <b>0</b></span>
                 </div>
                 <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
               </div>
@@ -306,7 +310,7 @@
             </div>
             <div class="ha-pos-payment-pop-footer-row">
               <div>Change $</div>
-              <div>-10.00</div>
+              <div id="ha-pos-payment-pop-change-footer-section">10.00</div>
             </div>
           </div>
         </div>

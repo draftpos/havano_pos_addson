@@ -1,0 +1,99 @@
+// Function to open the payment popup
+function openPaymentPopup() {
+    console.log("handle function onPaymentPopUp");
+
+    let total_amount = parseFloat(document.getElementById("sub_total").value) || 0;
+
+    let pop_up_total_amount = document.getElementById("ha-pos-payment-pop-total-amount");
+    let pop_up_total_cash = document.getElementById("ha-pos-payment-method-cash-amount");
+    let pop_up_total_amount_container = document.querySelector(".ha-pos-payment-method-cash-amount-container b");
+    let ha_pos_payment_pop_change_footer_section = document.querySelector("#ha-pos-payment-pop-change-footer-section");
+    
+    // initialize popup
+    pop_up_total_amount.textContent = total_amount.toFixed(2);
+    pop_up_total_cash.value = total_amount.toFixed(2);
+    pop_up_total_amount_container.textContent = total_amount.toFixed(2);
+    ha_pos_payment_pop_change_footer_section.textContent = "0.00";
+
+    // setup keypad
+    const all_popup_nums = document.querySelectorAll(".ha-pos-payment-pop-btn-num");
+    all_popup_nums.forEach((item) => {
+        item.onclick = function() {
+            handleKeypadInput(item.textContent);
+        };
+    });
+
+    document.getElementById("paymentOverlay").style.display = "flex";
+}
+
+function closePaymentPopup() {
+    document.getElementById("paymentOverlay").style.display = "none";
+}
+
+// Track the active input
+let activeInput = null;
+
+// Function to handle keypad input
+function handleKeypadInput(num) {
+    if (!activeInput) return;
+
+    // Append digit like calculator
+    if (num === "C") {
+        activeInput.value = "";
+    } else {
+        activeInput.value = num;
+    }
+
+    updateChange();
+}
+
+// Update change calculation
+function updateChange() {
+    let total_amount = parseFloat(document.getElementById("sub_total").value) || 0;
+    let sumPaid = 0;
+
+    document.querySelectorAll(".ha-pos-payment-pop-method-input").forEach(input => {
+        sumPaid += parseFloat(input.value) || 0;
+    });
+
+    let change = sumPaid - total_amount;
+     let pop_up_total_amount = document.getElementById("ha-pos-payment-pop-total-amount");
+     pop_up_total_amount.innerHTML = change;
+    document.querySelector("#ha-pos-payment-pop-change-footer-section").textContent = change > 0 ? change.toFixed(2) : "0.00";
+}
+
+// Function to update values on method section click
+function updateValues(event) {
+    resetValues();
+    let total_amount = parseFloat(document.getElementById("sub_total").value) || 0;
+    const clickedSection = event.currentTarget;
+    const bElement = clickedSection.querySelector("b");
+    const inputElement = clickedSection.querySelector("input");
+
+    if (bElement && inputElement) {
+        bElement.textContent = total_amount.toFixed(2);
+        inputElement.value = total_amount.toFixed(2);
+        inputElement.focus();
+        activeInput = inputElement; // track focused input
+    }
+}
+
+// Attach event listeners to methods
+const paymentMethods = document.querySelectorAll(".ha-pos-payment-pop-method");
+paymentMethods.forEach(method => {
+    method.onclick = updateValues;
+});
+
+// Reset all values
+function resetValues() {
+    const paymentMethods = document.querySelectorAll(".ha-pos-payment-pop-method");
+    paymentMethods.forEach(method => {
+        const bElement = method.querySelector("b");
+        const inputElement = method.querySelector("input");
+        if (bElement && inputElement) {
+            bElement.textContent = "0.00"; 
+            inputElement.value = "";
+        }
+    });
+    activeInput = null;
+}
