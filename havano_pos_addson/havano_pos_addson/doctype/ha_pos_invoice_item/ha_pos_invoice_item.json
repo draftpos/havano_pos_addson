@@ -106,7 +106,7 @@
  "modified": "2025-01-27 10:00:00.000000",
  "modified_by": "Administrator",
  "name": "Ha Pos Invoice Item",
- "module": "havano_pos_addson",
+ "module": "Havano Pos Addson",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

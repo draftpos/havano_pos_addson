@@ -1,11 +1,15 @@
 // Load initial data
 function loadInitialData() {
     showLoading();
+    console.log("loadInitialData");
     
     // First load settings, then customers and price lists
     loadPosSettings(function(settings) {
         // Store settings for later use
         allSettings = settings;
+        console.log("loadPosSettings");
+        console.log("actual settings below----");
+        console.log(allSettings);
         
         // Now load customers and price lists
         loadCustomers(function() {

@@ -109,9 +109,13 @@ function handleFunctionKey(action) {
 }
 
 function showPaymentDialog(){
-    // alert("this is a payment");
+    const subTotalEl = document.getElementById('sub_total').value;
+    if (subTotalEl == 0) {
+        showHaPopupCustom('Select at least one Item')
+        return
+    }
     openPaymentPopup();
-    // frappe.message("Hello");
+  
 }
 
 // Adjust main styles

@@ -1,7 +1,7 @@
 {
     "doctype": "DocType",
     "name": "HA POS Setting",
-    "module": "havano_pos_addson",
+    "module": "Havano Pos Addson",
     "fields": [
         {
             "fieldname": "ha_pos_settings_on",

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    /* Overlay */
+    .ha-pos-shift-management-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    /* Popup container */
+    .ha-pos-shift-management-container {
+      width: 700px;
+      border: 2px solid #6f8a8a;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Header */
+    .ha-pos-shift-management-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 6px;
+      background: #c0d0d0;
+      border-bottom: 1px solid #888;
+    }
+
+    /* Body layout */
+    .ha-pos-shift-management-body {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      min-height: 320px;
+    }
+
+    /* Left side: methods + status */
+    .ha-pos-shift-management-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ha-pos-shift-management-method {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f0f0;
+      border: 1px solid #aaa;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .ha-pos-shift-management-method-label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .ha-pos-shift-management-method-input {
+      width: 100px;
+      height: 35px;
+      font-size: 16px;
+      text-align: right;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding-right: 5px;
+    }
+
+    /* Closing amount */
+    .ha-pos-closing-amount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      padding: 6px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .ha-pos-closing-amount label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .ha-pos-closing-amount input {
+      width: 120px;
+      height: 35px;
+      font-size: 16px;
+      text-align: right;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      padding-right: 5px;
+    }
+
+    .ha-pos-shift-management-status {
+      margin-top: auto;
+      font-size: 14px;
+      padding: 8px;
+      background: #e8e8e8;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ha-pos-shift-management-status.open {
+      color: green;
+    }
+
+    .ha-pos-shift-management-status.closed {
+      color: red;
+    }
+
+    /* Right side: keypad */
+    .ha-pos-shift-management-right {
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ha-pos-shift-management-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+
+    .ha-pos-shift-management-btn {
+      background: #e8e8e8;
+      border: 1px solid #aaa;
+      font-size: 18px;
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ha-pos-shift-management-btn:hover {
+      background: #d0d0d0;
+    }
+
+    /* Footer actions */
+    .ha-pos-shift-management-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .ha-pos-shift-management-action {
+      flex: 1;
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .ha-pos-shift-management-action.close {
+      background: #f44336;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay + Popup -->
+  <div class="ha-pos-shift-management-overlay" id="shiftOverlay">
+    <div class="ha-pos-shift-management-container">
+      <div class="ha-pos-shift-management-header">
+        <div>
+          <span>Shift Management</span>
+          <span class="ha-pos-shift-name">23rv59c1tm</span>
+        </div>
+        <div style="cursor:pointer;" onclick="closeShiftPopup()">✖</div>
+      </div>
+
+      <div class="ha-pos-shift-management-body">
+        <!-- Left side -->
+        <div class="ha-pos-shift-management-left" id="shiftMethods">
+          <!-- Methods + Closing Amount will be injected -->
+        </div>
+
+        <!-- Right side -->
+        <div class="ha-pos-shift-management-right">
+          <div class="ha-pos-shift-management-keypad">
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('7')">7</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('8')">8</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('9')">9</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('4')">4</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('5')">5</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('6')">6</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('1')">1</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('2')">2</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('3')">3</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('0')">0</div>
+            <div class="ha-pos-shift-management-btn" onclick="keypadInput('.')">.</div>
+            <div class="ha-pos-shift-management-btn" onclick="backspaceInput()">⌫</div>
+          </div>
+
+          <div class="ha-pos-shift-management-actions">
+            <button class="ha-pos-shift-management-action" onclick="openShift(document.querySelector('.ha-pos-shift-name').textContent)">Open Shift</button>
+            <button class="ha-pos-shift-management-action close" onclick="closeShift(document.querySelector('.ha-pos-shift-name').textContent)">Close Shift</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    let activeInput = null;
+    let paymentMethods = ["Cash", "Ecocash", "Card", "Bank Transfer"];
+
+    function renderShiftMethods() {
+      const container = document.getElementById("shiftMethods");
+      container.innerHTML = "";
+
+      paymentMethods.forEach(method => {
+        const row = document.createElement("div");
+        row.className = "ha-pos-shift-management-method";
+        row.innerHTML = `
+          <div class="ha-pos-shift-management-method-label">${method}</div>
+          <input type="text" class="ha-pos-shift-management-method-input" value="0.00" onclick="setActiveInput(this)">
+        `;
+        container.appendChild(row);
+      });
+
+      // Closing amount row
+      const closingRow = document.createElement("div");
+      closingRow.className = "ha-pos-closing-amount";
+      closingRow.innerHTML = `
+        <label>Closing Amount</label>
+        <input type="text" id="closingAmount" value="0.00" onclick="setActiveInput(this)">
+      `;
+      container.appendChild(closingRow);
+
+      // Append status at the bottom
+      const status = document.createElement("div");
+      status.className = "ha-pos-shift-management-status closed";
+      status.id = "shiftStatus";
+      status.innerHTML = "Status: <span class='closed'>Closed</span>";
+      container.appendChild(status);
+    }
+
+    function setActiveInput(input) {
+      activeInput = input;
+    }
+
+    function keypadInput(value) {
+      if (!activeInput) return;
+      if (activeInput.value === "0.00") activeInput.value = "";
+      activeInput.value += value;
+    }
+
+    function backspaceInput() {
+      if (!activeInput) return;
+      activeInput.value = activeInput.value.slice(0, -1) || "0.00";
+    }
+
+    function setShiftStatus(status) {
+      const statusEl = document.getElementById("shiftStatus");
+      if (status === "open") {
+        statusEl.innerHTML = "Status: <span class='open'>Open</span>";
+      } else {
+        statusEl.innerHTML = "Status: <span class='closed'>Closed</span>";
+      }
+    }
+
+    function openShiftPopup() {
+      renderShiftMethods();
+      document.getElementById("shiftOverlay").style.display = "flex";
+    }
+
+    function closeShiftPopup() {
+      document.getElementById("shiftOverlay").style.display = "none";
+    }
+
+    function openShift(shiftName) {
+      frappe.call({
+        method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.open_shift",
+        args: { shift_name: shiftName },
+        callback: function(r) {
+          if (r.message) {
+            document.getElementById("shiftStatus").innerHTML =
+              "Status: <span class='open'>Open</span>";
+            console.log("Shift opened:", r.message);
+          }
+        }
+      });
+    }
+
+    function closeShift(shiftName) {
+      // Collect payment values from the left panel
+      const payments = [];
+      document.querySelectorAll(".ha-pos-shift-management-method").forEach(row => {
+        const label = row.querySelector(".ha-pos-shift-management-method-label").textContent.trim();
+        const input = row.querySelector("input");
+        const amount = parseFloat(input.value) || 0;
+        if (amount > 0) {
+          payments.push({ payment_method: label, amount: amount });
+        }
+      });
+
+      // Get closing amount input
+      const closingAmount = parseFloat(document.getElementById("closingAmount").value) || 0;
+
+      frappe.call({
+        method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.close_shift",
+        args: {
+          shift_name: shiftName,
+          closing_amount: closingAmount,
+          payments: payments
+        },
+        callback: function(r) {
+          if (r.message) {
+            document.getElementById("shiftStatus").innerHTML =
+              "Status: <span class='closed'>Closed</span>";
+            console.log("Shift closed:", r.message);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
     "doctype": "DocType",
     "name": "Ha Pos Payment Summary",
-    "module": "havano_pos_addson",
+    "module": "Havano Pos Addson",
     "fields": [
         {
             "fieldname": "sales_invoice_link",

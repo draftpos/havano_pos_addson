@@ -1,8 +1,13 @@
-
+<!DOCTYPE html>
+<html>
+<head>
   <style>
     body {
       background: #f5f5f5;
       font-family: Arial, sans-serif;
+    }
+    .ha-pos-payment-method-main-header-next-button{
+      display: flex;
     }
 
     /* Overlay */
@@ -13,7 +18,7 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.5);
-      display: none; /* Hidden by default */
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
@@ -72,9 +77,16 @@
       display: flex;
       flex-direction: column;
       align-items: left;
-      background: #d8d8d8;
+      background: #f0f0f0;
       border: 1px solid #aaa;
-      height: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .ha-pos-payment-pop-method:hover {
+      background: #e0e0e0;
+      transform: scale(1.02);
     }
 
     .ha-pos-payment-pop-method-label {
@@ -156,60 +168,27 @@
       background: #d0d0d0;
     }
 
-    /* Demo button */
-    .ha-pos-payment-pop-open-btn {
-      margin: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    .ha-pos-payment-method-base-currency{
+    .ha-pos-payment-method-base-currency {
       display: flex;
       align-items: center;
-      padding-bottom: 4px;
-      padding-top: 4px;
-      gap: 3px;
-      margin-top: 2px;
-      margin-bottom: 2px;
-      cursor: pointer;
+      justify-content: space-between;
+      padding: 8px;
+      gap: 6px;
+      margin: 2px 0;
+      width: 100%;
     }
+
     .ha-pos-payment-method-base-currency div,
-    .ha-pos-payment-method-base-currency input{
+    .ha-pos-payment-method-base-currency input {
       width: 50%;
     }
-    .ha-pos-payment-method-base-currency input{
+
+    .ha-pos-payment-method-base-currency input {
       background-color: white
     }
-    .ha-pos-payment-next-button{
-          background-color: #04AA6D; /* Green */
-          border: 1px solid green;
-          color: white;
-          padding: 1px 6px;
-          text-align: center;
-          text-decoration: none;
-          display: inline-block;
-          cursor: pointer;
-    }
-
-  .ha-pos-payment-next-button {
-    background-color: #3e8e41;
-  }
-
-  .ha-pos-payment-method-main-header-next-button{
-    display: flex;
-    gap: 20px;
-  }
-
   </style>
 </head>
 <body>
-
-  <!-- Button to open popup -->
-  <!-- <button class="ha-pos-payment-pop-open-btn" onclick="openPaymentPopup()">Open Payment Popup</button> -->
 
   <!-- Overlay + Popup -->
   <div class="ha-pos-payment-pop-overlay" id="paymentOverlay">
@@ -227,81 +206,8 @@
         <div class="ha-pos-payment-pop-left">
           <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total">0.00</div>
 
-          <div class="ha-pos-payment-pop-methods">
-
-
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label ha-pos-payment-method-cash-amount-container">
-                  <span>1 CASH</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" id="ha-pos-payment-method-cash-amount" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
-                  <span>2 CHECK</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
-                  <span>3 C/ CARD</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
-                  <span>4 AMEX</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
-                  <span>5 DINNERS</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-
-            <div class="ha-pos-payment-pop-method">
-              <div class="ha-pos-payment-method-base-currency">
-                <div class="ha-pos-payment-pop-method-label">
-                  <span>6 EFTPOS</span><br>
-                  <span>ZIG <b>0</b></span>
-                </div>
-                <input type="text" class="ha-pos-payment-pop-method-input" value="0.00">
-              </div>
-            </div>
-
-
-
-
-
-  
-            
-          </div>
+          <!-- Dynamic Payment Methods will be injected here -->
+          <div class="ha-pos-payment-pop-methods"></div>
 
           <div class="ha-pos-payment-pop-footer">
             <div class="ha-pos-payment-pop-footer-row">
@@ -310,7 +216,7 @@
             </div>
             <div class="ha-pos-payment-pop-footer-row">
               <div>Change $</div>
-              <div id="ha-pos-payment-pop-change-footer-section">10.00</div>
+              <div id="ha-pos-payment-pop-change-footer-section">0.00</div>
             </div>
           </div>
         </div>
@@ -326,29 +232,80 @@
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">7</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">8</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">9</button>
-            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">10</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">20</button>
 
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">4</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">5</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">6</button>
-            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">20</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">50</button>
 
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">1</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">2</button>
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">3</button>
-            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">50</button>
+            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">100</button>
 
             <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">0</button>
             <button class="ha-pos-payment-pop-btn">.</button>
             <button class="ha-pos-payment-pop-btn">+/-</button>
-            <button class="ha-pos-payment-pop-btn ha-pos-payment-pop-btn-num">100</button>
           </div>
 
           <div class="ha-pos-payment-pop-actions">
-            <div class="ha-pos-payment-pop-action">Save</div>
+            <div class="ha-pos-payment-pop-action" id="ha-pos-savepaymentdata">Save</div>
             <div class="ha-pos-payment-pop-action">Print (F3)</div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    let allpaymentmethods = [
+      {"name":"Bank Draft","mode_of_payment":"Bank Draft"},
+      {"name":"Cash","mode_of_payment":"Cash"},
+      // {"name":"Cheque","mode_of_payment":"Cheque"},
+      // {"name":"Credit Card","mode_of_payment":"Credit Card"},
+      {"name":"Ecocash","mode_of_payment":"Ecocash"},
+      {"name":"NMB Bank","mode_of_payment":"NMB Bank"},
+      {"name":"Wire Transfer","mode_of_payment":"Wire Transfer"}
+    ];
+    
+    // let allpaymentmethods = JSON.parse(localStorage.getItem("allpaymentmethods"));
+    function renderPaymentMethods() {
+      const container = document.querySelector(".ha-pos-payment-pop-methods");
+      container.innerHTML = "";
+
+      allpaymentmethods.forEach((method, index) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "ha-pos-payment-pop-method";
+
+        // Special class for Cash (so JS can target it)
+        const cashClass = method.name.toLowerCase() === "cash" 
+            ? "ha-pos-payment-method-cash-amount-container" 
+            : "";
+
+        wrapper.innerHTML = `
+          <div class="ha-pos-payment-method-base-currency ${cashClass}">
+            <div class="ha-pos-payment-pop-method-label">
+              <span>${index + 1} ${method.name.toUpperCase()}</span><br>
+              <span>ZIG <b>0</b></span>
+            </div>
+            <input 
+              type="text" 
+              class="ha-pos-payment-pop-method-input"
+              id="${cashClass ? 'ha-pos-payment-method-cash-amount' : 'payment-method-' + index}"
+              value="0.00"
+            >
+          </div>
+        `;
+
+        container.appendChild(wrapper);
+      });
+    }
+
+    // Render immediately on DOM load
+    document.addEventListener("DOMContentLoaded", renderPaymentMethods);
+  </script>
+
+
+</body>
+</html>
