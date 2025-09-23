@@ -4,13 +4,14 @@ function modesOfPayments(callback) {
         args: {
             doctype: "Mode of Payment",
             fields: ["name", "mode_of_payment"],
+            filters: { "enabled": 1 },   // ✅ only get enabled methods
             limit: 4
         },
         callback: function(response) {
             console.log(response.message);
             if (response.message) {
                 allItems = response.message;
-                localStorage.setItem("[allpaymentmethods]", JSON.stringify(allItems));
+                localStorage.setItem("allpaymentmethods", JSON.stringify(allItems));
                 if (callback) callback();
             } else {
                 showToast('Failed to load items', 'error');
@@ -23,6 +24,7 @@ function modesOfPayments(callback) {
         }
     });
 }
+
 
 modesOfPayments();
 

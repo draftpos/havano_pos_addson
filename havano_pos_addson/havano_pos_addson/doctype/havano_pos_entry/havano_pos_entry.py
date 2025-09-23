@@ -64,3 +64,122 @@ def save_pos_entries(payments):
 
     return {"created": results}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# @frappe.whitelist()
+# def send_invoice_to_django_agent(docname):
+#     print("send_invoice_to_django_agent   HAS RUN -----------------------------------")
+#     import requests, base64
+
+#     pdf_bytes = frappe.get_print("Sales Invoice", docname, "Standard", as_pdf=True)
+#     pdf_b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+
+#     url = "http://127.0.0.1:5002/api/save-invoice"
+#     payload = {"name": docname, "pdf": pdf_b64}
+
+#     resp = requests.post(url, json=payload, timeout=15)
+#     resp.raise_for_status()
+#     return resp.json()
+
+
+
+
+
+# import frappe, os, base64
+
+# @frappe.whitelist()
+# def save_invoice_pdf(docname):
+#     # Generate PDF bytes
+#     pdf_data = frappe.get_print("Sales Invoice", docname, "Standard", as_pdf=True)
+
+#     # Ensure folder exists
+#     folder = frappe.get_site_path("public", "files", "InvoiceFolder")
+#     os.makedirs(folder, exist_ok=True)
+
+#     # Save file on server
+#     file_path = os.path.join(folder, f"{docname}.pdf")
+#     with open(file_path, "wb") as f:
+#         f.write(pdf_data)
+
+#     # Return relative URL (browser can open this)
+#     return f"/files/InvoiceFolder/{docname}.pdf"
+
+
+# import frappe, requests, json, os
+# from frappe.utils import nowdate, now
+
+# @frappe.whitelist()
+# def send_invoice_json_to_agent(docname):
+#     # Load Sales Invoice
+#     doc = frappe.get_doc("Sales Invoice", docname)
+
+#     # Build JSON structure
+#     invoice_json = {
+#         "CompanyLogoPath": "/files/logo.png",
+#         "CompanyName": frappe.db.get_single_value("Global Defaults", "default_company"),
+#         "CompanyAddress": frappe.db.get_value("Company", doc.company, "address") or "",
+#         "postcode": "",
+#         "waiter_id": "",   # fill if needed
+#         "contact": doc.contact_display or "",
+#         "CompanyEmail": frappe.db.get_value("Company", doc.company, "email") or "",
+#         "TIN": "",   # optional
+#         "VATNo": "",
+#         "Tel": frappe.db.get_value("Company", doc.company, "phone_no") or "",
+#         "InvoiceNo": doc.name,
+#         "InvoiceDate": str(doc.posting_date),
+#         "CashierName": frappe.session.user,
+#         "CustomerName": doc.customer_name,
+#         "Customeraddress": doc.customer_address or "",
+#         "itemlist": [
+#             {
+#                 "ProductName": i.item_name,
+#                 "productid": i.item_code,
+#                 "Qty": float(i.qty),
+#                 "Price": float(i.rate),
+#                 "Amount": float(i.amount),
+#                 "vat": float(i.taxes_and_charges or 0),
+#             }
+#             for i in doc.items
+#         ],
+#         "AmountTendered": str(doc.paid_amount or 0),
+#         "Change": str((doc.paid_amount or 0) - (doc.grand_total or 0)),
+#         "QRCodePath": "",
+#         "QRCodePath2": "",
+#         "Currency": doc.currency,
+#         "Footer": "Thank you for your business!",
+#         "MultiCurrencyDetails": [],
+#         "DeviceID": frappe.local.site,
+#         "FiscalDay": str(nowdate()),
+#         "ReceiptNo": doc.name,
+#         "CustomerRef": doc.customer or "",
+#         "VCode": "",
+#         "QRCode": "",
+#         "DiscAmt": float(doc.discount_amount or 0),
+#         "GrandTotal": float(doc.grand_total or 0),
+#         "TaxType": "VAT",
+#         "PaymentMode": ",".join([p.mode_of_payment for p in doc.payments]) if doc.payments else "",
+#     }
+
+  
+#     resp = requests.post(
+#         "http://127.0.0.1:5002/api/save-invoice-json",
+#         json={"name": docname, "data": invoice_json},
+#         timeout=15,
+#     )
+
+#     return resp.json()
+
+
+
+

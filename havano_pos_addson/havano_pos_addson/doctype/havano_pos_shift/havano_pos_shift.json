@@ -3,6 +3,7 @@
   "name": "Havano POS Shift",
   "module": "Havano Pos Addson",
   "istable": 0,
+  "is_submittable": 1,
   "fields": [
     {
       "fieldname": "shift_date",
@@ -22,6 +23,21 @@
       "label": "Actual Closing",
       "fieldtype": "Currency"
     },
+
+    {
+      "fieldname": "shift_number",
+      "label": "Shift Number",
+      "fieldtype": "Data",
+      "unique": 1,
+      "read_only": 1
+    },
+
+    {
+      "fieldname": "shift_name",
+      "label": "Shift Name",
+      "fieldtype": "Data"
+    },
+
     {
       "fieldname": "difference",
       "label": "Difference",

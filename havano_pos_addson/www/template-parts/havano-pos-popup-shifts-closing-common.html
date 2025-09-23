@@ -6,7 +6,12 @@
       font-family: Arial, sans-serif;
       background: #f5f5f5;
     }
-
+    
+    #ha-pos-shift-management-message-div {
+      text-align: center;
+      color: red;
+      font-size: 13px;
+    }
     /* Overlay */
     .ha-pos-shift-management-overlay {
       position: fixed;
@@ -180,6 +185,8 @@
 
     .ha-pos-shift-management-action.close {
       background: #f44336;
+      padding-top: 5px;
+      padding-bottom: 5px;
     }
   </style>
 </head>
@@ -188,12 +195,17 @@
   <!-- Overlay + Popup -->
   <div class="ha-pos-shift-management-overlay" id="shiftOverlay">
     <div class="ha-pos-shift-management-container">
+      <div style="text-align: center;"><span>Shift Management</span></div>
       <div class="ha-pos-shift-management-header">
         <div>
-          <span>Shift Management</span>
-          <span class="ha-pos-shift-name">23rv59c1tm</span>
+          Shift Name
+          <span id="ha-pos-shift-management-shift-name" class="ha-pos-shift-name"></span>
         </div>
         <div style="cursor:pointer;" onclick="closeShiftPopup()">✖</div>
+      </div>
+
+      <div id="ha-pos-shift-management-message-div" class="ha-pos-shift-management-header">
+        
       </div>
 
       <div class="ha-pos-shift-management-body">
@@ -220,7 +232,6 @@
           </div>
 
           <div class="ha-pos-shift-management-actions">
-            <button class="ha-pos-shift-management-action" onclick="openShift(document.querySelector('.ha-pos-shift-name').textContent)">Open Shift</button>
             <button class="ha-pos-shift-management-action close" onclick="closeShift(document.querySelector('.ha-pos-shift-name').textContent)">Close Shift</button>
           </div>
         </div>
@@ -232,7 +243,10 @@
 
   <script>
     let activeInput = null;
-    let paymentMethods = ["Cash", "Ecocash", "Card", "Bank Transfer"];
+    let paymentMethods =  JSON.parse(localStorage.getItem("allpaymentmethods"));
+    let havano_pos_shift = JSON.parse(localStorage.getItem("havano_pos_shift"));
+    let shiftName  = havano_pos_shift.message[0].name;
+    document.querySelector('.ha-pos-shift-name').textContent = shiftName;
 
     function renderShiftMethods() {
       const container = document.getElementById("shiftMethods");
@@ -242,7 +256,7 @@
         const row = document.createElement("div");
         row.className = "ha-pos-shift-management-method";
         row.innerHTML = `
-          <div class="ha-pos-shift-management-method-label">${method}</div>
+          <div class="ha-pos-shift-management-method-label">${method.name}</div>
           <input type="text" class="ha-pos-shift-management-method-input" value="0.00" onclick="setActiveInput(this)">
         `;
         container.appendChild(row);
@@ -258,11 +272,11 @@
       container.appendChild(closingRow);
 
       // Append status at the bottom
-      const status = document.createElement("div");
-      status.className = "ha-pos-shift-management-status closed";
-      status.id = "shiftStatus";
-      status.innerHTML = "Status: <span class='closed'>Closed</span>";
-      container.appendChild(status);
+      // const status = document.createElement("div");
+      // status.className = "ha-pos-shift-management-status closed";
+      // status.id = "shiftStatus";
+      // status.innerHTML = "Status: <span class='closed'>Closed</span>";
+      // container.appendChild(status);
     }
 
     function setActiveInput(input) {
@@ -280,18 +294,19 @@
       activeInput.value = activeInput.value.slice(0, -1) || "0.00";
     }
 
-    function setShiftStatus(status) {
-      const statusEl = document.getElementById("shiftStatus");
-      if (status === "open") {
-        statusEl.innerHTML = "Status: <span class='open'>Open</span>";
-      } else {
-        statusEl.innerHTML = "Status: <span class='closed'>Closed</span>";
-      }
-    }
+    // function setShiftStatus(status) {
+    //   const statusEl = document.getElementById("shiftStatus");
+    //   if (status === "open") {
+    //     statusEl.innerHTML = "Status: <span class='open'>Open</span>";
+    //   } else {
+    //     statusEl.innerHTML = "Status: <span class='closed'>Closed</span>";
+    //   }
+    // }
 
-    function openShiftPopup() {
+    function openShiftPopup(message) {
       renderShiftMethods();
       document.getElementById("shiftOverlay").style.display = "flex";
+      document.getElementById("ha-pos-shift-management-message-div").textContent = message;
     }
 
     function closeShiftPopup() {
@@ -336,9 +351,12 @@
         },
         callback: function(r) {
           if (r.message) {
-            document.getElementById("shiftStatus").innerHTML =
-              "Status: <span class='closed'>Closed</span>";
+            // document.getElementById("shiftStatus").innerHTML =
+            //   "Status: <span class='closed'>Closed</span>";
             console.log("Shift closed:", r.message);
+            showHaPopupCustom("Shift Closed");
+            localStorage.removeItem("havano_pos_shift");
+            closeShiftPopup() 
           }
         }
       });

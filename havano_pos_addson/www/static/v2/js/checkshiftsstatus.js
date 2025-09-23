@@ -1,13 +1,12 @@
-function showShiftPopup(message) {
-  // Simple popup (can replace with your custom popup later)
-  alert(message);
-}
+
 
 function checkShiftStatus() {
   let data = localStorage.getItem("havano_pos_shift");
 
   if (!data) {
-    showShiftPopup("Please open a shift first.");
+    // openShiftPopup();
+    // showHaPopupCustom("Please open a shift first");
+   
     return false;
   }
 
@@ -16,12 +15,12 @@ function checkShiftStatus() {
     m = JSON.parse(data);
   } catch (e) {
     console.error("Invalid JSON in havano_pos_shift", e);
-    showShiftPopup("Shift data corrupted. Please open shift again.");
+    // showHaPopupCustom("Shift data corrupted. Please open shift again.");
     return false;
   }
 
   if (!m.message || m.message.length === 0) {
-    showShiftPopup("Please open a shift first.");
+    // showHaPopupCustom("Please open a shift first");
     return false;
   }
 
@@ -29,12 +28,12 @@ function checkShiftStatus() {
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
   if (shift.status === "closed") {
-    showShiftPopup("Open shift to continue.");
+    // showHaPopupCustom("Open shift to continue.");
     return false;
   }
 
   if (shift.status === "open" && shift.shift_date !== today) {
-    showShiftPopup("Close the yesterday shift first to continue.");
+    // showHaPopupCustom("Close the yesterday shift first to continue.");
     return false;
   }
 

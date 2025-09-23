@@ -1,7 +1,12 @@
 import frappe
 from frappe.model.document import Document
+from frappe.utils import nowdate, flt
 
 class HavanoPOSShift(Document):
+    def autoname(self):
+        self.name = frappe.model.naming.make_autoname("SHIFT-.YYYY.-.#####")
+        self.shift_number = self.name
+
     def before_save(self):
         self.calculate_totals()
         self.calculate_difference()
@@ -39,31 +44,47 @@ class HavanoPOSShift(Document):
 
 
 
-
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 
 @frappe.whitelist()
-def open_shift(shift_name: str, opening_amount: float = 0):
+def open_shift(openingAmount=None):
     """Mark a shift as open and set opening amount."""
-    if not frappe.db.exists("Havano POS Shift", shift_name):
-        frappe.throw(f"Shift {shift_name} not found")
 
-    doc = frappe.get_doc("Havano POS Shift", shift_name)
+    # Check if there is already an open shift
+    existing_open = frappe.db.exists("Havano POS Shift", {"status": "open"})
+    if existing_open:
+        frappe.throw("You cannot open a new shift while another shift is still open.")
+
+    # Make sure openingAmount is safely converted to a number
+    opening_amount_value = flt(openingAmount) if openingAmount else 0
+
+    # Create new shift document
+    doc = frappe.new_doc("Havano POS Shift")
     doc.status = "open"
-    if opening_amount:
-        doc.opening_amount = opening_amount
-    if not doc.shift_date:
-        doc.shift_date = nowdate()
+    doc.opening_amount = opening_amount_value
+    doc.shift_date = nowdate()
 
+    # Save the document ignoring user permissions
     doc.save(ignore_permissions=True)
     frappe.db.commit()
-    return {"name": doc.name, "status": doc.status, "opening_amount": doc.opening_amount}
+
+    return {
+        "name": doc.name,
+        "status": doc.status,
+        "opening_amount": doc.opening_amount
+    }
+
+
 
 
 @frappe.whitelist()
 def close_shift(shift_name: str, closing_amount: float = 0, payments: list | str = None):
     """Mark a shift as closed, save payments, and calculate totals/difference."""
+    print("closing shift data -------------------------")
+    print(shift_name)
+    print(closing_amount)
+    print(payments)
     if not frappe.db.exists("Havano POS Shift", shift_name):
         frappe.throw(f"Shift {shift_name} not found")
 

@@ -1,5 +1,5 @@
 function checkOpenShift(callback) {
-  const today = new Date().getDate;
+  const today = new Date().toISOString().split('T')[0];
 
   frappe.call({
     method: "frappe.client.get_list",
@@ -17,7 +17,8 @@ function checkOpenShift(callback) {
         localStorage.setItem("havano_pos_shift", JSON.stringify(r));
       if (!r.message || r.message.length === 0) {
         // No open shift
-        alert("Please open a shift first");
+        // alert("Please open a shift first");
+        haPosOpeningOpenPopup("Please open a shift first");
         if (callback) callback(false);
         return;
       }
@@ -28,7 +29,8 @@ function checkOpenShift(callback) {
         if (callback) callback(true, shift);
       } else {
         // Shift is open but date mismatch
-        alert("Close the yesterday shift and open another");
+        openShiftPopup("Close the yesterday shift and open another");
+        // alert("Close the yesterday shift and open another");
         if (callback) callback(false, shift);
       }
     },

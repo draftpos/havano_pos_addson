@@ -1,344 +1,40 @@
 {% extends "templates/web.html" %}
-
-{% block style %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="./static/css/havano-pos-touch-ui.css">
-<link rel="stylesheet" href="./static/css/havano-pos-touch-ui-payment-tab.css">
+{% block styles %}
 {% endblock %}
 
-{% block page_content %}
 
+{% block content %}
+
+
+{% include "havano_pos_addson/www/template-parts/general-loader.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-modal-common.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-popup-shifts-opening-common.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-popup-shifts-closing-common.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-payment-popup-common.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-header.html" %}
+{% include "havano_pos_addson/www/template-parts/general.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-table-items-touchui.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-quantity-popup-touchui.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-group-items-touchui.html" %}
+{% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-footer-touchui.html" %}
+
+
+
+<script src="./static/v2/js/touchui/globals.js"></script>
+<script src="./static/v2/js/touchui/dom-cache.js"></script>
+<script src="./static/v2/js/touchui/ui.js"></script>
+<script src="./static/v2/js/touchui/quantity-popup.js"></script>
+<script src="./static/v2/js/touchui/data.js"></script>
+<script src="./static/v2/js/touchui/item-groups.js"></script>
+<script src="./static/v2/js/touchui/search.js"></script>
+<script src="./static/v2/js/touchui/navigation.js"></script>
+<script src="./static/v2/js/touchui/events.js"></script>
+<script src="./static/v2/js/touchui/invoice.js" ></script>
+<script src="./static/v2/js/touchui/main.js"></script>
+<script src="./static/v2/js/checkshiftsstatus.js"></script>
+<script src="./static/v2/js/setshiftsstatus.js" defer></script>
+<script src="./static/v2/js/touchui/handlepayment.js" defer></script>
+<script src="./static/v2/js/touchui/getPaymentModes.js" defer></script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="ha-pos-payment-overlay" id="overlay">
-    <div class="ha-pos-payment-overlay-modal">
-        <span class="ha-pos-payment-overlay-close-btn" id="closeBtn">&times;</span>
-        <div class="ha-pos-payment-wrapper">
-            <div class="ha-pos-payment-container">
-                <div class="ha-pos-payment-header">Payment</div>
-                <div class="ha-pos-payment-sections">
-                    <div>
-                        <div class="ha-pos-payment-amount-due">50.00</div>
-                        <div class="ha-pos-payment-methods">
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>1 CASH</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>2 CHECK</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>3 C / CARD</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>4 AMEX</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>5 DINERS</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                            <div class="ha-pos-payment-method" onclick="selectPayment(this)">
-                                <span>6 EFTPOS</span><span class="ha-pos-payment-amount">0.00</span>
-                            </div>
-                        </div>
-
-                        <div class="ha-pos-payment-transaction-summary">
-                            <div class="ha-pos-payment-summary-item">
-                                <div class="ha-pos-payment-summary-label">Rounding $</div>
-                                <div class="ha-pos-payment-summary-value">0.00</div>
-                            </div>
-                            <div class="ha-pos-payment-summary-item">
-                                <div class="ha-pos-payment-summary-label">Change $</div>
-                                <div class="ha-pos-payment-summary-value">-50.00</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="ha-pos-payment-keypad">
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(7)">7</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(8)">8</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(9)">9</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(4)">4</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(5)">5</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(6)">6</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(1)">1</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(2)">2</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(3)">3</button>
-                            <button class="ha-pos-payment-keypad-button ha-pos-payment-special" onclick="toggleSign()">+/-</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="appendNumber(0)">0</button>
-                            <button class="ha-pos-payment-keypad-button" onclick="setAmount(100)">100</button>
-                            <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="backspace()">Back</button>
-                            <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="clearAmount()">Clear</button>
-                            <button class="ha-pos-payment-keypad-button ha-pos-payment-action" onclick="cancelPayment()">Cancel</button>
-                        </div>
-
-                        <div class="ha-pos-payment-action-buttons">
-                            <button class="ha-pos-payment-action-button ha-pos-payment-save" onclick="savePayment()">Save</button>
-                            <button class="ha-pos-payment-action-button ha-pos-payment-print" onclick="printReceipt()">Print (F3)</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- <button id="openModalBtn">Open Modal</button> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- This wrapper ensures styles don't affect the rest of the page -->
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="ha-pos-container">
-    <div class="ha-main-layout">
-
-        <!-- First row: 75% items table, 25% number pad -->
-        <div class="ha-first-row">
-            <!-- Items section (75%) -->
-            <div class="ha-items-section">
-                <div class="ha-scrollable-content">
-                    <div class="ha-form-row">
-                        <div class="ha-form-group">
-                            <label for="customer">Customer</label>
-                            <select id="customer" class="form-select">
-                                <option value="">Select Customer</option>
-                            </select>
-                        </div>
-                        
-                        <div class="ha-form-group">
-                            <label for="pricelist">Price List</label>
-                            <select id="pricelist" class="form-select">
-                                <option value="">Select Price List</option>
-                            </select>
-                        </div>
-                        
-                        <div class="ha-form-group">
-                            <label for="sub_total">Total</label>
-                            <input type="text" id="sub_total" class="form-control" value="0.00" readonly>
-                        </div>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table class="ha-items-table">
-                            <thead>
-                                <tr>
-                                    <th width="15%">Item Code</th>
-                                    <th width="25%">Item Name</th>
-                                    <th width="8%">UOM</th>
-                                    <th width="8%">Qty</th>
-                                    <th width="10%">Rate</th>
-                                    <th width="12%">Amount</th>
-                                    <th width="4%">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsTableBody">
-                                <!-- Rows will be added dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="ha-total-add-button-container">
-                        <button class="ha-add-item-btn" id="btnAddRow">
-                            <i class="fas fa-plus me-2"></i>Add Item
-                        </button>
-                        <div>
-                            <span>Total</span>
-                            <span class="ha-total-value" id="totalAmount">$0.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-        
-
-
-
-        
-        <!-- Second row: item groups and items -->
-        <div class="ha-second-row">
-            <!-- Item groups row -->
-            <div class="ha-item-groups-container" id="itemGroupsContainer">
-                <!-- Item groups will be populated here -->
-            </div>
-            
-            <!-- Items in selected group -->
-            <div class="ha-group-items-container" id="groupItemsContainer">
-                <!-- Items will be populated here when a group is selected -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="ha-sticky-footer">
-    <div class="ha-function-keys">
-        <button class="ha-function-key" data-action="payment" id="btnPayment">
-            <i class="fas fa-money-bill-wave"></i>
-           <span class="ha-key-label">Payment (F1)</span>
-            
-        </button>
-        <button class="ha-function-key" data-action="options">
-            <i class="fas fa-cog"></i>
-            <span class="ha-key-label">Options (F10)</span>
-        </button>
-        <button class="ha-function-key" data-action="quantity">
-            <i class="fas fa-boxes"></i>
-            <span class="ha-key-label">Qty (F5)</span>
-        </button>
-        <button class="ha-function-key" data-action="return">
-            <i class="fas fa-undo"></i>
-            <span class="ha-key-label">Return (F12)</span>
-        </button>
-        <button class="ha-function-key" data-action="discount">
-            <i class="fas fa-tag"></i>
-            <span class="ha-key-label">Discount (F7)</span>
-        </button>
-        <a href="havano-pos.html">
-            <button class="ha-function-key" data-action="switch">
-                <i class="fas fa-tag"></i>
-                <span class="ha-key-label">Switch</span>
-            </button>
-        </a>
-    </div>
-    <button class="ha-logout-btn" id="btnLogout">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-    </button>
-</div>
-
-<!-- Loading overlay -->
-<div class="ha-loading-overlay" id="loadingOverlay">
-    <div class="ha-spinner"></div>
-</div>
-
-<!-- Search dropdown -->
-<div class="ha-item-search-dropdown" id="searchDropdown"></div>
-
-<!-- Quantity Popup with Number Pad -->
-<div class="ha-popup-overlay" id="quantityPopupOverlay"></div>
-<div class="ha-quantity-popup" id="quantityPopup">
-    <h3>Enter Quantity tttt</h3>
-    <div class="ha-quantity-display" id="quantityDisplay">0</div>
-    
-    <div class="ha-numpad">
-        <button class="ha-numpad-btn" data-value="1">1</button>
-        <button class="ha-numpad-btn" data-value="2">2</button>
-        <button class="ha-numpad-btn" data-value="3">3</button>
-        <button class="ha-numpad-btn" data-value="4">4</button>
-        <button class="ha-numpad-btn" data-value="5">5</button>
-        <button class="ha-numpad-btn" data-value="6">6</button>
-        <button class="ha-numpad-btn" data-value="7">7</button>
-        <button class="ha-numpad-btn" data-value="8">8</button>
-        <button class="ha-numpad-btn" data-value="9">9</button>
-        <button class="ha-numpad-btn ha-numpad-clear" id="quantityClear">C</button>
-        <button class="ha-numpad-btn" data-value="0">0</button>
-        <button class="ha-numpad-btn ha-numpad-backspace" id="quantityBackspace">⌫</button>
-    </div>
-    
-    <div class="ha-quantity-popup-buttons">
-        <button class="ha-quantity-popup-btn ha-quantity-popup-cancel" id="quantityPopupCancel">Cancel</button>
-        <button class="ha-quantity-popup-btn ha-quantity-popup-confirm" id="quantityPopupConfirm">Confirm</button>
-    </div>
-</div>
-
-<script src="./static/js/havano-pos-touch-ui.js"></script>
-<script src="./static/js/havano-pos-touch-ui-payment-tab.js"></script>
 {% endblock %}

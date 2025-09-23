@@ -2,6 +2,7 @@
   "doctype": "DocType",
   "name": "Havano POS Entry",
   "module": "Havano Pos Addson",
+  "is_submittable": 1,
   "fields": [
     {
       "fieldname": "invoice_number",

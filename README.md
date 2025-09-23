@@ -12,22 +12,10 @@ bench get-app $URL_OF_THIS_REPO --branch develop
 bench install-app havano_pos_addson
 ```
 
-### Contributing
+### Usage
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+# main link
 
-```bash
-cd apps/havano_pos_addson
-pre-commit install
-```
+http://localhost:8000/havano-pos-touch-ui.html
 
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### License
-
-mit
+# Dont Worry About so many html files and css there, some of them are not in Use.

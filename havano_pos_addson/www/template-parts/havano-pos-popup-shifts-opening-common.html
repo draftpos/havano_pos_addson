@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    
+    #ha-pos-opening-message-div {
+      text-align: center;
+      color: red;
+      font-size: 13px;
+    }
+
+    /* Overlay */
+    .ha-pos-opening-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    /* Popup container */
+    .ha-pos-opening-container {
+      width: 700px;
+      border: 2px solid #6f8a8a;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Header */
+    .ha-pos-opening-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 6px;
+      background: #c0d0d0;
+      border-bottom: 1px solid #888;
+    }
+
+    /* Body layout */
+    .ha-pos-opening-body {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      min-height: 320px;
+    }
+
+    /* Left side */
+    .ha-pos-opening-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .ha-pos-opening-method {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f0f0;
+      border: 1px solid #aaa;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .ha-pos-opening-method-label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .ha-pos-opening-method-input {
+      width: 100px;
+      height: 35px;
+      font-size: 16px;
+      text-align: right;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding-right: 5px;
+    }
+
+    /* Opening amount */
+    .ha-pos-opening-amount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      padding: 6px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .ha-pos-opening-amount label {
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .ha-pos-opening-amount input {
+      width: 120px;
+      height: 35px;
+      font-size: 16px;
+      text-align: right;
+      border: 1px solid #4caf50;
+      border-radius: 4px;
+      padding-right: 5px;
+    }
+
+    .ha-pos-opening-status {
+      margin-top: auto;
+      font-size: 14px;
+      padding: 8px;
+      background: #e8e8e8;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ha-pos-opening-status.open {
+      color: green;
+    }
+
+    .ha-pos-opening-status.closed {
+      color: red;
+    }
+
+    /* Right side: keypad */
+    .ha-pos-opening-right {
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ha-pos-opening-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+
+    .ha-pos-opening-btn {
+      background: #e8e8e8;
+      border: 1px solid #aaa;
+      font-size: 18px;
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ha-pos-opening-btn:hover {
+      background: #d0d0d0;
+    }
+
+    /* Footer actions */
+    .ha-pos-opening-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .ha-pos-opening-action {
+      flex: 1;
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .ha-pos-opening-action.close {
+      background: #f44336;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay + Popup -->
+  <div class="ha-pos-opening-overlay" id="haPosOpeningOverlay">
+    <div class="ha-pos-opening-container">
+      <div style="text-align: center;"><span>Shift Management</span></div>
+      <div class="ha-pos-opening-header">
+        <div>
+          Opening Shift
+          <span id="ha-pos-opening-shift-name" class="ha-pos-opening-shift-name"></span>
+        </div>
+        <div style="cursor:pointer;" onclick="haPosOpeningClosePopup()">✖</div>
+      </div>
+
+      <div id="ha-pos-opening-message-div" class="ha-pos-opening-header"></div>
+
+      <div class="ha-pos-opening-body">
+        <!-- Left side -->
+        <div class="ha-pos-opening-left" id="haPosOpeningMethods">
+          <!-- Methods + Opening Amount will be injected -->
+        </div>
+
+        <!-- Right side -->
+        <div class="ha-pos-opening-right">
+          <div class="ha-pos-opening-keypad">
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('7')">7</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('8')">8</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('9')">9</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('4')">4</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('5')">5</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('6')">6</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('1')">1</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('2')">2</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('3')">3</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('0')">0</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningKeypadInput('.')">.</div>
+            <div class="ha-pos-opening-btn" onclick="haPosOpeningBackspace()">⌫</div>
+          </div>
+
+          <div class="ha-pos-opening-actions">
+            <button class="ha-pos-opening-action" onclick="haPosOpeningOpenShift(document.querySelector('.ha-pos-opening-shift-name').textContent)">Open Shift</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let haPosOpeningActiveInput = null;
+    let haPosOpeningShiftData = JSON.parse(localStorage.getItem("havano_pos_shift"));
+    let haPosOpeningShiftName = haPosOpeningShiftData.message[0].name;
+    document.querySelector('.ha-pos-opening-shift-name').textContent = haPosOpeningShiftName;
+
+    function haPosOpeningRenderMethods() {
+      const container = document.getElementById("haPosOpeningMethods");
+      container.innerHTML = "";
+      // Opening amount row
+      const openingRow = document.createElement("div");
+      openingRow.className = "ha-pos-opening-amount";
+      openingRow.innerHTML = `
+        <label>Opening Amount</label>
+        <input type="text" id="haPosOpeningAmount" value="0.00" onclick="haPosOpeningSetActiveInput(this)">
+      `;
+      container.appendChild(openingRow);
+    }
+
+    function haPosOpeningSetActiveInput(input) {
+      haPosOpeningActiveInput = input;
+    }
+
+    function haPosOpeningKeypadInput(value) {
+      if (!haPosOpeningActiveInput) return;
+      if (haPosOpeningActiveInput.value === "0.00") haPosOpeningActiveInput.value = "";
+      haPosOpeningActiveInput.value += value;
+    }
+
+    function haPosOpeningBackspace() {
+      if (!haPosOpeningActiveInput) return;
+      haPosOpeningActiveInput.value = haPosOpeningActiveInput.value.slice(0, -1) || "0.00";
+    }
+
+    function haPosOpeningOpenPopup(message) {
+      haPosOpeningRenderMethods();
+      document.getElementById("haPosOpeningOverlay").style.display = "flex";
+      document.getElementById("ha-pos-opening-message-div").textContent = message;
+    }
+
+    function haPosOpeningClosePopup() {
+      document.getElementById("haPosOpeningOverlay").style.display = "none";
+    }
+
+    function haPosOpeningOpenShift(shiftName) {
+      let openingAmount = document.getElementById("haPosOpeningAmount").value;
+      frappe.call({
+        method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.open_shift",
+        args: { openingAmount: openingAmount },
+        callback: function(r) {
+          if (r.message) {
+            showHaPopupCustom("Shift Opened");
+             haPosOpeningClosePopup();
+             setTimeout(function () {
+                window.location.reload();
+              }, 2 * 1000); 
+            // document.getElementById("ha-pos-opening-status").innerHTML =
+            //   "Status: <span class='open'>Open</span>";
+            // console.log("Shift opened:", r.message);
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
