@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="../static/v1/css/touch-ui/havano-pos-non-touchui-table-items.css">
+
+
+<style>
+    /* Container to limit height */
+.ha-pos-items-height-nontouch-container {
+  max-height: 78vh;              /* 3/4 of viewport height */
+  overflow-y: auto;              /* Scroll when content exceeds */
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Make table header sticky while body scrolls */
+.ha-pos-items-height-nontouch-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ha-pos-items-height-nontouch-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 2px solid #ccc;
+}
+
+/* Optional: smooth scrolling */
+.ha-pos-items-height-nontouch-container::-webkit-scrollbar {
+  width: 8px;
+}
+.ha-pos-items-height-nontouch-container::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+</style>
+<div class="ha-table-responsive ha-pos-items-height-nontouch-container">
+    <table class="ha-items-table ha-pos-items-height-nontouch-table">
+        <thead>
+            <tr>
+                <th width="15%">Item Code</th>
+                <th width="25%">Item Name</th>
+                <th width="8%">UOM</th>
+                <th width="8%">Qty</th>
+                <th width="10%">Rate</th>
+                <th width="12%">Amount</th>
+                <th width="4%">Action</th>
+            </tr>
+        </thead>
+        <tbody class="itemsTableBody-class ha-pos-items-height-nontouch-body" id="itemsTableBody">
+            <!-- Rows will be added dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<div class="ha-total-add-button-container">
+    <button class="ha-add-item-btn" id="btnAddRow">
+        <i class="fas fa-plus me-2"></i>Add Item
+    </button>
+    <div>
+        <span>Total</span>
+        <span class="ha-total-value" id="totalAmount">$0.00</span>
+    </div>
+</div>

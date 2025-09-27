@@ -1,24 +1,28 @@
 // Load initial data
 function loadInitialData() {
     showLoading();
+    console.log("loadInitialData");
     
     // First load settings, then customers and price lists
     loadPosSettings(function(settings) {
         // Store settings for later use
         allSettings = settings;
+        console.log("loadPosSettings");
+        console.log("actual settings below----");
+        console.log(allSettings);
         
         // Now load customers and price lists
         loadCustomers(function() {
             loadPriceLists(function() {
-                // Set default values after all dropdowns are populated
-                if (allSettings.length > 0) {
-                    setDefaultValues(allSettings[0]);
-                }
-                
-                // Finally load items
-                loadAllItems(function() {
-                    hideLoading();
-                });
+                // Load item groups
+               if (allSettings.length > 0) {
+                        setDefaultValues(allSettings[0]);
+                    }
+                    
+                    // Finally load items
+                    loadAllItems(function() {
+                        hideLoading();
+                    });
             });
         });
     });

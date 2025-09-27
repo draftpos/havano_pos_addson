@@ -1,15 +1,3 @@
-// Global variables
-let allItems = [];
-let allSettings = [];
-let allCustomers = [];
-let allPriceLists = [];
-let activeItemField = null;
-let currentFocusIndex = -1;
-let isInSearchMode = false;
-let currentSearchTerm = '';
-let currentSearchResults = [];
-let currentRowForQuantity = null;
-
 // Initialize the POS when DOM is loaded
 document.addEventListener('DOMContentLoaded', initPOS);
 
@@ -70,3 +58,84 @@ function addNewRow() {
         currentFocusIndex = fields.indexOf(itemCodeInput);
     }, 100);
 }
+
+// Update item amount
+function updateItemAmount(input) {
+    const row = input.closest('tr');
+    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+    const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+    const amountCell = row.querySelector('.item-amount');
+    
+    const amount = qty * rate;
+    amountCell.value = amount.toFixed(2);
+    
+    updateTotals();
+}
+
+// Remove item
+function removeItem(button) {
+    if (itemsTableBody.querySelectorAll('tr').length > 1) {
+        button.closest('tr').remove();
+        updateTotals();
+    } else {
+        showToast('You must have at least one item row.', 'error');
+    }
+}
+
+// Update totals
+function updateTotals() {
+    let total = 0;
+    const amountCells = document.querySelectorAll('.item-amount');
+    
+    amountCells.forEach(cell => {
+        total += parseFloat(cell.value) || 0;
+    });
+    
+    totalAmount.textContent = `$${total.toFixed(2)}`;
+    subTotal.value = total.toFixed(2);
+}
+
+// Handle function keys
+function handleFunctionKey(action) {
+    const actions = {
+        // payment: () => saveSalesInvoice(),
+        quantity: () => showQuantityPopup(),
+        discount: () => showToast('Discount feature coming soon', 'success'),
+        options: () => showToast('Options menu coming soon', 'success'),
+        return: () => showToast('Return process coming soon', 'success')
+    };
+    
+    if (actions[action]) actions[action]();
+}
+
+function showPaymentDialog(){
+    const subTotalEl = document.getElementById('sub_total').value;
+    if (subTotalEl == 0) {
+        showHaPopupCustom('Select at least one Item')
+        return
+    }
+    openPaymentPopup();
+  
+}
+
+// Adjust main styles
+function adjustMainStyles() {
+    const mainElement = document.querySelector('main.container.my-4');
+    if (mainElement) {
+        // Replace class 'container' with 'container-fluid'
+        mainElement.classList.replace('container', 'container-fluid');
+
+        // Set styles
+        mainElement.style.setProperty('margin', '0', 'important');
+        mainElement.style.setProperty('padding', '0', 'important');
+        mainElement.style.setProperty('width', '100%', 'important');
+    }
+}
+
+// Make save function globally available for testing
+window.saveSalesInvoice = saveSalesInvoice;
+
+// Run when window loads
+window.onload = function() {
+    adjustMainStyles();
+};

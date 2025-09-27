@@ -270,15 +270,15 @@
         wrapper.className = "ha-pos-payment-pop-method";
 
         // Special class for Cash (so JS can target it)
-        const cashClass = method.name.toLowerCase() === "cash" 
+        const cashClass = method.mode_of_payment.toLowerCase() === "cash" 
             ? "ha-pos-payment-method-cash-amount-container" 
             : "";
 
         wrapper.innerHTML = `
           <div class="ha-pos-payment-method-base-currency ${cashClass}">
             <div class="ha-pos-payment-pop-method-label">
-              <span>${index + 1} ${method.name.toUpperCase()}</span><br>
-              <span>ZIG <b>0</b></span>
+              <span>${index + 1} ${method.mode_of_payment.toUpperCase()}</span><br>
+              <span>${method.currency_symbol} <b>0</b></span>
             </div>
             <input 
               type="text" 

@@ -1,7 +1,7 @@
 // Bind event listeners
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
-    btnPayment.addEventListener('click', showPaymentDialog);
+    btnPayment.addEventListener('click',  showPaymentDialog);
     
     // Quantity popup events
     quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);

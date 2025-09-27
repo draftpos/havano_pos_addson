@@ -1,8 +1,11 @@
 // DOM elements
 let itemsTableBody, totalAmount, subTotal, btnAddRow, searchDropdown;
 let customerSelect, priceListSelect, btnPayment, loadingOverlay;
-let tableContainer, quantityPopup, quantityPopupOverlay, quantityDisplay;
+let quantityPopup, quantityPopupOverlay, quantityDisplay;
 let quantityPopupConfirm, quantityPopupCancel, quantityClear, quantityBackspace;
+let itemGroupsContainer, groupItemsContainer;
+let quantityDisplaySidebar, quantitySidebarConfirm, quantitySidebarCancel;
+let quantitySidebarClear, quantitySidebarBackspace;
 
 // Cache DOM elements
 function cacheDOM() {
@@ -15,7 +18,6 @@ function cacheDOM() {
     priceListSelect = document.getElementById('pricelist');
     btnPayment = document.getElementById('btnPayment');
     loadingOverlay = document.getElementById('loadingOverlay');
-    tableContainer = document.querySelector('.table-responsive');
     quantityPopup = document.getElementById('quantityPopup');
     quantityPopupOverlay = document.getElementById('quantityPopupOverlay');
     quantityDisplay = document.getElementById('quantityDisplay');
@@ -23,4 +25,11 @@ function cacheDOM() {
     quantityPopupCancel = document.getElementById('quantityPopupCancel');
     quantityClear = document.getElementById('quantityClear');
     quantityBackspace = document.getElementById('quantityBackspace');
+    itemGroupsContainer = document.getElementById('itemGroupsContainer');
+    groupItemsContainer = document.getElementById('groupItemsContainer');
+    quantityDisplaySidebar = document.getElementById('quantityDisplaySidebar');
+    quantitySidebarConfirm = document.getElementById('quantitySidebarConfirm');
+    quantitySidebarCancel = document.getElementById('quantitySidebarCancel');
+    quantitySidebarClear = document.getElementById('quantitySidebarClear');
+    quantitySidebarBackspace = document.getElementById('quantitySidebarBackspace');
 }

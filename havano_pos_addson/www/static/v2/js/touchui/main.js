@@ -98,7 +98,7 @@ function updateTotals() {
 // Handle function keys
 function handleFunctionKey(action) {
     const actions = {
-        payment: () => saveSalesInvoice(),
+        // payment: () => saveSalesInvoice(),
         quantity: () => showQuantityPopup(),
         discount: () => showToast('Discount feature coming soon', 'success'),
         options: () => showToast('Options menu coming soon', 'success'),
