@@ -21,7 +21,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 9999;
     }
 
     /* Popup container */
@@ -186,6 +186,16 @@
     .ha-pos-payment-method-base-currency input {
       background-color: white
     }
+
+    .ha-exchange-rate-info {
+      margin-top: 2px;
+      color: #666;
+      font-size: 10px;
+    }
+
+    .ha-exchange-rate-info small {
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -259,8 +269,10 @@
   </div>
 
   <script>
+    // console.log(localStorage);
     
     let allpaymentmethods = JSON.parse(localStorage.getItem("allpaymentmethods"));
+    
     function renderPaymentMethods() {
       const container = document.querySelector(".ha-pos-payment-pop-methods");
       container.innerHTML = "";
@@ -279,12 +291,17 @@
             <div class="ha-pos-payment-pop-method-label">
               <span>${index + 1} ${method.mode_of_payment.toUpperCase()}</span><br>
               <span>${method.currency_symbol} <b>0</b></span>
+              <div class="ha-exchange-rate-info" id="exchange-rate-${index}" style="display: none;">
+                <small>Rate: <span class="exchange-rate-value">1</span></small>
+              </div>
             </div>
             <input 
               type="text" 
               class="ha-pos-payment-pop-method-input"
               id="${cashClass ? 'ha-pos-payment-method-cash-amount' : 'payment-method-' + index}"
               value="0.00"
+              data-currency="${method.currency}"
+              data-currency-symbol="${method.currency_symbol}"
             >
           </div>
         `;

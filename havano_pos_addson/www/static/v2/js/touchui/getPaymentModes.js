@@ -23,8 +23,8 @@ function modesOfPayments(callback) {
                     callback: function(res2) {
                         if (res2.message) {
                             const doc = res2.message;
-                            console.log("FETH PAYMENT METHODS RUN ------------------------");
-                            console.log(doc);
+                            // console.log("FETH PAYMENT METHODS RUN ------------------------");
+                            // console.log(doc);
                             const allItems = doc.selected_payment_methods || [];
 
                             // save to local storage
@@ -55,6 +55,6 @@ function modesOfPayments(callback) {
 
 // usage
 modesOfPayments(function(allItems, defaultPaymentMethod) {
-    console.log("Default Payment Method:", defaultPaymentMethod);
-    console.log("Selected Payment Methods:", allItems);
+    // console.log("Default Payment Method:", defaultPaymentMethod);
+    // console.log("Selected Payment Methods:", allItems);
 });

@@ -1,21 +1,23 @@
 // Load initial data
 function loadInitialData() {
     showLoading();
-    console.log("loadInitialData");
+        
+    // console.log("loadInitialData", frappe.session.user);
     
     // First load settings, then customers and price lists
     loadPosSettings(function(settings) {
         // Store settings for later use
-        allSettings = settings;
-        console.log("loadPosSettings");
-        console.log("actual settings below----");
-        console.log(allSettings);
+        let allSettings = settings;
+        // console.log("loadPosSettings");
+        // console.log("actual settings below----");
+        // console.log(allSettings);
         
         // Now load customers and price lists
         loadCustomers(function() {
             loadPriceLists(function() {
                 // Load item groups
                 loadItemGroups(function() {
+                    // console.log('Item groups loaded, setting default values...');
                     // Set default values after all dropdowns are populated
                     if (allSettings.length > 0) {
                         setDefaultValues(allSettings[0]);
@@ -23,6 +25,7 @@ function loadInitialData() {
                     
                     // Finally load items
                     loadAllItems(function() {
+                        // console.log('All items loaded, hiding loading...');
                         hideLoading();
                     });
                 });

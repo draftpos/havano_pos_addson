@@ -14,7 +14,7 @@ function checkShiftStatus() {
   try {
     m = JSON.parse(data);
   } catch (e) {
-    console.error("Invalid JSON in havano_pos_shift", e);
+    // console.error("Invalid JSON in havano_pos_shift", e);
     // showHaPopupCustom("Shift data corrupted. Please open shift again.");
     return false;
   }
@@ -45,5 +45,5 @@ function checkShiftStatus() {
 
 if (checkShiftStatus()) {
   // proceed with invoice creation or other actions
-  console.log("Shift is valid, continue...");
+  // console.log("Shift is valid, continue...");
 }

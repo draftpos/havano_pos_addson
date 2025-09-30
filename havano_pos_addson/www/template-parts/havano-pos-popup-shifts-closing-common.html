@@ -245,8 +245,13 @@
     let activeInput = null;
     let paymentMethods =  JSON.parse(localStorage.getItem("allpaymentmethods"));
     let havano_pos_shift = JSON.parse(localStorage.getItem("havano_pos_shift"));
-    let shiftName  = havano_pos_shift.message[0].name;
-    document.querySelector('.ha-pos-shift-name').textContent = shiftName;
+    // console.log(havano_pos_shift);
+    if(havano_pos_shift.message.length > 0){
+      let shiftName  = havano_pos_shift.message[0].name;
+      document.querySelector('.ha-pos-shift-name').textContent = shiftName;
+    }else{
+      document.querySelector('.ha-pos-shift-name').textContent = "No Shift Found";
+    }
 
     function renderShiftMethods() {
       const container = document.getElementById("shiftMethods");
@@ -256,7 +261,7 @@
         const row = document.createElement("div");
         row.className = "ha-pos-shift-management-method";
         row.innerHTML = `
-          <div class="ha-pos-shift-management-method-label">${method.name}</div>
+          <div class="ha-pos-shift-management-method-label">${method.mode_of_payment}</div>
           <input type="text" class="ha-pos-shift-management-method-input" value="0.00" onclick="setActiveInput(this)">
         `;
         container.appendChild(row);
@@ -321,7 +326,7 @@
           if (r.message) {
             document.getElementById("shiftStatus").innerHTML =
               "Status: <span class='open'>Open</span>";
-            console.log("Shift opened:", r.message);
+            // console.log("Shift opened:", r.message);
           }
         }
       });
@@ -342,6 +347,7 @@
       // Get closing amount input
       const closingAmount = parseFloat(document.getElementById("closingAmount").value) || 0;
 
+      // First, close the shift
       frappe.call({
         method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.close_shift",
         args: {
@@ -351,13 +357,39 @@
         },
         callback: function(r) {
           if (r.message) {
-            // document.getElementById("shiftStatus").innerHTML =
-            //   "Status: <span class='closed'>Closed</span>";
             console.log("Shift closed:", r.message);
-            showHaPopupCustom("Shift Closed");
-            localStorage.removeItem("havano_pos_shift");
-            closeShiftPopup() 
+            
+            // Then create payment entries for all sales invoices for today
+            frappe.call({
+              method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.create_payment_entries_for_shift",
+              args: {
+                shift_name: shiftName,
+                payments: payments
+              },
+              callback: function(paymentResponse) {
+                if (paymentResponse.message) {
+                  console.log("Payment entries created:", paymentResponse.message);
+                  showHaPopupCustom("Shift Closed and Payment Entries Created");
+                  localStorage.removeItem("havano_pos_shift");
+                  closeShiftPopup();
+                } else {
+                  showHaPopupCustom("Shift Closed but Error Creating Payment Entries");
+                }
+              },
+              error: function(error) {
+                console.error("Error creating payment entries:", error);
+                showHaPopupCustom("Shift Closed but Error Creating Payment Entries");
+                localStorage.removeItem("havano_pos_shift");
+                closeShiftPopup();
+              }
+            });
+          } else {
+            showHaPopupCustom("Error closing shift");
           }
+        },
+        error: function(error) {
+          console.error("Error closing shift:", error);
+          showHaPopupCustom("Error closing shift");
         }
       });
     }

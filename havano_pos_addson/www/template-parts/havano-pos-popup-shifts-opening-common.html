@@ -241,9 +241,15 @@
   <script>
     let haPosOpeningActiveInput = null;
     let haPosOpeningShiftData = JSON.parse(localStorage.getItem("havano_pos_shift"));
-    let haPosOpeningShiftName = haPosOpeningShiftData.message[0].name;
-    document.querySelector('.ha-pos-opening-shift-name').textContent = haPosOpeningShiftName;
-
+    // console.log(haPosOpeningShiftData.message.length);
+    if(haPosOpeningShiftData.message.length > 0){
+      let haPosOpeningShiftName = haPosOpeningShiftData.message[0].name;
+      document.querySelector('.ha-pos-opening-shift-name').textContent = haPosOpeningShiftName;
+      
+    }else{
+      document.querySelector('.ha-pos-opening-shift-name').textContent = "No Shift Found";
+    }
+   
     function haPosOpeningRenderMethods() {
       const container = document.getElementById("haPosOpeningMethods");
       container.innerHTML = "";

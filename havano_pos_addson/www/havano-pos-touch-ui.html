@@ -1,9 +1,22 @@
 {% extends "templates/web.html" %}
 {% block styles %}
+<!-- Modern CSS Framework and Animations -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/fontawesome.min.css" integrity="sha512-M5Kq4YVQrjg5c2wsZSn27Dkfm/2ALfxmun0vUE3mPiJyK53hQBHYCVAtvMYEC7ZXmYLg8DVG4tF8gD27WmDbsg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="./static/v1/css/touch-ui/havano-pos-touch-ui.css">
 {% endblock %}
 
+<!-- Guest User Check Script - Must run before any other scripts -->
 
 {% block content %}
+<!-- Main Container with Glassmorphism Effect -->
+<div class="ha-main-container">
+    <!-- Floating Action Button -->
+    <!-- <button class="ha-fab" onclick="scrollToTop()" title="Scroll to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button> -->
 
 
 {% include "havano_pos_addson/www/template-parts/general-loader.html" %}
@@ -11,6 +24,7 @@
 {% include "havano_pos_addson/www/template-parts/havano-pos-popup-shifts-opening-common.html" %}
 {% include "havano_pos_addson/www/template-parts/havano-pos-popup-shifts-closing-common.html" %}
 {% include "havano_pos_addson/www/template-parts/havano-pos-payment-popup-common.html" %}
+{% include "havano_pos_addson/www/template-parts/havano-pos-invoices-modal.html" %}
 {% include "havano_pos_addson/www/template-parts/havano-pos-header.html" %}
 {% include "havano_pos_addson/www/template-parts/general.html" %}
 {% include "havano_pos_addson/www/template-parts/touch-ui/havano-pos-table-items-touchui.html" %}
@@ -35,6 +49,95 @@
 <script src="./static/v2/js/setshiftsstatus.js" defer></script>
 <script src="./static/v2/js/touchui/handlepayment.js" defer></script>
 <script src="./static/v2/js/touchui/getPaymentModes.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/fontawesome.min.js" integrity="sha512-obFNtQ1JKCrxPBPLmYDUevlriATl5EhvwU3CFtdW/HKOkeAe0bbsyZfHO44/f1QyndrZJ464TQvrRP9ZjyXSSA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/js/all.min.js" integrity="sha512-6BTOlkauINO65nLhXhthZMtepgJSghyimIalb+crKRPhvhmsCdnIuGcVbR5/aQY2A+260iC1OPy1oCdB6pSSwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</div> <!-- End of ha-main-container -->
 
+<!-- Enhanced JavaScript for Animations and Interactions -->
+<script>
+// Smooth scroll to top function
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+
+// Add ripple effect to buttons
+function addRippleEffect() {
+    const buttons = document.querySelectorAll('.ha-function-key, .ha-add-item-btn, .ha-logout-btn');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+}
+
+// Add typing animation to form inputs
+function addTypingAnimation() {
+    const inputs = document.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+            this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.2)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+        });
+    });
+}
+
+// Add stagger animation to table rows
+function addStaggerAnimation() {
+    const rows = document.querySelectorAll('.ha-items-table tbody tr');
+    
+    rows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.1}s`;
+        row.classList.add('fade-in-row');
+    });
+}
+
+// Initialize all enhancements when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    addRippleEffect();
+    addTypingAnimation();
+    addStaggerAnimation();
+    
+    // Add scroll-based animations
+    window.addEventListener('scroll', function() {
+        const fab = document.querySelector('.ha-fab');
+        if (fab) {
+            if (window.scrollY > 300) {
+                fab.style.opacity = '1';
+                fab.style.transform = 'translateY(0)';
+            } else {
+                fab.style.opacity = '0';
+                fab.style.transform = 'translateY(20px)';
+            }
+        }
+    });
+});
+
+</script>
 
 {% endblock %}

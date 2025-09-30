@@ -25,6 +25,73 @@
         --border-radius: 8px;
         --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         --success-color: #28a745;
+        
+        /* Footer Button Colors */
+        /* Function Key Button Colors */
+        --btn-orange-primary: #ff6b35;
+        --btn-orange-secondary: #f7931e;
+        --btn-orange-hover: #ff5722;
+        --btn-orange-hover-secondary: #ff9800;
+        
+        /* Payment Button Colors */
+        --btn-payment-primary: #4caf50;
+        --btn-payment-secondary: #8bc34a;
+        --btn-payment-hover: #66bb6a;
+        --btn-payment-hover-secondary: #9ccc65;
+        
+        /* Options Button Colors */
+        --btn-options-primary: #2196f3;
+        --btn-options-secondary: #1e88e5;
+        --btn-options-hover: #42a5f5;
+        --btn-options-hover-secondary: #1976d2;
+        
+        /* Quantity Button Colors */
+        --btn-quantity-primary: #ff9800;
+        --btn-quantity-secondary: #ffc107;
+        --btn-quantity-hover: #ffb74d;
+        --btn-quantity-hover-secondary: #ffca28;
+        
+        /* Return Button Colors */
+        --btn-return-primary: #f44336;
+        --btn-return-secondary: #e53935;
+        --btn-return-hover: #ef5350;
+        --btn-return-hover-secondary: #d32f2f;
+        
+        /* Discount Button Colors */
+        --btn-discount-primary: #9c27b0;
+        --btn-discount-secondary: #8e24aa;
+        --btn-discount-hover: #ba68c8;
+        --btn-discount-hover-secondary: #7b1fa2;
+        
+        /* Switch Button Colors */
+        --btn-switch-primary: #667eea;
+        --btn-switch-secondary: #764ba2;
+        --btn-switch-hover: #7c8ef5;
+        --btn-switch-hover-secondary: #9575cd;
+        
+        /* Shift Button Colors */
+        --btn-shift-primary: #607d8b;
+        --btn-shift-secondary: #546e7a;
+        --btn-shift-hover: #78909c;
+        --btn-shift-hover-secondary: #455a64;
+        
+        /* Logout Button Colors */
+        --btn-logout-primary: #e74c3c;
+        --btn-logout-secondary: #c0392b;
+        --btn-logout-hover: #ff4757;
+        --btn-logout-hover-secondary: #e74c3c;
+        
+        /* Footer Background Colors */
+        --footer-bg-primary: #2c3e50;
+        --footer-bg-secondary: #34495e;
+        --footer-border: #34495e;
+        
+        /* Icon Background Colors */
+        --icon-bg-light: rgba(255, 255, 255, 0.2);
+        --icon-bg-hover: rgba(255, 255, 255, 0.3);
+        
+        /* Ripple Effect Colors */
+        --ripple-color: rgba(255, 255, 255, 0.3);
     }
  
 

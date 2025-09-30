@@ -1,30 +1,539 @@
 <link rel="stylesheet" href="../static/v1/css/touch-ui/havano-pos-non-touchui-table-items.css">
 
-<div class="ha-table-responsive">
-    <table class="ha-items-table">
-        <thead>
-            <tr>
-                <th width="15%">Item Code</th>
-                <th width="25%">Item Name</th>
-                <th width="8%">UOM</th>
-                <th width="8%">Qty</th>
-                <th width="10%">Rate</th>
-                <th width="12%">Amount</th>
-                <th width="4%">Action</th>
-            </tr>
-        </thead>
-        <tbody class="itemsTableBody-class" id="itemsTableBody">
-            <!-- Rows will be added dynamically -->
-        </tbody>
-    </table>
-</div>
+<!-- Enhanced Table Container -->
+<div class="ha-table-container">
+    <!-- Table Header -->
 
-<div class="ha-total-add-button-container">
-    <button class="ha-add-item-btn" id="btnAddRow">
-        <i class="fas fa-plus me-2"></i>Add Item
-    </button>
-    <div>
-        <span>Total</span>
-        <span class="ha-total-value" id="totalAmount">$0.00</span>
+    <!-- Enhanced Table -->
+    <div class="ha-table-responsive">
+        <table class="ha-items-table">
+            <thead>
+                <tr>
+                    <th width="15%">
+                        <i class="fas fa-barcode"></i>
+                        <span>Code</span>
+                    </th>
+                    <th width="25%">
+                        <i class="fas fa-box"></i>
+                        <span>Name</span>
+                    </th>
+                    <th width="8%">
+                        <i class="fas fa-ruler"></i>
+                        <span>UOM</span>
+                    </th>
+                    <th width="8%">
+                        <i class="fas fa-cubes"></i>
+                        <span>Qty</span>
+                    </th>
+                    <th width="10%">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>Rate</span>
+                    </th>
+                    <th width="12%">
+                        <i class="fas fa-calculator"></i>
+                        <span>Amount</span>
+                    </th>
+                    <th width="4%">
+                        <i class="fas fa-ellipsis-v"></i>
+                        <span>Action</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="itemsTableBody-class" id="itemsTableBody">
+                <!-- Empty State -->
+                <tr class="">
+                    <td colspan="7">
+                        <!-- <div class="ha-empty-content">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h4>Your cart is empty</h4>
+                            <p>Add items to get started with your sale</p>
+                        </div> -->
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Enhanced Total Section -->
+    <div class="ha-total-add-button-container">
+        <div class="ha-add-section">
+            <button class="ha-add-item-btn" id="btnAddRow">
+                <div class="ha-btn-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="ha-btn-content">
+                    <span class="ha-btn-label">Add Item</span>
+                    <span class="ha-btn-shortcut">Ctrl+A</span>
+                </div>
+                <div class="ha-btn-ripple"></div>
+            </button>
+            
+            <div class="ha-cart-info">
+                <div class="ha-cart-badge" id="cartBadge">0</div>
+                <span class="ha-cart-label">Items in Cart</span>
+            </div>
+            
+            <button class="ha-clear-cart-btn ha-btn-content" id="clearCartBtn">
+                
+                <span class="ha-btn-label"><i class="fas fa-trash-alt"></i> Clear All</span>
+                <span class="ha-btn-shortcut">Alt + F6</span>
+            </button>
+        </div>
+        
+        <div class="ha-total-section">
+            <div class="ha-total-breakdown">
+                
+                <div class="ha-total-row ha-total-final">
+                    <span class="ha-total-label">Total:</span>
+                    <span class="ha-total-value" id="totalAmount">$0.00</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+/* Enhanced Table Styles */
+.ha-table-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin: 0px 20px;
+    animation: slideInUp 0.8s ease-out;
+}
+
+.ha-table-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    padding: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ha-table-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ha-table-title i {
+    font-size: 24px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ha-table-title h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.ha-cart-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+.ha-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Removed search container styles - no longer needed */
+
+.ha-clear-cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(229, 57, 53, 0.1));
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #d32f2f;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ha-clear-cart-btn:hover {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(229, 57, 53, 0.2));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+}
+
+.ha-table-responsive {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.ha-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.ha-items-table thead {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ha-items-table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 11px;
+    display: table-cell;
+    vertical-align: middle;
+    height: 40px;
+    white-space: nowrap;
+}
+
+.ha-items-table th i {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-right: 6px;
+}
+
+.ha-items-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.ha-items-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    transform: translateX(4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ha-items-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.ha-items-table td {
+    padding: 8px 12px;
+    vertical-align: middle;
+    position: relative;
+    font-size: 13px;
+}
+
+.ha-empty-state td {
+    padding: 40px;
+    text-align: center;
+}
+
+.ha-empty-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #9ca3af;
+}
+
+.ha-empty-content i {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.ha-empty-content h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.ha-empty-content p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* Enhanced Total Section */
+.ha-total-add-button-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 5px 20px;
+    /* margin: 0px 20px; */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.8s ease-out;
+}
+
+.ha-add-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.ha-cart-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.ha-cart-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 20px;
+}
+
+.ha-cart-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Clear cart button styles moved above */
+
+.ha-add-item-btn,
+.ha-bulk-add-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #2e7d32;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 100px;
+    height: 40px;
+    overflow: hidden;
+}
+
+.ha-bulk-add-btn {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(30, 136, 229, 0.1));
+    border-color: rgba(33, 150, 243, 0.3);
+    color: #1976d2;
+}
+
+.ha-add-item-btn::before,
+.ha-bulk-add-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.ha-add-item-btn:hover::before,
+.ha-bulk-add-btn:hover::before {
+    left: 100%;
+}
+
+.ha-add-item-btn:hover {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(139, 195, 74, 0.2));
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+    border-color: rgba(76, 175, 80, 0.4);
+}
+
+.ha-bulk-add-btn:hover {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2), rgba(30, 136, 229, 0.2));
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+    border-color: rgba(33, 150, 243, 0.4);
+}
+
+.ha-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.ha-add-item-btn:hover .ha-btn-icon,
+.ha-bulk-add-btn:hover .ha-btn-icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(5deg);
+}
+
+.ha-btn-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.ha-btn-label {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.ha-btn-shortcut {
+    font-size: 9px;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.ha-total-section {
+    text-align: right;
+}
+
+.ha-total-row {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.ha-total-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ha-total-value {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ha-total-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.ha-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.ha-total-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.ha-total-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.ha-total-final {
+    border-top: 2px solid rgba(102, 126, 234, 0.2);
+    padding-top: 12px;
+    margin-top: 0px;
+}
+
+.ha-total-final .ha-total-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.ha-total-value {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s infinite;
+}
+
+/* Ripple Effect */
+.ha-btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ha-table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    /* Removed search input responsive styles */
+    
+    .ha-total-add-button-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+    }
+    
+    .ha-add-section {
+        justify-content: center;
+    }
+    
+    .ha-total-section {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .ha-add-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .ha-add-item-btn,
+    .ha-bulk-add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>

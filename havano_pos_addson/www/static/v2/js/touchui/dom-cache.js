@@ -6,6 +6,7 @@ let quantityPopupConfirm, quantityPopupCancel, quantityClear, quantityBackspace;
 let itemGroupsContainer, groupItemsContainer;
 let quantityDisplaySidebar, quantitySidebarConfirm, quantitySidebarCancel;
 let quantitySidebarClear, quantitySidebarBackspace;
+let clearCartBtn;
 
 // Cache DOM elements
 function cacheDOM() {
@@ -32,4 +33,5 @@ function cacheDOM() {
     quantitySidebarCancel = document.getElementById('quantitySidebarCancel');
     quantitySidebarClear = document.getElementById('quantitySidebarClear');
     quantitySidebarBackspace = document.getElementById('quantitySidebarBackspace');
+    clearCartBtn = document.getElementById('clearCartBtn');
 }

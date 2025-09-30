@@ -14,9 +14,9 @@
     },
     {
       "fieldname": "exchange_rate",
-      "fieldtype": "Link",
-      "label": "Currency Exchange",
-      "options": "Currency Exchange",
+      "fieldtype": "Float",
+      "label": "Exchange Rate",
+      "precision": 4,
       "in_preview": 1,
       "in_list_view": 1
     },

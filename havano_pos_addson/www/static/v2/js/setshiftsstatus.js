@@ -12,8 +12,8 @@ function checkOpenShift(callback) {
       limit_page_length: 1
     },
     callback: function(r) {
-        console.log("shift check");
-        console.log(r);
+        // console.log("shift check");
+        // console.log(r);
         localStorage.setItem("havano_pos_shift", JSON.stringify(r));
       if (!r.message || r.message.length === 0) {
         // No open shift
@@ -35,7 +35,7 @@ function checkOpenShift(callback) {
       }
     },
     error: function(err) {
-      console.error("Error checking open shift:", err);
+      // console.error("Error checking open shift:", err);
       if (callback) callback(false);
     }
   });
@@ -45,8 +45,8 @@ function checkOpenShift(callback) {
 
 checkOpenShift(function(ok, shift) {
   if (ok) {
-    console.log("Shift is open and valid:", shift.name);
+    // console.log("Shift is open and valid:", shift.name);
   } else {
-    console.log("No valid shift available.");
+    // console.log("No valid shift available.");
   }
 });

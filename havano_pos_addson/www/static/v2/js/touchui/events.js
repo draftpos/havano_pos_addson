@@ -2,6 +2,7 @@
 function bindEvents() {
     btnAddRow.addEventListener('click', addNewRow);
     btnPayment.addEventListener('click',  showPaymentDialog);
+    clearCartBtn.addEventListener('click', clearCart);
     
     // Quantity popup events
     quantityPopupConfirm.addEventListener('click', applyQuantityFromPopup);
@@ -152,9 +153,25 @@ function bindEvents() {
             e.preventDefault();
             handleFunctionKey('quantity');
         }
+        else if (e.key === 'F6') {
+            e.preventDefault();
+            handleFunctionKey('delete');
+        }
+        else if (e.key === 'F9') {
+            e.preventDefault();
+            openShiftPopup();
+        }
+        
         else if (e.key === 'F7') handleFunctionKey('discount');
         else if (e.key === 'F10') handleFunctionKey('options');
         else if (e.key === 'F12') handleFunctionKey('return');
+        
+        // Alt + F6 for Clear All
+        if (e.altKey && e.key === 'F6') {
+            e.preventDefault();
+            handleFunctionKey('clearAll');
+        }
+
         
         // Enter key to move to next field/row or confirm selection
         if (e.key === 'Enter') {
@@ -168,11 +185,20 @@ function bindEvents() {
                     activeResult.click();
                     searchDropdown.style.display = 'none';
                     isInSearchMode = false;
+                    // console.log("allSettings", allSettings);
 
-                    if (allSettings.length > 0 && allSettings[0].ha_on_pres_enter === "nextrow") {
-                        addNewRow();
+                    // Always go to next row after selecting item from search
+                    const currentRow = activeElement.closest('tr');
+                    const nextRow = currentRow.nextElementSibling;
+                    
+                    if (nextRow) {
+                        nextRow.querySelector('.item-code').focus();
+                        nextRow.querySelector('.item-code').select();
                     } else {
-                        moveToNextField();
+                        addNewRow();
+                        const newRow = itemsTableBody.lastChild;
+                        newRow.querySelector('.item-code').focus();
+                        newRow.querySelector('.item-code').select();
                     }
                 }
             }
@@ -192,9 +218,8 @@ function bindEvents() {
                             searchDropdown.style.display = 'none';
                             isInSearchMode = false;
                             
-                            // Move to rate field after selection
-                            row.querySelector('.item-rate').focus();
-                            row.querySelector('.item-rate').select();
+                            // Navigation is now handled in the click event handler
+                            // based on the success/failure of selectItem
                         }
                     } else {
                         // First Enter - show search results
@@ -225,9 +250,8 @@ function bindEvents() {
                         searchDropdown.style.display = 'none';
                         isInSearchMode = false;
                         
-                        // Move to rate field after selection
-                        row.querySelector('.item-rate').focus();
-                        row.querySelector('.item-rate').select();
+                        // Navigation is now handled in the click event handler
+                        // based on the success/failure of selectItem
                     }
                 } else {
                     // First Enter - show search results
@@ -313,7 +337,34 @@ function bindEvents() {
     
     // Logout button
     document.getElementById('btnLogout').addEventListener('click', function() {
-        window.location.href = '/logout';
+        // Show confirmation dialog
+        if (confirm('Are you sure you want to logout?')) {
+            // Show loading message
+            if (typeof frappe !== 'undefined' && frappe.show_alert) {
+                frappe.show_alert('Logging out...', 'info');
+            } else {
+                alert('Logging out...');
+            }
+            
+            // Clear any cached data first
+            // localStorage.clear();
+            // sessionStorage.clear();
+            
+            // Use the correct Frappe logout endpoint
+            // Method 1: Direct redirect to logout URL (most reliable)
+            // window.location.href = "/api/method/logout";
+            
+            // Method 2: Alternative - fetch logout endpoint
+            fetch('/api/method/logout', {
+                method: 'GET',
+                credentials: 'include'
+            }).then(() => {
+                window.location.href = "/login?redirect-to=havano-pos-touch-ui#login";
+            }).catch((error) => {
+                // console.error("Logout error:", error);
+                window.location.href = "/login?redirect-to=havano-pos-touch-ui#login";
+            });
+        }
     });
     
     // Handle window resize to reposition dropdown
@@ -322,4 +373,41 @@ function bindEvents() {
             positionDropdown(activeItemField);
         }
     });
+
+    // Handle scroll indicators for function keys
+    function setupScrollIndicators() {
+        const functionKeysContainer = document.querySelector('.ha-function-keys');
+        if (!functionKeysContainer) return;
+
+        function updateScrollIndicators() {
+            const { scrollLeft, scrollWidth, clientWidth } = functionKeysContainer;
+            
+            // Remove existing classes
+            functionKeysContainer.classList.remove('scroll-left', 'scroll-right');
+            
+            // Add appropriate classes based on scroll position
+            if (scrollLeft > 0) {
+                functionKeysContainer.classList.add('scroll-left');
+            }
+            if (scrollLeft < scrollWidth - clientWidth - 1) {
+                functionKeysContainer.classList.add('scroll-right');
+            }
+        }
+
+        // Update indicators on scroll
+        functionKeysContainer.addEventListener('scroll', updateScrollIndicators);
+        
+        // Update indicators on resize
+        window.addEventListener('resize', updateScrollIndicators);
+        
+        // Initial update
+        updateScrollIndicators();
+    }
+
+    // Setup scroll indicators when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupScrollIndicators);
+    } else {
+        setupScrollIndicators();
+    }
 }

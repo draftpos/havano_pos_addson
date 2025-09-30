@@ -46,14 +46,35 @@ function displaySearchResults(items) {
         `;
         
         resultItem.addEventListener('click', () => {
-            selectItem(item, activeItemField.closest('tr'));
+            const result = selectItem(item, activeItemField.closest('tr'));
             searchDropdown.style.display = 'none';
             isInSearchMode = false;
             
-            // Focus on rate after selecting item
-            const row = activeItemField.closest('tr');
-            row.querySelector('.item-rate').focus();
-            row.querySelector('.item-rate').select();
+            if (result === 'new_item_added') {
+                // Item was added to a new row, navigate to next row
+                const currentRow = activeItemField.closest('tr');
+                const nextRow = currentRow.nextElementSibling;
+                
+                if (nextRow) {
+                    // Focus on item code field of next row
+                    nextRow.querySelector('.item-code').focus();
+                    nextRow.querySelector('.item-code').select();
+                } else {
+                    // If no next row, add new row and focus on item code
+                    addNewRow();
+                    const newRow = itemsTableBody.lastChild;
+                    newRow.querySelector('.item-code').focus();
+                    newRow.querySelector('.item-code').select();
+                }
+            } else if (result === 'quantity_increased') {
+                // Item quantity was increased, stay on current field
+                activeItemField.focus();
+                activeItemField.select();
+            } else {
+                // If item selection failed, focus back on the current item code field
+                activeItemField.focus();
+                activeItemField.select();
+            }
         });
         
         searchDropdown.appendChild(resultItem);
@@ -90,10 +111,43 @@ function showItemSearchDropdown(field) {
 
 // Select item and populate row
 function selectItem(item, row) {
+    
+    // Remove empty rows above before selecting the item
+    removeEmptyRowsAbove(row);
+    
+    // Check if item has a valid rate
+    const itemRate = parseFloat(item.valuation_rate) || 0;
+    const itemDescription = item.description || '';
+    const isGiftItem = itemDescription.toLowerCase().includes('gift');
+    if (itemRate === 0 && isGiftItem) {
+        frappe.show_alert(`Item "${item.item_name || item.name || 'Unknown Item'}" is a gift item and rate is empty.`);
+    }
+    
+    if (itemRate === 0 && !isGiftItem) {
+        // Show error message and clear the row (only for non-gift items)
+        const itemName = item.item_name || item.name || 'Unknown Item';
+        frappe.msgprint(`Item "${itemName}" rate is empty. Please contact admin to add rate for this item.`);
+        // Clear the row to remove the item
+        row.querySelector('.item-code').value = '';
+        row.querySelector('.item-name').value = '';
+        row.querySelector('.item-uom').value = 'Nos';
+        row.querySelector('.item-rate').value = '0.00';
+        row.querySelector('.item-qty').value = '1';
+        row.querySelector('.item-amount').value = '0.00';
+        
+        // Update totals
+        updateTotals();
+        
+        // Clear search mode
+        isInSearchMode = false;
+        currentSearchTerm = '';
+        return false; // Return false to indicate failure
+    }
+    
     row.querySelector('.item-code').value = item.name;
     row.querySelector('.item-name').value = item.item_name || item.name;
     row.querySelector('.item-uom').value = item.stock_uom || 'Nos';
-    row.querySelector('.item-rate').value = (item.valuation_rate || 0).toFixed(2);
+    row.querySelector('.item-rate').value = itemRate.toFixed(2);
     
     // Calculate amount
     updateItemAmount(row.querySelector('.item-qty'));
@@ -101,4 +155,5 @@ function selectItem(item, row) {
     // Clear search mode
     isInSearchMode = false;
     currentSearchTerm = '';
+    return 'new_item_added'; // Return specific status for new item added
 }

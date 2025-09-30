@@ -1,0 +1,509 @@
+<!-- Invoices Modal -->
+<div id="invoicesModal" class="ha-invoices-overlay" style="display: none;" onclick="closeInvoicesModal()">
+    <div class="ha-invoices-container" onclick="event.stopPropagation()">
+        <div class="ha-invoices-header">
+            <div class="ha-invoices-title">
+                <div><i class="fas fa-file-invoice"></i> Today's Invoices</div>
+            </div>
+            <div><span style="float:right; cursor:pointer;" onclick="closeInvoicesModal()">✖</span></div>
+        </div>
+        
+        <div class="ha-invoices-body">
+            <div class="ha-invoices-controls">
+                <div class="ha-invoices-search">
+                    <input type="text" id="invoiceSearch" placeholder="Search invoices..." class="ha-invoices-search-input">
+                    <!-- <i class="fas fa-search"></i> -->
+                </div>
+                <div class="ha-invoices-actions">
+                    <button class="ha-function-key" onclick="refreshInvoices()">
+                        <div class="ha-key-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="ha-key-content">
+                            <span class="ha-key-label">Refresh</span>
+                        </div>
+                    </button>
+                    <button class="ha-function-key" onclick="printAllInvoices()">
+                        <div class="ha-key-icon">
+                            <i class="fas fa-print"></i>
+                        </div>
+                        <div class="ha-key-content">
+                            <span class="ha-key-label">Print All</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="ha-invoices-list" id="invoicesList">
+                <div class="ha-loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading invoices...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ha-invoices-footer">
+            <div class="ha-invoices-summary">
+                <span class="ha-summary-item">
+                    <i class="fas fa-file-invoice"></i>
+                    <span id="totalInvoices">0</span> Invoices
+                </span>
+                <span class="ha-summary-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span id="totalAmount">$0.00</span> Total
+                </span>
+            </div>
+            <!-- <button class="ha-function-key" onclick="closeInvoicesModal()">
+                <div class="ha-key-icon">
+                    <i class="fas fa-times"></i>
+                </div>
+                <div class="ha-key-content">
+                    <span class="ha-key-label">Close</span>
+                </div>
+            </button> -->
+        </div>
+    </div>
+</div>
+
+<style>
+.ha-invoices-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.ha-invoices-container {
+    max-width: 900px;
+    width: 95%;
+    max-height: 80vh;
+    background: #fff;
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.ha-invoices-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e5e9;
+    border-radius: 12px 12px 0 0;
+}
+
+.ha-invoices-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.ha-invoices-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background: #fff;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.ha-invoices-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e1e5e9;
+    border-radius: 0 0 12px 12px;
+}
+
+.ha-invoices-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ha-invoices-search {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.ha-invoices-search-input {
+    width: 100%;
+    height: 40px;
+    font-size: 14px;
+    padding: 10px 40px 10px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #fff;
+    outline: none;
+}
+
+.ha-invoices-search-input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.ha-invoices-search i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.ha-invoices-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.ha-invoices-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.ha-invoice-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f3f4;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.ha-invoice-item:hover {
+    background: #f8f9fa;
+}
+
+.ha-invoice-item:last-child {
+    border-bottom: none;
+}
+
+.ha-invoice-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ha-invoice-number {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+.ha-invoice-details {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.ha-invoice-amount {
+    font-weight: 600;
+    color: #27ae60;
+    font-size: 16px;
+    min-width: 80px;
+    text-align: right;
+}
+
+.ha-invoice-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 15px;
+}
+
+.ha-invoice-actions .ha-function-key,
+.ha-invoices-actions .ha-function-key {
+    padding: 8px 12px;
+    font-size: 12px;
+    margin: 0 2px;
+    min-width: auto;
+    height: auto;
+    background: #000 !important;
+    border: 1px solid #000 !important;
+    color: #fff !important;
+}
+
+.ha-invoice-actions .ha-function-key:hover,
+.ha-invoices-actions .ha-function-key:hover {
+    background: #333 !important;
+    border-color: #333 !important;
+}
+
+.ha-invoices-footer .ha-function-key {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: auto;
+    height: auto;
+    background: #000 !important;
+    border: 1px solid #000 !important;
+    color: #fff !important;
+}
+
+.ha-invoices-footer .ha-function-key:hover {
+    background: #333 !important;
+    border-color: #333 !important;
+}
+
+.ha-loading-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.ha-loading-state i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.ha-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.ha-empty-state i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0.5;
+}
+
+.ha-invoices-summary {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.ha-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.ha-summary-item i {
+    color: #667eea;
+}
+
+.ha-summary-item span:last-child {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+@media (max-width: 768px) {
+    .ha-invoices-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .ha-invoices-search {
+        min-width: auto;
+    }
+    
+    .ha-invoices-actions {
+        justify-content: center;
+    }
+    
+    .ha-invoice-details {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .ha-invoices-summary {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+let allInvoices = [];
+let filteredInvoices = [];
+
+function showInvoicesModal() {
+    console.log('Opening invoices modal...');
+    const modal = document.getElementById('invoicesModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadTodaysInvoices();
+    } else {
+        console.error('Invoices modal not found!');
+    }
+}
+
+function closeInvoicesModal() {
+    console.log('Closing invoices modal...');
+    const modal = document.getElementById('invoicesModal');
+    if (modal) {
+        modal.style.display = 'none';
+        allInvoices = [];
+        filteredInvoices = [];
+    } else {
+        console.error('Invoices modal not found for closing!');
+    }
+}
+
+function loadTodaysInvoices() {
+    const invoicesList = document.getElementById('invoicesList');
+    invoicesList.innerHTML = `
+        <div class="ha-loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading invoices...</p>
+        </div>
+    `;
+    
+    frappe.call({
+        method: "havano_pos_addson.havano_pos_addson.doctype.ha_pos_invoice.ha_pos_invoice.get_todays_invoices",
+        callback: function(response) {
+            if (response.message) {
+                allInvoices = response.message;
+                filteredInvoices = [...allInvoices];
+                renderInvoices();
+                updateSummary();
+            } else {
+                showEmptyState();
+            }
+        },
+        error: function(error) {
+            console.error("Error loading invoices:", error);
+            showEmptyState();
+        }
+    });
+}
+
+function renderInvoices() {
+    const invoicesList = document.getElementById('invoicesList');
+    
+    if (filteredInvoices.length === 0) {
+        showEmptyState();
+        return;
+    }
+    
+    invoicesList.innerHTML = filteredInvoices.map(invoice => `
+        <div class="ha-invoice-item" data-invoice="${invoice.name}">
+            <div class="ha-invoice-info">
+                <div class="ha-invoice-number">${invoice.name}</div>
+                <div class="ha-invoice-details">
+                    <span><i class="fas fa-user"></i> ${invoice.customer || 'N/A'}</span>
+                    <span><i class="fas fa-calendar"></i> ${invoice.posting_date}</span>
+                    <span><i class="fas fa-clock"></i> ${invoice.posting_time || 'N/A'}</span>
+                </div>
+            </div>
+            <div class="ha-invoice-amount">${invoice.currency} ${parseFloat(invoice.grand_total).toFixed(2)}</div>
+            <div class="ha-invoice-actions">
+                <button class="ha-function-key" onclick="printInvoice('${invoice.name}')">
+                    <div class="ha-key-icon">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <div class="ha-key-content">
+                        <span class="ha-key-label">Print</span>
+                    </div>
+                </button>
+                <button class="ha-function-key" onclick="viewInvoice('${invoice.name}')">
+                    <div class="ha-key-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="ha-key-content">
+                        <span class="ha-key-label">View</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function showEmptyState() {
+    const invoicesList = document.getElementById('invoicesList');
+    invoicesList.innerHTML = `
+        <div class="ha-empty-state">
+            <i class="fas fa-file-invoice"></i>
+            <p>No invoices found for today</p>
+        </div>
+    `;
+}
+
+function updateSummary() {
+    document.getElementById('totalInvoices').textContent = filteredInvoices.length;
+    
+    const totalAmount = filteredInvoices.reduce((sum, invoice) => {
+        return sum + parseFloat(invoice.grand_total || 0);
+    }, 0);
+    
+    const currency = filteredInvoices.length > 0 ? filteredInvoices[0].currency : '$';
+    document.getElementById('totalAmount').textContent = `${currency} ${totalAmount.toFixed(2)}`;
+}
+
+function refreshInvoices() {
+    loadTodaysInvoices();
+}
+
+function printInvoice(invoiceName) {
+    // Open invoice in new window for printing
+    const printUrl = `/api/method/frappe.desk.form.load.getdoc?doctype=Sales Invoice&name=${invoiceName}&format=print`;
+    window.open(printUrl, '_blank');
+}
+
+function printAllInvoices() {
+    if (filteredInvoices.length === 0) {
+        showToast('No invoices to print', 'warning');
+        return;
+    }
+    
+    // Print each invoice in a new window
+    filteredInvoices.forEach((invoice, index) => {
+        setTimeout(() => {
+            printInvoice(invoice.name);
+        }, index * 500); // Stagger the prints
+    });
+}
+
+function viewInvoice(invoiceName) {
+    // Open invoice in new window for viewing
+    const viewUrl = `/app/sales-invoice/${invoiceName}`;
+    window.open(viewUrl, '_blank');
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('invoiceSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filteredInvoices = allInvoices.filter(invoice => 
+                invoice.name.toLowerCase().includes(searchTerm) ||
+                (invoice.customer && invoice.customer.toLowerCase().includes(searchTerm)) ||
+                invoice.posting_date.includes(searchTerm)
+            );
+            renderInvoices();
+            updateSummary();
+        });
+    }
+});
+</script>

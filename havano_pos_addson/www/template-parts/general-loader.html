@@ -1,62 +1,397 @@
 <style>
-    /* Fullscreen overlay */
+/* Enhanced Fullscreen Loader */
 #ha-pos-loader-universal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+  overflow: hidden;
 }
 
-/* Spinner */
+/* Animated Background */
+#ha-pos-loader-universal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  animation: backgroundFloat 6s ease-in-out infinite;
+}
+
+/* Main Loader Container */
+.ha-loader-container {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Enhanced Spinner */
 .ha-pos-loader-universal-spinner {
-  border: 6px solid #e0e0e0;
-  border-top: 6px solid #0b1362;
+  position: relative;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ha-pos-loader-universal-spinner::before {
+  content: '';
+  position: absolute;
   width: 60px;
   height: 60px;
-  animation: ha-pos-loader-universal-spin 1s linear infinite;
-  margin-bottom: 15px;
+  border: 3px solid transparent;
+  border-top: 3px solid rgba(255, 255, 255, 0.8);
+  border-right: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: ha-pos-loader-universal-spin 1.2s linear infinite;
 }
 
-/* Text */
+.ha-pos-loader-universal-spinner::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid transparent;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-left: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: ha-pos-loader-universal-spin-reverse 0.8s linear infinite;
+}
+
+/* Center Icon */
+.ha-loader-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.9);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+/* Loading Text */
 .ha-pos-loader-universal-text {
-  font-family: Arial, sans-serif;
-  color: #555;
-  font-size: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  animation: textFade 2s ease-in-out infinite;
 }
 
+/* Progress Bar */
+.ha-loader-progress {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ha-loader-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+  border-radius: 2px;
+  width: 0%;
+  animation: progressLoad 3s ease-in-out infinite;
+}
+
+/* Dots Animation */
+.ha-loader-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.ha-loader-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: dotBounce 1.4s ease-in-out infinite both;
+}
+
+.ha-loader-dot:nth-child(1) { animation-delay: -0.32s; }
+.ha-loader-dot:nth-child(2) { animation-delay: -0.16s; }
+.ha-loader-dot:nth-child(3) { animation-delay: 0s; }
+
+/* Animations */
 @keyframes ha-pos-loader-universal-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes ha-pos-loader-universal-spin-reverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes backgroundFloat {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1) rotate(0deg); 
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.1) rotate(180deg); 
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.9; 
+  }
+  50% { 
+    transform: scale(1.1); 
+    opacity: 1; 
+  }
+}
+
+@keyframes textFade {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes progressLoad {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Hidden state */
 #ha-pos-loader-universal.hidden {
   opacity: 0;
   visibility: hidden;
+  transform: scale(0.9);
 }
 
+/* Success state */
+#ha-pos-loader-universal.success {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+}
+
+#ha-pos-loader-universal.success .ha-loader-icon {
+  color: #fff;
+}
+
+#ha-pos-loader-universal.success .ha-pos-loader-universal-text {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Error state */
+#ha-pos-loader-universal.error {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+#ha-pos-loader-universal.error .ha-loader-icon {
+  color: #fff;
+}
+
+#ha-pos-loader-universal.error .ha-pos-loader-universal-text {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ha-pos-loader-universal-spinner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .ha-pos-loader-universal-spinner::before {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .ha-pos-loader-universal-spinner::after {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .ha-loader-icon {
+    font-size: 20px;
+  }
+  
+  .ha-pos-loader-universal-text {
+    font-size: 14px;
+  }
+  
+  .ha-loader-progress {
+    width: 150px;
+  }
+}
 </style>
-<!-- Loader -->
+
+<!-- Enhanced Loader -->
 <div id="ha-pos-loader-universal">
-  <div class="ha-pos-loader-universal-spinner"></div>
-  <p class="ha-pos-loader-universal-text">Loading, please wait...</p>
+  <div class="ha-loader-container">
+    <div class="ha-pos-loader-universal-spinner">
+      <i class="fas fa-cash-register ha-loader-icon"></i>
+    </div>
+    
+    <div class="ha-loader-text-container">
+      <p class="ha-pos-loader-universal-text">Initializing Point of Sale</p>
+      <div class="ha-loader-progress">
+        <div class="ha-loader-progress-bar"></div>
+      </div>
+      <div class="ha-loader-dots">
+        <div class="ha-loader-dot"></div>
+        <div class="ha-loader-dot"></div>
+        <div class="ha-loader-dot"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
 <script>
-    // Hide loader once the full page is loaded
+// Enhanced Loader with Smooth Transitions
+let loaderProgress = 0;
+let progressInterval;
+
+// Simulate loading progress
+function updateLoaderProgress() {
+    loaderProgress += Math.random() * 15;
+    if (loaderProgress >= 100) {
+        loaderProgress = 100;
+        clearInterval(progressInterval);
+    }
+    
+    const progressBar = document.querySelector('.ha-loader-progress-bar');
+    if (progressBar) {
+        progressBar.style.width = loaderProgress + '%';
+    }
+}
+
+// Show success state
+function showLoaderSuccess() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader) {
+        loader.classList.add("success");
+        const text = loader.querySelector('.ha-pos-loader-universal-text');
+        const icon = loader.querySelector('.ha-loader-icon');
+        if (text) text.textContent = "Ready to start selling!";
+        if (icon) icon.className = "fas fa-check-circle ha-loader-icon";
+    }
+}
+
+// Show error state
+function showLoaderError() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader) {
+        loader.classList.add("error");
+        const text = loader.querySelector('.ha-pos-loader-universal-text');
+        const icon = loader.querySelector('.ha-loader-icon');
+        if (text) text.textContent = "Error loading POS system";
+        if (icon) icon.className = "fas fa-exclamation-triangle ha-loader-icon";
+    }
+}
+
+// Hide loader with animation
+function hideLoader() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader) {
+        // Show success state briefly before hiding
+        showLoaderSuccess();
+        
+        setTimeout(() => {
+            loader.classList.add("hidden");
+            
+            // Remove loader from DOM after animation
+            setTimeout(() => {
+                if (loader.parentNode) {
+                    loader.parentNode.removeChild(loader);
+                }
+            }, 800);
+        }, 1000);
+    }
+}
+
+// Initialize loader
+document.addEventListener("DOMContentLoaded", function() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader) {
+        // Start progress animation
+        progressInterval = setInterval(updateLoaderProgress, 200);
+        
+        // Update loading text periodically
+        const loadingTexts = [
+            "Initializing Point of Sale",
+            "Loading product catalog",
+            "Connecting to payment gateway",
+            "Setting up user interface",
+            "Almost ready..."
+        ];
+        
+        let textIndex = 0;
+        const textInterval = setInterval(() => {
+            const textElement = loader.querySelector('.ha-pos-loader-universal-text');
+            if (textElement && textIndex < loadingTexts.length) {
+                textElement.textContent = loadingTexts[textIndex];
+                textIndex++;
+            } else {
+                clearInterval(textInterval);
+            }
+        }, 800);
+    }
+});
+
+// Hide loader once the full page is loaded
 window.addEventListener("load", function () {
-  const loader = document.getElementById("ha-pos-loader-universal");
-  loader.classList.add("hidden");
+    // Add a small delay for better UX
+    setTimeout(hideLoader, 1500);
+});
+
+// Error handling
+window.addEventListener("error", function() {
+    showLoaderError();
+    setTimeout(hideLoader, 2000);
+});
+
+// Network status monitoring
+window.addEventListener("online", function() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader && !loader.classList.contains("hidden")) {
+        const text = loader.querySelector('.ha-pos-loader-universal-text');
+        if (text) text.textContent = "Connection restored, continuing...";
+    }
+});
+
+window.addEventListener("offline", function() {
+    const loader = document.getElementById("ha-pos-loader-universal");
+    if (loader && !loader.classList.contains("hidden")) {
+        const text = loader.querySelector('.ha-pos-loader-universal-text');
+        if (text) text.textContent = "Connection lost, retrying...";
+    }
 });
 
 </script>

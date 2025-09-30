@@ -59,6 +59,7 @@ def save_pos_entries(payments):
             "shift_name": p.get("shift_name")
         })
         doc.insert(ignore_permissions=True)
+        doc.submit()
         frappe.db.commit()
         results.append(doc.name)
 

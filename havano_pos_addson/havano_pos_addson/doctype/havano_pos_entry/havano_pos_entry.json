@@ -1,65 +1,104 @@
 {
-  "doctype": "DocType",
-  "name": "Havano POS Entry",
-  "module": "Havano Pos Addson",
-  "is_submittable": 1,
-  "fields": [
-    {
-      "fieldname": "invoice_number",
-      "label": "Invoice Number",
-      "fieldtype": "Data",
-      "reqd": 1
-    },
-    {
-      "fieldname": "invoice_date",
-      "label": "Invoice Date",
-      "fieldtype": "Date",
-      "reqd": 1
-    },
-    {
-      "fieldname": "payment_method",
-      "label": "Payment Method",
-      "fieldtype": "Link",
-      "options": "Mode of Payment",
-      "reqd": 1
-    },
-    {
-      "fieldname": "amount",
-      "label": "Amount",
-      "fieldtype": "Currency",
-      "reqd": 1
-    },
-    {
-      "fieldname": "currency",
-      "label": "Currency",
-      "fieldtype": "Link",
-      "options": "Currency",
-      "default": "USD"
-    },
-    {
-      "fieldname": "shift_name",
-      "label": "Shift Name",
-      "fieldtype": "Link",
-      "options": "Havano POS Shift",
-      "reqd": 1
-    }
-  ],
-  "permissions": [
-        {
-            "role": "System Manager",
-            "permlevel": 0,
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1
-        },
-        {
-            "role": "All",
-            "permlevel": 0,
-            "read": 1,
-            "write": 1,
-            "create": 1,
-            "delete": 1
-        }
-    ]
+ "actions": [],
+ "autoname": "POS-ENTRY.DD.MM.YY.-.####",
+ "creation": "2025-09-26 12:49:30.419203",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_number",
+  "invoice_date",
+  "payment_method",
+  "column_break_ykjb",
+  "amount",
+  "currency",
+  "shift_name",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Invoice Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_method",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Method",
+   "options": "Mode of Payment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "shift_name",
+   "fieldtype": "Link",
+   "label": "Shift Name",
+   "options": "Havano POS Shift",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ykjb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Havano POS Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-09-29 23:50:07.153632",
+ "modified_by": "Administrator",
+ "module": "Havano Pos Addson",
+ "name": "Havano POS Entry",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "All",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
 }

@@ -1,21 +1,31 @@
 .ha-second-row {
-        height: 800px !important;
+        height: 60vh !important;
+        min-height: 400px !important;
+        max-height: 600px !important;
         background-color: #e7e7e7;
         width: 100%;
         border-top: 1px solid #ddd;
         overflow: hidden;
+        display: flex !important;
+        flex-direction: column;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
 
 .ha-item-groups-container {
-        flex: 0 0 20%;
-        /* min-height: 70px; */
+        flex: 0 0 auto;
+        /* height: 80px; */
         overflow-x: auto;
         overflow-y: hidden;
         white-space: nowrap;
-        /* padding: 10px; */
+        padding: 0px 10px;
         background-color: #e7e7e7;
         border-bottom: 1px solid #ddd;
+        display: flex !important;
+        align-items: center;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
     .ha-group-items-container {
@@ -24,6 +34,8 @@
         overflow-y: auto;
         gap: 1px;
         background-color: #e7e7e7;
+        flex: 1;
+        padding: 0px 10px;
     }
     
 
@@ -31,7 +43,7 @@
         display: inline-block;
         align-items: center;
         align-content: center;
-          height: 60px;
+        height: 50px;
         background-color: var(--navyblue);
         color: white;
         border: none;
@@ -81,4 +93,183 @@
    
     .ha-scrollable-content{
         /* height: 300px !important; */
+    }
+
+    /* Pagination Styles */
+    .ha-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background-color: var(--navyblue);
+        border-bottom: 1px solid #ddd;
+        min-height: 44px;
+    }
+
+    .ha-pagination-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        min-width: 40px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ha-pagination-btn:hover:not(:disabled) {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .ha-pagination-btn:disabled {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.5);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .ha-page-info {
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 6px 12px;
+        border-radius: 4px;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .ha-page-numbers {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+
+    .ha-page-number-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        min-width: 32px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ha-page-number-btn:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .ha-page-number-btn.active {
+        background-color: var(--orange-color);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    }
+
+    /* Responsive pagination */
+    @media (max-width: 768px) {
+        .ha-pagination-container {
+            padding: 6px 8px;
+            min-height: 36px;
+        }
+
+        .ha-pagination-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            min-width: 32px;
+            height: 28px;
+        }
+
+        .ha-page-info {
+            font-size: 11px;
+            padding: 4px 8px;
+            min-width: 100px;
+        }
+    }
+
+    /* Group Items Pagination Styles */
+    .ha-group-items-pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 10px;
+        background-color: var(--secondary-color);
+        border-bottom: 1px solid #ddd;
+        min-height: 36px;
+        grid-column: 1 / -1;
+        margin-bottom: 4px;
+    }
+
+    .ha-group-pagination-btn {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s ease;
+        min-width: 32px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ha-group-pagination-btn:hover:not(:disabled) {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .ha-group-pagination-btn:disabled {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.5);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .ha-group-page-info {
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 4px 8px;
+        border-radius: 4px;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    /* Responsive group items pagination */
+    @media (max-width: 768px) {
+        .ha-group-items-pagination-container {
+            padding: 4px 6px;
+            min-height: 32px;
+        }
+
+        .ha-group-pagination-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            min-width: 28px;
+            height: 24px;
+        }
+
+        .ha-group-page-info {
+            font-size: 9px;
+            padding: 3px 6px;
+            min-width: 80px;
+        }
     }

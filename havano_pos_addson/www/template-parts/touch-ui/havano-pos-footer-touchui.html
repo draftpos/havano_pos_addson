@@ -1,43 +1,97 @@
 <link rel="stylesheet" href="../static/v1/css/touch-ui/havano-pos-non-touchui-footer.css">
 
+<!-- Enhanced Footer with Modern Design -->
 <div class="ha-sticky-footer">
+    <!-- Function Keys Section -->
     <div class="ha-function-keys">
-        <button class="ha-function-key" data-action="payment" id="btnPayment">
-            <i class="fas fa-money-bill-wave"></i>
-            <span class="ha-key-label">Payment (F1)</span>
+        <button class="ha-function-key ha-payment-btn" data-action="payment" id="btnPayment">
+            <div class="ha-key-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Payment</span>
+                <span class="ha-key-shortcut">F1</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
-        <button class="ha-function-key" data-action="options">
-            <i class="fas fa-cog"></i>
-            <span class="ha-key-label">Options (F10)</span>
+        
+        <button class="ha-function-key ha-options-btn" data-action="options">
+            <div class="ha-key-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Options</span>
+                <span class="ha-key-shortcut">F10</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
-        <button class="ha-function-key" data-action="quantity">
-            <i class="fas fa-boxes"></i>
-            <span class="ha-key-label">Qty (F5)</span>
+        
+        <button class="ha-function-key ha-quantity-btn" data-action="quantity">
+            <div class="ha-key-icon">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Quantity</span>
+                <span class="ha-key-shortcut">F5</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
-        <button class="ha-function-key" data-action="return">
-            <i class="fas fa-undo"></i>
-            <span class="ha-key-label">Return (F12)</span>
+        
+        <button class="ha-function-key ha-return-btn" data-action="return">
+            <div class="ha-key-icon">
+                <i class="fas fa-undo"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Return</span>
+                <span class="ha-key-shortcut">F12</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
-        <button class="ha-function-key" data-action="discount">
-            <i class="fas fa-tag"></i>
-            <span class="ha-key-label">Discount (F7)</span>
+        
+        <button class="ha-function-key ha-discount-btn" data-action="discount">
+            <div class="ha-key-icon">
+                <i class="fas fa-tag"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Discount</span>
+                <span class="ha-key-shortcut">F7</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
 
-         <a href="havano-pos.html">
-            <button class="ha-function-key" data-action="switch">
-                <i class="fas fa-tag"></i>
-                <span class="ha-key-label">Switch</span>
+        <a href="havano-pos.html" class="ha-switch-link">
+            <button class="ha-function-key ha-switch-btn" data-action="switch">
+                <div class="ha-key-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="ha-key-content">
+                    <span class="ha-key-label">Switch UI</span>
+                    <span class="ha-key-shortcut">Alt+S</span>
+                </div>
+                <div class="ha-key-ripple"></div>
             </button>
         </a>
-         <button onclick="openShiftPopup()" class="ha-function-key" data-action="shifts">
-            <i class="fas fa-tag"></i>
-            <span class="ha-key-label">Shift</span>
+        
+        <button onclick="openShiftPopup()" class="ha-function-key ha-shift-btn" data-action="shifts">
+            <div class="ha-key-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="ha-key-content">
+                <span class="ha-key-label">Close Shift</span>
+                <span class="ha-key-shortcut">F9</span>
+            </div>
+            <div class="ha-key-ripple"></div>
         </button>
-        
-        
-        
     </div>
-    <button class="ha-logout-btn" id="btnLogout">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-    </button>
+    
+    <!-- Logout Section -->
+    <div class="ha-logout-section">
+        <button class="ha-logout-btn" id="btnLogout">
+            <div class="ha-logout-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <span class="ha-logout-text">Logout</span>
+            <div class="ha-logout-ripple"></div>
+        </button>
+    </div>
 </div>

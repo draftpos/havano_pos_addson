@@ -2,27 +2,26 @@
 function showQuantityPopup(row = null) {
     // Determine which row to update
     if (!row) {
-        // If no row specified, try to find the active row
-        const activeRow = document.querySelector('.item-row-active');
-        if (activeRow) {
-            currentRowForQuantity = activeRow;
-        } else {
-            // If no active row, use the row with the focused input
-            const focusedInput = document.activeElement;
-            if (focusedInput && focusedInput.closest('tr')) {
-                currentRowForQuantity = focusedInput.closest('tr');
-            } else {
-                // If no focused input, use the last row with items
-                const rows = itemsTableBody.querySelectorAll('tr');
-                if (rows.length > 0) {
-                    currentRowForQuantity = rows[rows.length - 1];
-                } else {
-                    // If no rows, add a new one
-                    addNewRow();
-                    const newRows = itemsTableBody.querySelectorAll('tr');
-                    currentRowForQuantity = newRows[newRows.length - 1];
-                }
+        // Find the last row with an item code (not empty)
+        const rows = itemsTableBody.querySelectorAll('tr');
+        let lastRowWithItem = null;
+        
+        // Search from the end to find the last row with an item code
+        for (let i = rows.length - 1; i >= 0; i--) {
+            const itemCodeEl = rows[i].querySelector('.item-code');
+            if (itemCodeEl && itemCodeEl.value && itemCodeEl.value.trim() !== '') {
+                lastRowWithItem = rows[i];
+                break;
             }
+        }
+        
+        if (lastRowWithItem) {
+            currentRowForQuantity = lastRowWithItem;
+        } else {
+            // If no rows with items found, add a new one
+            addNewRow();
+            const newRows = itemsTableBody.querySelectorAll('tr');
+            currentRowForQuantity = newRows[newRows.length - 1];
         }
     } else {
         currentRowForQuantity = row;
