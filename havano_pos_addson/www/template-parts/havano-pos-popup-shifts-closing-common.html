@@ -67,12 +67,18 @@
 
     .ha-pos-shift-management-method {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       background: #f0f0f0;
       border: 1px solid #aaa;
       padding: 6px;
       border-radius: 6px;
+      gap: 4px;
+    }
+
+    .ha-pos-shift-management-method-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .ha-pos-shift-management-method-label {
@@ -88,6 +94,14 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       padding-right: 5px;
+    }
+
+    .ha-pos-shift-management-method-details {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
     }
 
     /* Closing amount */
@@ -245,43 +259,116 @@
     let activeInput = null;
     let paymentMethods =  JSON.parse(localStorage.getItem("allpaymentmethods"));
     let havano_pos_shift = JSON.parse(localStorage.getItem("havano_pos_shift"));
+    let posSettings = JSON.parse(localStorage.getItem("hapossettings"));
+    let shiftData = null;
+    let shiftName = "";
+    let baseCurrency = posSettings?.default_currency || 'USD';
+    
     // console.log(havano_pos_shift);
     if(havano_pos_shift.message.length > 0){
-      let shiftName  = havano_pos_shift.message[0].name;
+      shiftName  = havano_pos_shift.message[0].name;
       document.querySelector('.ha-pos-shift-name').textContent = shiftName;
     }else{
       document.querySelector('.ha-pos-shift-name').textContent = "No Shift Found";
+    }
+    
+    // Function to load shift data
+    function loadShiftData(callback) {
+      if (!shiftName || !window.frappe) {
+        if (callback) callback();
+        return;
+      }
+      
+      frappe.call({
+        method: "frappe.client.get",
+        args: {
+          doctype: "Havano POS Shift",
+          name: shiftName
+        },
+        callback: function(r) {
+          if (r.message) {
+            shiftData = r.message;
+          }
+          if (callback) callback();
+        }
+      });
     }
 
     function renderShiftMethods() {
       const container = document.getElementById("shiftMethods");
       container.innerHTML = "";
 
+      // Create a map of payment methods and their amounts from shift data
+      const paymentAmounts = {};
+      if (shiftData && shiftData.payments) {
+        shiftData.payments.forEach(payment => {
+          paymentAmounts[payment.payment_method] = payment.amount || 0;
+        });
+      }
+
       paymentMethods.forEach(method => {
+        const amount = paymentAmounts[method.mode_of_payment] || 0;
+        const currency = method.currency || method.currency_symbol || '';
+        const exchangeRate = method.exchange_rate || 1;
+        
+        // Calculate equivalent in base currency
+        const equivalent = amount / exchangeRate;
+        
         const row = document.createElement("div");
         row.className = "ha-pos-shift-management-method";
         row.innerHTML = `
-          <div class="ha-pos-shift-management-method-label">${method.mode_of_payment}</div>
-          <input type="text" class="ha-pos-shift-management-method-input" value="0.00" onclick="setActiveInput(this)">
+          <div class="ha-pos-shift-management-method-row">
+            <div class="ha-pos-shift-management-method-label">${method.mode_of_payment}</div>
+            <input type="text" 
+                   class="ha-pos-shift-management-method-input" 
+                   value="${amount.toFixed(2)}" 
+                   data-exchange-rate="${exchangeRate}"
+                   data-currency="${currency}"
+                   onclick="setActiveInput(this)" 
+                   oninput="updateClosingAmount()">
+          </div>
+          <div class="ha-pos-shift-management-method-details">
+            <span>Rate: ${exchangeRate.toFixed(4)} | Currency: ${currency}</span>
+            <span>≈ ${baseCurrency} ${equivalent.toFixed(2)}</span>
+          </div>
         `;
         container.appendChild(row);
       });
 
-      // Closing amount row
+      // Closing amount row (auto-calculated)
       const closingRow = document.createElement("div");
       closingRow.className = "ha-pos-closing-amount";
       closingRow.innerHTML = `
-        <label>Closing Amount</label>
-        <input type="text" id="closingAmount" value="0.00" onclick="setActiveInput(this)">
+        <label>Closing Amount (${baseCurrency})</label>
+        <input type="text" id="closingAmount" value="0.00" readonly style="background-color: #f0f0f0;">
       `;
       container.appendChild(closingRow);
-
-      // Append status at the bottom
-      // const status = document.createElement("div");
-      // status.className = "ha-pos-shift-management-status closed";
-      // status.id = "shiftStatus";
-      // status.innerHTML = "Status: <span class='closed'>Closed</span>";
-      // container.appendChild(status);
+      
+      // Calculate initial closing amount
+      updateClosingAmount();
+    }
+    
+    function updateClosingAmount() {
+      let total = 0;
+      document.querySelectorAll(".ha-pos-shift-management-method-input").forEach(input => {
+        const amount = parseFloat(input.value) || 0;
+        const exchangeRate = parseFloat(input.dataset.exchangeRate) || 1;
+        
+        // Convert to base currency
+        const equivalent = amount / exchangeRate;
+        total += equivalent;
+        
+        // Update the equivalent display
+        const detailsDiv = input.closest('.ha-pos-shift-management-method').querySelector('.ha-pos-shift-management-method-details span:last-child');
+        if (detailsDiv) {
+          detailsDiv.textContent = `≈ ${baseCurrency} ${equivalent.toFixed(2)}`;
+        }
+      });
+      
+      const closingAmountInput = document.getElementById("closingAmount");
+      if (closingAmountInput) {
+        closingAmountInput.value = total.toFixed(2);
+      }
     }
 
     function setActiveInput(input) {
@@ -292,11 +379,13 @@
       if (!activeInput) return;
       if (activeInput.value === "0.00") activeInput.value = "";
       activeInput.value += value;
+      updateClosingAmount();
     }
 
     function backspaceInput() {
       if (!activeInput) return;
       activeInput.value = activeInput.value.slice(0, -1) || "0.00";
+      updateClosingAmount();
     }
 
     // function setShiftStatus(status) {
@@ -309,9 +398,12 @@
     // }
 
     function openShiftPopup(message) {
-      renderShiftMethods();
-      document.getElementById("shiftOverlay").style.display = "flex";
-      document.getElementById("ha-pos-shift-management-message-div").textContent = message;
+      // Load shift data first, then render
+      loadShiftData(function() {
+        renderShiftMethods();
+        document.getElementById("shiftOverlay").style.display = "flex";
+        document.getElementById("ha-pos-shift-management-message-div").textContent = message;
+      });
     }
 
     function closeShiftPopup() {
@@ -333,19 +425,25 @@
     }
 
     function closeShift(shiftName) {
-      // Collect payment values from the left panel
+      // Collect payment values from the left panel (only methods with entered values)
       const payments = [];
       document.querySelectorAll(".ha-pos-shift-management-method").forEach(row => {
         const label = row.querySelector(".ha-pos-shift-management-method-label").textContent.trim();
         const input = row.querySelector("input");
         const amount = parseFloat(input.value) || 0;
+        
+        // Only include payment methods with values entered
         if (amount > 0) {
           payments.push({ payment_method: label, amount: amount });
         }
       });
 
+      console.log("Shift closing data:");
+      console.log("- Payment methods with values:", payments);
+      
       // Get closing amount input
       const closingAmount = parseFloat(document.getElementById("closingAmount").value) || 0;
+      console.log("- Total closing amount:", closingAmount);
 
       // First, close the shift
       frappe.call({
@@ -363,22 +461,21 @@
             frappe.call({
               method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.create_payment_entries_for_shift",
               args: {
-                shift_name: shiftName,
-                payments: payments
+                shift_name: shiftName
               },
               callback: function(paymentResponse) {
                 if (paymentResponse.message) {
                   console.log("Payment entries created:", paymentResponse.message);
-                  showHaPopupCustom("Shift Closed and Payment Entries Created");
+                  showHaPopupCustom("Shift Closed, Submitted, and Payment Entries Created");
                   localStorage.removeItem("havano_pos_shift");
                   closeShiftPopup();
                 } else {
-                  showHaPopupCustom("Shift Closed but Error Creating Payment Entries");
+                  showHaPopupCustom("Shift Closed and Submitted but Error Creating Payment Entries");
                 }
               },
               error: function(error) {
                 console.error("Error creating payment entries:", error);
-                showHaPopupCustom("Shift Closed but Error Creating Payment Entries");
+                showHaPopupCustom("Shift Closed and Submitted but Error Creating Payment Entries");
                 localStorage.removeItem("havano_pos_shift");
                 closeShiftPopup();
               }
