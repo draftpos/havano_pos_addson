@@ -10,6 +10,17 @@
       display: flex;
     }
 
+    /* Force frappe modals to appear above payment popup */
+    .modal,
+    .modal-dialog,
+    .modal-content {
+      z-index: 999999 !important;
+    }
+    
+    .modal-backdrop {
+      z-index: 999998 !important;
+    }
+
     /* Overlay */
     .ha-pos-payment-pop-overlay {
       position: fixed;
@@ -191,10 +202,20 @@
       margin-top: 2px;
       color: #666;
       font-size: 10px;
+      padding-left: 4px;
     }
 
     .ha-exchange-rate-info small {
       color: #888;
+    }
+
+    .ha-base-currency-equivalent {
+      margin-top: 2px;
+      color: #004d00;
+      font-size: 11px;
+      font-weight: bold;
+      padding-left: 4px;
+      display: none;
     }
   </style>
 </head>
@@ -214,18 +235,18 @@
       <div class="ha-pos-payment-pop-body">
         <!-- Left side -->
         <div class="ha-pos-payment-pop-left">
-          <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total">0.00</div>
+          <div id="ha-pos-payment-pop-total-amount" class="ha-pos-payment-pop-total"><span id="ha-pos-payment-pop-currency-symbol"></span> 0.00</div>
 
           <!-- Dynamic Payment Methods will be injected here -->
           <div class="ha-pos-payment-pop-methods"></div>
 
           <div class="ha-pos-payment-pop-footer">
             <div class="ha-pos-payment-pop-footer-row">
-              <div>Rounding $</div>
+              <div>Rounding <span id="ha-pos-payment-pop-rounding-currency"></span></div>
               <div>0.00</div>
             </div>
             <div class="ha-pos-payment-pop-footer-row">
-              <div>Change $</div>
+              <div>Change <span id="ha-pos-payment-pop-change-currency"></span></div>
               <div id="ha-pos-payment-pop-change-footer-section">0.00</div>
             </div>
           </div>
@@ -293,6 +314,9 @@
               <span>${method.currency_symbol} <b>0</b></span>
               <div class="ha-exchange-rate-info" id="exchange-rate-${index}" style="display: none;">
                 <small>Rate: <span class="exchange-rate-value">1</span></small>
+              </div>
+              <div class="ha-base-currency-equivalent" id="base-equiv-${index}" style="display: none;">
+                ≈ <span class="base-currency-symbol"></span> <span class="base-equiv-value">0.00</span>
               </div>
             </div>
             <input 

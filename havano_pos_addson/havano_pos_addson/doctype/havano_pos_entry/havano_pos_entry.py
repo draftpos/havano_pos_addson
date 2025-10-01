@@ -31,7 +31,7 @@ def save_pos_entries(payments):
     """
     Insert multiple Havano POS Entry records at once.
     `payments` should be a list of dicts with:
-    invoice_number, invoice_date, payment_method, amount, currency, shift_number
+    invoice_number, invoice_date, payment_method, amount, currency, base_amount, base_currency, shift_number
     """
     if isinstance(payments, str):
         # if sent as JSON string, parse it
@@ -48,14 +48,31 @@ def save_pos_entries(payments):
         if not p.get("amount") or float(p.get("amount")) <= 0:
             continue  # skip zero/negative payments
 
+        # Get base amount - use provided base_amount or fallback to amount
+        base_amount = p.get("base_amount") or p.get("amount")
+        
+        # Get base currency from settings or use provided
+        base_currency = p.get("base_currency")
+        if not base_currency:
+            # Try to get from HA POS Setting
+            pos_setting = frappe.get_all(
+                "HA POS Setting",
+                filters={"ha_pos_settings_on": 1},
+                fields=["default_currency"],
+                limit=1
+            )
+            base_currency = pos_setting[0].default_currency if pos_setting else p.get("currency", "USD")
+
         # Create and insert document
         doc = frappe.get_doc({
             "doctype": "Havano POS Entry",
             "invoice_number": p.get("invoice_number"),
             "invoice_date": p.get("invoice_date") or nowdate(),
             "payment_method": p.get("payment_method"),
-            "amount": p.get("amount"),
+            "amount": p.get("amount"),  # Amount in original currency
             "currency": p.get("currency") or "USD",
+            "base_amount": base_amount,  # Amount in base currency
+            "base_currency": base_currency,
             "shift_name": p.get("shift_name")
         })
         doc.insert(ignore_permissions=True)

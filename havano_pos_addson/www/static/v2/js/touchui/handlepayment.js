@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
       callback: function(response) {
         if (response.message) {
           defaultCurrency = response.message.default_currency;
-          console.log("Default Currency:", defaultCurrency);
+          // Store in localStorage for use by invoice.js
+          localStorage.setItem("pos_base_currency", defaultCurrency);
           checkAndShowExchangeRates();
           updateExchangeRateDisplay(); // Ensure proper display state
         }
@@ -58,11 +59,9 @@ document.addEventListener('DOMContentLoaded', function () {
       callback: function(response) {
         if (response.message && response.message.exchange_rate) {
           exchangeRates[`${fromCurrency}_${toCurrency}`] = response.message.exchange_rate;
-          console.log(`Exchange rate ${fromCurrency} to ${toCurrency}:`, response.message.exchange_rate);
         } else {
           // Fallback to 1 if no exchange rate found
           exchangeRates[`${fromCurrency}_${toCurrency}`] = 1;
-          console.log(`No exchange rate found for ${fromCurrency} to ${toCurrency}, using 1`);
         }
         updateExchangeRateDisplay();
       }
@@ -72,30 +71,35 @@ document.addEventListener('DOMContentLoaded', function () {
   function checkAndShowExchangeRates() {
     if (!defaultCurrency) return;
     
-    console.log("Checking exchange rates. Default currency:", defaultCurrency);
-    
     const paymentInputs = overlay.querySelectorAll('.ha-pos-payment-pop-method-input');
     paymentInputs.forEach((input, index) => {
       const currency = input.getAttribute('data-currency');
-      console.log(`Payment method ${index}: currency=${currency}, default=${defaultCurrency}, different=${currency !== defaultCurrency}`);
       
       // Find the exchange rate div by looking for it within the same payment method container
       const methodContainer = input.closest('.ha-pos-payment-pop-method');
       const exchangeRateDiv = methodContainer ? methodContainer.querySelector('.ha-exchange-rate-info') : null;
+      const baseEquivDiv = methodContainer ? methodContainer.querySelector('.ha-base-currency-equivalent') : null;
       
       if (currency && currency !== defaultCurrency) {
-        // Show exchange rate info
-        console.log(`Showing exchange rate for index ${index}, div found:`, !!exchangeRateDiv);
+        // Show exchange rate info and base currency equivalent
         if (exchangeRateDiv) {
           exchangeRateDiv.style.display = 'block';
         }
-        console.log("Fetching exchange rate from", defaultCurrency, "to", currency);
+        if (baseEquivDiv) {
+          baseEquivDiv.style.display = 'block';
+          // Set the base currency symbol
+          const baseSymbol = baseEquivDiv.querySelector('.base-currency-symbol');
+          if (baseSymbol) baseSymbol.textContent = defaultCurrency;
+        }
         // Fetch exchange rate
         fetchExchangeRate(defaultCurrency, currency);
       } else {
         // Hide exchange rate info for same currency
         if (exchangeRateDiv) {
           exchangeRateDiv.style.display = 'none';
+        }
+        if (baseEquivDiv) {
+          baseEquivDiv.style.display = 'none';
         }
       }
     });
@@ -143,6 +147,15 @@ document.addEventListener('DOMContentLoaded', function () {
     
     const rate = exchangeRates[`${fromCurrency}_${toCurrency}`] || 1;
     return (parseFloat(inputValue) || 0) * rate;
+  }
+
+  // Calculate base currency equivalent from foreign currency input
+  function calculateBaseEquivalent(foreignAmount, foreignCurrency) {
+    if (!defaultCurrency || foreignCurrency === defaultCurrency) return parseFloat(foreignAmount) || 0;
+    
+    // To convert from foreign to base: divide by the exchange rate (base to foreign)
+    const rate = exchangeRates[`${defaultCurrency}_${foreignCurrency}`] || 1;
+    return (parseFloat(foreignAmount) || 0) / rate;
   }
 
   function safeSetInputValue(inputEl, valueStr) {
@@ -194,6 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function syncDisplay(inputEl) {
     if (!inputEl || inputEl.id === 'sub_total') return;
+    const methodContainer = inputEl.closest('.ha-pos-payment-pop-method');
     const container = inputEl.closest('.ha-pos-payment-method-base-currency');
     const bEl = container ? container.querySelector('b') : null;
     if (!bEl) return;
@@ -201,14 +215,176 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputValue = parseFloat(inputEl.value) || 0;
     const currency = inputEl.getAttribute('data-currency');
     
-    // If currency is different from default, show converted amount
+    // Calculate total and sum paid to get remaining balance
+    const totalAmount = getTotalAmount();
+    let sumPaidInBaseCurrency = 0;
+    
+    overlay.querySelectorAll('.ha-pos-payment-pop-method-input').forEach(input => {
+      if (input.id === 'sub_total') return;
+      const val = parseFloat(input.value) || 0;
+      const curr = input.getAttribute('data-currency');
+      
+      if (curr && defaultCurrency && curr !== defaultCurrency) {
+        sumPaidInBaseCurrency += calculateBaseEquivalent(val, curr);
+      } else {
+        sumPaidInBaseCurrency += val;
+      }
+    });
+    
+    const remainingBalanceInBase = totalAmount - sumPaidInBaseCurrency;
+    
+    // Show remaining balance converted to this payment method's currency
     if (currency && defaultCurrency && currency !== defaultCurrency) {
-      const convertedAmount = calculateConvertedAmount(inputValue, defaultCurrency, currency);
-      bEl.textContent = convertedAmount.toFixed(2);
+      const remainingInThisCurrency = calculateConvertedAmount(remainingBalanceInBase, defaultCurrency, currency);
+      bEl.textContent = (remainingInThisCurrency > 0 ? remainingInThisCurrency : 0).toFixed(2);
+      
+      // Show base currency equivalent of what was entered
+      const baseEquivDiv = methodContainer ? methodContainer.querySelector('.ha-base-currency-equivalent') : null;
+      if (baseEquivDiv && inputValue > 0) {
+        const baseEquivalent = calculateBaseEquivalent(inputValue, currency);
+        const baseEquivValue = baseEquivDiv.querySelector('.base-equiv-value');
+        if (baseEquivValue) {
+          baseEquivValue.textContent = baseEquivalent.toFixed(2);
+        }
+      }
     } else {
-      // For same currency, show original amount
-      bEl.textContent = inputValue.toFixed(2);
+      // For same currency, show remaining balance
+      bEl.textContent = (remainingBalanceInBase > 0 ? remainingBalanceInBase : 0).toFixed(2);
     }
+  }
+
+  // --------------------------
+  // Distribute balance across payment methods with currency conversion
+  // --------------------------
+  function distributeBalanceAcrossPaymentMethods() {
+    const totalAmount = getTotalAmount();
+    let sumPaidInBaseCurrency = 0;
+
+    // Calculate total paid across all methods (in base currency)
+    overlay.querySelectorAll('.ha-pos-payment-pop-method-input').forEach(input => {
+      if (input.id === 'sub_total') return;
+      const inputValue = parseFloat(input.value) || 0;
+      const currency = input.getAttribute('data-currency');
+      
+      // Convert to base currency if different
+      if (currency && defaultCurrency && currency !== defaultCurrency) {
+        sumPaidInBaseCurrency += calculateBaseEquivalent(inputValue, currency);
+      } else {
+        sumPaidInBaseCurrency += inputValue;
+      }
+    });
+
+    const remainingBalance = totalAmount - sumPaidInBaseCurrency;
+
+    // Check if any method has input
+    const hasAnyInput = sumPaidInBaseCurrency > 0;
+
+    // Update <b> tags for all payment methods
+    const inputs = overlay.querySelectorAll('.ha-pos-payment-pop-method-input');
+
+    inputs.forEach((input, index) => {
+      if (input.id === 'sub_total') return;
+      
+      const container = input.closest('.ha-pos-payment-pop-method');
+      if (!container) return;
+      
+      const labelDiv = container.querySelector('.ha-pos-payment-pop-method-label');
+      if (!labelDiv) return;
+      
+      // Get the second span which contains the currency symbol and <b> tag
+      const spans = labelDiv.querySelectorAll('span');
+      const currencySpan = spans.length > 1 ? spans[1] : spans[0];
+      
+      if (!currencySpan) return;
+      
+      const bEl = currencySpan.querySelector('b');
+      if (!bEl) return;
+
+      const inputValue = parseFloat(input.value) || 0;
+      const currency = input.getAttribute('data-currency');
+
+      // Always show remaining balance (converted to the method's currency if needed)
+      let amountToShowInBaseCurrency;
+      
+      if (hasAnyInput) {
+        // If ANY method has input, show remaining balance
+        amountToShowInBaseCurrency = remainingBalance > 0 ? remainingBalance : 0;
+      } else {
+        // If NO method has input yet, show total amount
+        amountToShowInBaseCurrency = totalAmount;
+      }
+      
+      // Convert to the payment method's currency if different
+      if (currency && defaultCurrency && currency !== defaultCurrency) {
+        const convertedAmount = calculateConvertedAmount(amountToShowInBaseCurrency, defaultCurrency, currency);
+        bEl.textContent = convertedAmount.toFixed(2);
+        
+        // Update base currency equivalent if this method has an input value
+        if (inputValue > 0) {
+          const baseEquivDiv = container ? container.querySelector('.ha-base-currency-equivalent') : null;
+          if (baseEquivDiv) {
+            const baseEquivalent = calculateBaseEquivalent(inputValue, currency);
+            const baseEquivValue = baseEquivDiv.querySelector('.base-equiv-value');
+            if (baseEquivValue) {
+              baseEquivValue.textContent = baseEquivalent.toFixed(2);
+            }
+          }
+        }
+      } else {
+        bEl.textContent = amountToShowInBaseCurrency.toFixed(2);
+      }
+    });
+  }
+
+  // --------------------------
+  // Handle click on disabled save button
+  // --------------------------
+  function handleDisabledSaveClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const saveButton = document.getElementById('ha-pos-savepaymentdata');
+    if (saveButton && saveButton.hasAttribute('disabled')) {
+      const change = parseFloat(saveButton.getAttribute('data-change')) || 0;
+      const balance = Math.abs(change);
+      const currencySymbol = defaultCurrency || '$';
+      
+      frappe.msgprint({
+        message: `Cannot save! Balance remaining: ${currencySymbol} ${balance.toFixed(2)}`,
+        indicator: 'red',
+        title: 'Payment Incomplete'
+      });
+      
+      // Apply z-index to the modal after it's created
+      setTimeout(() => {
+        // Try multiple selectors to find the modal
+        const modals = document.querySelectorAll('.modal');
+        const modalDialogs = document.querySelectorAll('.modal-dialog');
+        const modalContents = document.querySelectorAll('.modal-content');
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        
+        // Apply z-index to all modals (the last one should be our msgprint)
+        modals.forEach((modal, index) => {
+          modal.style.setProperty('z-index', '999999', 'important');
+        });
+        
+        // Also apply to modal dialogs
+        modalDialogs.forEach((dialog, index) => {
+          dialog.style.setProperty('z-index', '999999', 'important');
+        });
+        
+        // Also apply to modal contents
+        modalContents.forEach((content, index) => {
+          content.style.setProperty('z-index', '999999', 'important');
+        });
+        
+        if (modalBackdrop) {
+          modalBackdrop.style.setProperty('z-index', '999998', 'important');
+        }
+      }, 100);
+    }
+    
+    return false;
   }
 
   // --------------------------
@@ -216,21 +392,85 @@ document.addEventListener('DOMContentLoaded', function () {
   // --------------------------
   function updateTotals() {
     const totalAmount = getTotalAmount();
-    let sumPaid = 0;
+    let sumPaidInBaseCurrency = 0;
 
-    // Only sum popup inputs (scoped inside overlay)
+    // Sum all payments converted to base currency
     overlay.querySelectorAll('.ha-pos-payment-pop-method-input').forEach(input => {
       if (input.id === 'sub_total') return; // safety
-      sumPaid += parseFloat(input.value) || 0;
+      const inputValue = parseFloat(input.value) || 0;
+      const currency = input.getAttribute('data-currency');
+      
+      // Convert to base currency if different
+      if (currency && defaultCurrency && currency !== defaultCurrency) {
+        sumPaidInBaseCurrency += calculateBaseEquivalent(inputValue, currency);
+      } else {
+        sumPaidInBaseCurrency += inputValue;
+      }
     });
 
-    const change = sumPaid - totalAmount;
+    const change = sumPaidInBaseCurrency - totalAmount; // Positive when overpaid, negative when underpaid
 
     const totalEl = document.getElementById('ha-pos-payment-pop-total-amount');
-    if (totalEl) totalEl.textContent = totalAmount.toFixed(2);
+    if (totalEl) {
+      // Get currency symbol
+      const currencySymbol = defaultCurrency || '$';
+      const currencySymbolEl = document.getElementById('ha-pos-payment-pop-currency-symbol');
+      if (currencySymbolEl) currencySymbolEl.textContent = currencySymbol;
+      
+      // Update total with currency
+      totalEl.innerHTML = `<span id="ha-pos-payment-pop-currency-symbol">${currencySymbol}</span> ${totalAmount.toFixed(2)}`;
+    }
 
     const changeEl = overlay.querySelector('#ha-pos-payment-pop-change-footer-section') || document.querySelector('#ha-pos-payment-pop-change-footer-section');
-    if (changeEl) changeEl.textContent = (change > 0 ? change.toFixed(2) : '0.00');
+    if (changeEl) {
+      // Show change with sign (negative when underpaid, positive when overpaid)
+      const changeText = change.toFixed(2);
+      changeEl.textContent = changeText;
+      
+      // Apply color styling: red for negative, green for positive
+      if (change < 0) {
+        changeEl.style.color = 'red';
+        changeEl.style.fontWeight = 'bold';
+      } else if (change > 0) {
+        changeEl.style.color = 'green';
+        changeEl.style.fontWeight = 'bold';
+      } else {
+        changeEl.style.color = 'black';
+        changeEl.style.fontWeight = 'normal';
+      }
+    }
+
+    // Update currency symbols for Rounding and Change
+    const currencySymbol = defaultCurrency || '$';
+    const roundingCurrencyEl = document.getElementById('ha-pos-payment-pop-rounding-currency');
+    const changeCurrencyEl = document.getElementById('ha-pos-payment-pop-change-currency');
+    if (roundingCurrencyEl) roundingCurrencyEl.textContent = currencySymbol;
+    if (changeCurrencyEl) changeCurrencyEl.textContent = currencySymbol;
+
+    // Disable save button if change is negative (underpaid)
+    const saveButton = document.getElementById('ha-pos-savepaymentdata');
+    if (saveButton) {
+      if (change < 0) {
+        saveButton.style.opacity = '0.5';
+        saveButton.style.cursor = 'not-allowed';
+        saveButton.setAttribute('disabled', 'true');
+        saveButton.setAttribute('data-change', change.toFixed(2)); // Store change value for message
+        
+        // Use capture phase to intercept clicks before they're blocked
+        saveButton.addEventListener('click', handleDisabledSaveClick, true);
+      } else {
+        saveButton.style.opacity = '1';
+        saveButton.style.cursor = 'pointer';
+        saveButton.removeAttribute('disabled');
+        saveButton.removeAttribute('data-change');
+        
+        // Remove the disabled click handler
+        saveButton.removeEventListener('click', handleDisabledSaveClick, true);
+      }
+    }
+
+    // Distribute balance across payment methods with currency conversion
+    distributeBalanceAcrossPaymentMethods();
   }
 
   // --------------------------
@@ -312,19 +552,6 @@ document.addEventListener('DOMContentLoaded', function () {
       input.addEventListener('input', function () {
         if (input.id === 'sub_total') return;
         
-        // Console log the input value change
-        const paymentMethod = input.id.includes('cash') ? 'Cash' : input.id.replace('payment-method-', '');
-        const currency = this.getAttribute('data-currency');
-        const inputValue = parseFloat(this.value) || 0;
-        
-        console.log(`Input changed - Payment Method: ${paymentMethod}, Amount: ${this.value}, Currency: ${currency}`);
-        
-        // Calculate converted amount if currency is different from default
-        if (currency && defaultCurrency && currency !== defaultCurrency) {
-          const convertedAmount = calculateConvertedAmount(this.value, defaultCurrency, currency);
-          console.log(`Converted amount: ${inputValue} ${defaultCurrency} = ${convertedAmount.toFixed(2)} ${currency}`);
-        }
-        
         syncDisplay(input);
         updateTotals();
       });
@@ -371,9 +598,28 @@ document.addEventListener('DOMContentLoaded', function () {
     
     cash_default.innerHTML = totalAmount;
     
-    if (cashMethodContainer) setMethodValue(cashMethodContainer, totalAmount);
-    updateTotals();
+    // Don't auto-fill cash, just show the total in all payment method <b> tags
+    // if (cashMethodContainer) setMethodValue(cashMethodContainer, totalAmount);
+    
     overlay.style.display = 'flex';
+    
+    // Initialize balance distribution across all payment methods with multiple attempts
+    // First attempt - immediate (might work if currency already cached)
+    setTimeout(() => {
+      distributeBalanceAcrossPaymentMethods();
+    }, 50);
+    
+    // Second attempt - after currency should be loaded
+    setTimeout(() => {
+      distributeBalanceAcrossPaymentMethods();
+    }, 300);
+    
+    // Third attempt - ensure it's definitely loaded
+    setTimeout(() => {
+      distributeBalanceAcrossPaymentMethods();
+    }, 800);
+    
+    updateTotals();
     startSubTotalWatcher();
   };
 

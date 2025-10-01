@@ -60,6 +60,9 @@ function saveSalesInvoice() {
                         const invoiceNumber = response.message.name;  // ✅ THIS is what we want to return
                         const invoiceDate = response.message.posting_date;
                         const currency = response.message.currency || "USD";
+                        
+                        // Get base currency from localStorage (set by handlepayment.js)
+                        const baseCurrency = localStorage.getItem("pos_base_currency") || currency;
 
                         let havano_pos_shift = JSON.parse(localStorage.getItem("havano_pos_shift"));
                         let shiftNumber = null, shiftName = null;
@@ -101,12 +104,10 @@ function saveSalesInvoice() {
                                 // console.log("Found inputs in payment popup:", inputs.length);
                                 
                                 inputs.forEach((input, index) => {
-                                    // Get amount from <b> element (converted amount) or input value
-                                    const methodContainer = input.closest('.ha-pos-payment-pop-method');
-                                    const bElement = methodContainer ? methodContainer.querySelector('.ha-pos-payment-pop-method-label b') : null;
-                                    const amount = bElement ? parseFloat(bElement.textContent) || 0 : parseFloat(input.value) || 0;
+                                    // Get the actual input value (what user entered)
+                                    const inputValue = parseFloat(input.value) || 0;
                                     
-                                    if (amount > 0) {
+                                    if (inputValue > 0) {
                                         // Try to find associated label or method name
                                         let methodName = `Payment Method ${index + 1}`;
                                         const label = input.closest('.form-group, .payment-row, .method-row')?.querySelector('label, .label, .method-name');
@@ -117,12 +118,28 @@ function saveSalesInvoice() {
                                         // Get currency from input data attribute
                                         const paymentCurrency = input.getAttribute('data-currency') || currency;
                                         
+                                        // Get base currency equivalent if available
+                                        const methodContainer = input.closest('.ha-pos-payment-pop-method');
+                                        let baseAmount = inputValue; // Default to input value
+                                        
+                                        if (methodContainer && paymentCurrency !== currency) {
+                                            const baseEquivDiv = methodContainer.querySelector('.ha-base-currency-equivalent');
+                                            if (baseEquivDiv) {
+                                                const baseEquivValue = baseEquivDiv.querySelector('.base-equiv-value');
+                                                if (baseEquivValue) {
+                                                    baseAmount = parseFloat(baseEquivValue.textContent) || inputValue;
+                                                }
+                                            }
+                                        }
+                                        
                                         payments.push({
                                             invoice_number: invoiceNumber,
                                             invoice_date: invoiceDate,
                                             payment_method: methodName,
-                                            amount: amount,
+                                            amount: inputValue, // Amount in original currency
+                                            base_amount: baseAmount, // Amount in base currency
                                             currency: paymentCurrency,
+                                            base_currency: baseCurrency,
                                             shift_name: shiftName
                                         });
                                     }
@@ -155,23 +172,36 @@ function saveSalesInvoice() {
                                     methodName = labelEl.textContent.trim().replace(/^\d+\s*/, '').split('\n')[0];
                                 }
 
-                                // Get amount from <b> element (converted amount) or input value
-                                const bElement = methodEl.querySelector('.ha-pos-payment-pop-method-label b');
-                                const amount = bElement ? parseFloat(bElement.textContent) || 0 : parseFloat(inputEl.value) || 0;
+                                // Get the actual input value (what user entered)
+                                const inputValue = parseFloat(inputEl.value) || 0;
                                 
                                 // Get currency from input data attribute
                                 const paymentCurrency = inputEl.getAttribute('data-currency') || currency;
 
-                                if (amount > 0) {
+                                if (inputValue > 0) {
+                                    // Get base currency equivalent if available
+                                    let baseAmount = inputValue; // Default to input value
+                                    
+                                    if (paymentCurrency !== currency) {
+                                        const baseEquivDiv = methodEl.querySelector('.ha-base-currency-equivalent');
+                                        if (baseEquivDiv) {
+                                            const baseEquivValue = baseEquivDiv.querySelector('.base-equiv-value');
+                                            if (baseEquivValue) {
+                                                baseAmount = parseFloat(baseEquivValue.textContent) || inputValue;
+                                            }
+                                        }
+                                    }
+                                    
                                     payments.push({
                                         invoice_number: invoiceNumber,
                                         invoice_date: invoiceDate,
                                         payment_method: methodName,
-                                        amount: amount,
+                                        amount: inputValue, // Amount in original currency
+                                        base_amount: baseAmount, // Amount in base currency
                                         currency: paymentCurrency,
+                                        base_currency: baseCurrency,
                                         shift_name: shiftName
                                     });
-                                    console.log(`Added payment: ${methodName} - ${amount} ${paymentCurrency}`);
                                 }
                             });
                         }
@@ -250,10 +280,34 @@ function saveSalesInvoice() {
 }
 
 
+// Clear <b> values for payment methods without input before saving
+function clearEmptyPaymentMethodsDisplay() {
+    const paymentInputs = document.querySelectorAll('.ha-pos-payment-pop-method-input');
+    paymentInputs.forEach(input => {
+        const inputValue = parseFloat(input.value) || 0;
+        if (inputValue === 0) {
+            // Clear the <b> tag for methods without input
+            const container = input.closest('.ha-pos-payment-pop-method');
+            if (container) {
+                const labelSpan = container.querySelector('.ha-pos-payment-pop-method-label span');
+                if (labelSpan) {
+                    const bEl = labelSpan.querySelector('b');
+                    if (bEl) {
+                        bEl.textContent = '0.00';
+                    }
+                }
+            }
+        }
+    });
+}
+
 // document.getElementById("ha-pos-savepaymentdata").addEventListener("click", saveSalesInvoice);
 
 document.getElementById("ha-pos-savepaymentdata")
   .addEventListener("click", function () {
+    // Clear <b> values for empty payment methods before saving
+    clearEmptyPaymentMethodsDisplay();
+    
     saveSalesInvoice().then((invoiceName) => {
         // alert(invoiceName);
         closePaymentPopup();

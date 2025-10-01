@@ -11,6 +11,8 @@
   "column_break_ykjb",
   "amount",
   "currency",
+  "base_amount",
+  "base_currency",
   "shift_name",
   "amended_from"
  ],
@@ -50,6 +52,19 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "base_amount",
+   "fieldtype": "Float",
+   "label": "Base Amount",
+   "description": "Amount in base currency"
+  },
+  {
+   "fieldname": "base_currency",
+   "fieldtype": "Link",
+   "label": "Base Currency",
+   "options": "Currency",
+   "description": "The base/default currency"
   },
   {
    "fieldname": "shift_name",
