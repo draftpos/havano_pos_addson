@@ -50,6 +50,45 @@
       border-bottom: 1px solid #888;
     }
 
+    /* Close button styles */
+    .ha-pos-opening-close-btn {
+      cursor: pointer;
+      font-size: 18px;
+      color: #666;
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: background-color 0.2s;
+    }
+
+    .ha-pos-opening-close-btn:hover {
+      background-color: #ff6b6b;
+      color: white;
+    }
+
+    .ha-pos-opening-close-btn.disabled {
+      cursor: not-allowed;
+      color: #ccc;
+      opacity: 0.5;
+    }
+
+    .ha-pos-opening-close-btn.disabled:hover {
+      background-color: transparent;
+      color: #ccc;
+    }
+
+    /* Modal mandatory indicator */
+    .ha-pos-opening-mandatory-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 8px 12px;
+      margin: 8px 0;
+      border-radius: 4px;
+      font-size: 13px;
+      text-align: center;
+      font-weight: bold;
+    }
+
     /* Body layout */
     .ha-pos-opening-body {
       display: flex;
@@ -202,10 +241,14 @@
           Opening Shift
           <span id="ha-pos-opening-shift-name" class="ha-pos-opening-shift-name"></span>
         </div>
-        <div style="cursor:pointer;" onclick="haPosOpeningClosePopup()">✖</div>
+        <div id="haPosOpeningCloseBtn" class="ha-pos-opening-close-btn disabled" onclick="haPosOpeningClosePopup()">✖</div>
       </div>
 
       <div id="ha-pos-opening-message-div" class="ha-pos-opening-header"></div>
+
+      <div class="ha-pos-opening-mandatory-notice">
+        ⚠️ You must open a shift to continue. This modal cannot be closed until a shift is opened.
+      </div>
 
       <div class="ha-pos-opening-body">
         <!-- Left side -->
@@ -282,10 +325,81 @@
       haPosOpeningRenderMethods();
       document.getElementById("haPosOpeningOverlay").style.display = "flex";
       document.getElementById("ha-pos-opening-message-div").textContent = message;
+      
+      // Disable close button initially
+      disableCloseButton();
+      
+      // Add event listeners to prevent closing via ESC or overlay click
+      addModalEventListeners();
+    }
+
+    function addModalEventListeners() {
+      // Prevent ESC key from closing modal
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          e.stopPropagation();
+          // Check if shift is open before allowing close
+          checkIfShiftIsOpen(function(isOpen) {
+            if (!isOpen) {
+              showHaPopupCustom("You must open a shift before closing this modal");
+            }
+          });
+        }
+      });
+
+      // Prevent overlay click from closing modal
+      document.getElementById("haPosOpeningOverlay").addEventListener('click', function(e) {
+        if (e.target === this) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Check if shift is open before allowing close
+          checkIfShiftIsOpen(function(isOpen) {
+            if (!isOpen) {
+              showHaPopupCustom("You must open a shift before closing this modal");
+            }
+          });
+        }
+      });
     }
 
     function haPosOpeningClosePopup() {
-      document.getElementById("haPosOpeningOverlay").style.display = "none";
+      // Check if a shift is open before allowing close
+      checkIfShiftIsOpen(function(isOpen) {
+        if (isOpen) {
+          document.getElementById("haPosOpeningOverlay").style.display = "none";
+        } else {
+          // Show a message that shift must be opened first
+          showHaPopupCustom("You must open a shift before closing this modal");
+        }
+      });
+    }
+
+    function checkIfShiftIsOpen(callback) {
+      frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+          doctype: "Havano POS Shift",
+          filters: {
+            status: "open"
+          },
+          fields: ["name", "shift_date", "status"],
+          limit_page_length: 1
+        },
+        callback: function(r) {
+          const today = new Date().toISOString().split('T')[0];
+          if (r.message && r.message.length > 0) {
+            const shift = r.message[0];
+            // Check if shift is for today
+            callback(shift.shift_date === today);
+          } else {
+            callback(false);
+          }
+        },
+        error: function(err) {
+          callback(false);
+        }
+      });
     }
 
     function haPosOpeningOpenShift(shiftName) {
@@ -296,8 +410,10 @@
         callback: function(r) {
           if (r.message) {
             showHaPopupCustom("Shift Opened");
-             haPosOpeningClosePopup();
-             setTimeout(function () {
+            // Enable the close button after successful shift opening
+            enableCloseButton();
+            haPosOpeningClosePopup();
+            setTimeout(function () {
                 window.location.reload();
               }, 2 * 1000); 
             // document.getElementById("ha-pos-opening-status").innerHTML =
@@ -306,6 +422,28 @@
           }
         }
       });
+    }
+
+    function enableCloseButton() {
+      const closeBtn = document.getElementById("haPosOpeningCloseBtn");
+      closeBtn.classList.remove("disabled");
+      
+      // Hide the mandatory notice
+      const notice = document.querySelector(".ha-pos-opening-mandatory-notice");
+      if (notice) {
+        notice.style.display = "none";
+      }
+    }
+
+    function disableCloseButton() {
+      const closeBtn = document.getElementById("haPosOpeningCloseBtn");
+      closeBtn.classList.add("disabled");
+      
+      // Show the mandatory notice
+      const notice = document.querySelector(".ha-pos-opening-mandatory-notice");
+      if (notice) {
+        notice.style.display = "block";
+      }
     }
   </script>
 </body>
