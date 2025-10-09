@@ -58,6 +58,7 @@ function saveSalesInvoice() {
 
                     const invoiceNumber = response.message.name;  // ✅ THIS is what we want to return
                     //----------------------calling custom function to download the txt file-----------------
+                    console.log("downloading ------------------now------------------")
                     frappe.call({
                     method: "invoice_override_pos.sales_invoice_hooks.download_invoice_json",
                     args: { invoice_name: invoiceNumber },
