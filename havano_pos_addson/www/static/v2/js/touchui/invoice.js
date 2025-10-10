@@ -58,6 +58,22 @@ function saveSalesInvoice() {
                         frappe.show_alert(`${response.message.name} Invoice created successfully!`);
 
                         const invoiceNumber = response.message.name;  // ✅ THIS is what we want to return
+                            //----------------------calling custom function to download the txt file-----------------
+                        console.log("downloading ------------------now------------------")
+                        frappe.call({
+                        method: "invoice_override_pos.sales_invoice_hooks.download_invoice_json",
+                        args: { invoice_name: invoiceNumber },
+                        callback: function(r) {
+                            if (r.message) {
+                                const blob = new Blob([JSON.stringify(r.message, null, 4)], { type: "text/plain" });
+                                const link = document.createElement("a");
+                                link.href = URL.createObjectURL(blob);
+                                link.download = invoiceNumber + ".txt";
+                                link.click();
+                            }
+                            }
+                        });
+                        //-----------------------end of custom function call------------------
                         const invoiceDate = response.message.posting_date;
                         const currency = response.message.currency || "USD";
                         
