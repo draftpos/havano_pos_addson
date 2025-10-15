@@ -126,15 +126,28 @@ function updateTotals() {
         const qty = parseFloat(cell.value) || 0;
         // Only count rows that have valid item data (non-zero rate indicates item is selected)
         const row = cell.closest('tr');
-        const itemCode = row.querySelector('.item-code').value || 0;
+        const itemCode = row.querySelector('.item-code')?.value || '';
         if(itemCode.length > 0){
             totalQuantity += qty;
         }
     });
     
-    totalAmount.textContent = `$${total.toFixed(2)}`;
-    subTotal.value = total.toFixed(2);
-    cartBadge.textContent = Math.round(totalQuantity);
+    // Update total amount display - with fallback to direct query if cached element is null
+    const totalAmountElement = totalAmount || document.getElementById('totalAmount');
+    if (totalAmountElement) {
+        totalAmountElement.textContent = `$${total.toFixed(2)}`;
+    }
+    
+    // Update subtotal field - with fallback
+    const subTotalElement = subTotal || document.getElementById('sub_total');
+    if (subTotalElement) {
+        subTotalElement.value = total.toFixed(2);
+    }
+    
+    // Update cart badge
+    if (cartBadge) {
+        cartBadge.textContent = Math.round(totalQuantity);
+    }
 }
 
 // Handle function keys

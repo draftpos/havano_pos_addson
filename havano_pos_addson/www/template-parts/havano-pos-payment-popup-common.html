@@ -281,13 +281,62 @@
           </div>
 
           <div class="ha-pos-payment-pop-actions">
-            <div class="ha-pos-payment-pop-action" id="ha-pos-savepaymentdata">Save</div>
-            <div class="ha-pos-payment-pop-action">Print (F3)</div>
+            <div class="ha-pos-payment-pop-action" id="ha-pos-savepaymentdata">Save (F3)</div>
           </div>
         </div>
       </div>
     </div>
   </div>
+  
+  <!-- Progress Bar Overlay -->
+  <div id="ha-pos-progress-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; text-align: center; min-width: 300px;">
+      <h3 style="margin: 0 0 20px 0; color: #333;">Processing Invoice...</h3>
+      <div style="width: 100%; height: 30px; background: #f0f0f0; border-radius: 15px; overflow: hidden; margin-bottom: 15px;">
+        <div id="ha-pos-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4caf50, #8bc34a); transition: width 0.3s ease;"></div>
+      </div>
+      <p id="ha-pos-progress-text" style="margin: 0; color: #666; font-size: 14px;">Saving invoice...</p>
+    </div>
+  </div>
+
+  <!-- Print Preview Modal -->
+  <div id="ha-pos-print-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; width: 90%; max-width: 900px; height: 90%; display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+      <!-- Modal Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-bottom: 2px solid #5a67d8;">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
+          <i class="fa fa-print" style="margin-right: 8px;"></i>
+          Invoice Print Preview
+        </h3>
+        <div style="display: flex; gap: 10px;">
+          <button onclick="printIframeContent()" style="background: white; color: #667eea; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+            <i class="fa fa-print"></i> Print
+          </button>
+          <button onclick="closePrintModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 14px;">
+            <i class="fa fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+      
+      <!-- Modal Body with Iframe -->
+      <div style="flex: 1; overflow: hidden; position: relative;">
+        <iframe id="ha-pos-print-iframe" style="width: 100%; height: 100%; border: none;" src="about:blank"></iframe>
+        <div id="ha-pos-print-loading" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9);">
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+            <div style="border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+            <p style="color: #666; font-size: 14px;">Loading preview...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 
   <script>
     // console.log(localStorage);
@@ -336,8 +385,74 @@
 
     // Render immediately on DOM load
     document.addEventListener("DOMContentLoaded", renderPaymentMethods);
+    
+    // Print Modal Functions
+    function openPrintModal(url) {
+      const modal = document.getElementById('ha-pos-print-modal');
+      const iframe = document.getElementById('ha-pos-print-iframe');
+      const loading = document.getElementById('ha-pos-print-loading');
+      
+      if (modal && iframe && loading) {
+        // console.log('Opening print modal with URL:', url);
+        
+        // Show loading
+        loading.style.display = 'block';
+        
+        // Show modal
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Load URL in iframe
+        iframe.src = url;
+        
+        // Hide loading when iframe loads
+        iframe.onload = function() {
+          // console.log('Iframe loaded successfully');
+          setTimeout(() => {
+            loading.style.display = 'none';
+          }, 500);
+        };
+      } else {
+        console.error('Print modal elements not found:', {modal: !!modal, iframe: !!iframe, loading: !!loading});
+      }
+    }
+    
+    function closePrintModal() {
+      const modal = document.getElementById('ha-pos-print-modal');
+      const iframe = document.getElementById('ha-pos-print-iframe');
+      
+      if (modal && iframe) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        
+        // Clear iframe after closing
+        setTimeout(() => {
+          iframe.src = 'about:blank';
+        }, 300);
+      }
+    }
+    
+    function printIframeContent() {
+      const iframe = document.getElementById('ha-pos-print-iframe');
+      
+      if (iframe && iframe.contentWindow) {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (e) {
+          console.error('Print error:', e);
+          // frappe.show_alert('Unable to print. Please use the browser print option.', 'orange');
+        }
+      }
+    }
+    
+    // Make functions globally available
+    window.openPrintModal = openPrintModal;
+    window.closePrintModal = closePrintModal;
+    window.printIframeContent = printIframeContent;
   </script>
 
 
 </body>
 </html>
+

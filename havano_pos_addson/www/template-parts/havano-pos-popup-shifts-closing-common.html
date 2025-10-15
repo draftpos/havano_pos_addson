@@ -257,24 +257,39 @@
 
   <script>
     let activeInput = null;
-    let paymentMethods =  JSON.parse(localStorage.getItem("allpaymentmethods"));
-    let havano_pos_shift = JSON.parse(localStorage.getItem("havano_pos_shift"));
-    let posSettings = JSON.parse(localStorage.getItem("hapossettings"));
+    let paymentMethods =  localStorage.getItem("allpaymentmethods") ? JSON.parse(localStorage.getItem("allpaymentmethods")) : [];
+    let havano_pos_shift = localStorage.getItem("havano_pos_shift") ? JSON.parse(localStorage.getItem("havano_pos_shift")) : null;
+    let posSettings = localStorage.getItem("hapossettings") ? JSON.parse(localStorage.getItem("hapossettings")) : null;
     let shiftData = null;
     let shiftName = "";
     let baseCurrency = posSettings?.default_currency || 'USD';
     
     // console.log(havano_pos_shift);
-    if(havano_pos_shift.message.length > 0){
+    if(havano_pos_shift && havano_pos_shift.message && havano_pos_shift.message.length > 0){
       shiftName  = havano_pos_shift.message[0].name;
       document.querySelector('.ha-pos-shift-name').textContent = shiftName;
+      
+      // Load shift data when Frappe is ready
+      function initShiftData() {
+        if (window.frappe && typeof frappe.call === 'function') {
+          loadShiftData(function() {
+            // console.log("Shift data loaded on page initialization");
+          });
+        } else {
+          // Retry after a short delay if Frappe is not ready
+          setTimeout(initShiftData, 100);
+        }
+      }
+      
+      // Start loading shift data
+      initShiftData();
     }else{
       document.querySelector('.ha-pos-shift-name').textContent = "No Shift Found";
     }
     
     // Function to load shift data
     function loadShiftData(callback) {
-      if (!shiftName || !window.frappe) {
+      if (!shiftName || !window.frappe || typeof frappe.call !== 'function') {
         if (callback) callback();
         return;
       }
@@ -283,11 +298,15 @@
         method: "frappe.client.get",
         args: {
           doctype: "Havano POS Shift",
-          name: shiftName
+          name: shiftName,
+          fields: ["*"]
         },
         callback: function(r) {
           if (r.message) {
             shiftData = r.message;
+            // console.log("Shift data loaded:", shiftData);
+            // console.log("Opening Amount:", shiftData.opening_amount);
+            // console.log("Total Sales:", shiftData.total_sales);
           }
           if (callback) callback();
         }
@@ -335,6 +354,50 @@
         container.appendChild(row);
       });
 
+      // Get amounts from shift data
+      const openingAmount = (shiftData && shiftData.opening_amount) ? parseFloat(shiftData.opening_amount) : 0;
+      const totalSales = (shiftData && shiftData.total_sales) ? parseFloat(shiftData.total_sales) : 0;
+      const expectedAmount = openingAmount + totalSales;
+      
+      // Opening Amount display (very small)
+      const openingRow = document.createElement("div");
+      openingRow.className = "ha-pos-closing-amount";
+      openingRow.style.background = "#fff3e0";
+      openingRow.style.border = "1px solid #ff9800";
+      openingRow.style.padding = "3px 6px";
+      openingRow.style.marginBottom = "2px";
+      openingRow.innerHTML = `
+        <label style="color: #e65100; font-size: 9px;">Opening</label>
+        <input type="text" value="${openingAmount.toFixed(2)}" readonly style="background-color: #ffe0b2; color: #e65100; font-size: 9px; height: 20px; padding: 2px 4px; border: 1px solid #ff9800;">
+      `;
+      container.appendChild(openingRow);
+      
+      // Sales Total display (very small)
+      const salesRow = document.createElement("div");
+      salesRow.className = "ha-pos-closing-amount";
+      salesRow.style.background = "#f3e5f5";
+      salesRow.style.border = "1px solid #9c27b0";
+      salesRow.style.padding = "3px 6px";
+      salesRow.style.marginBottom = "2px";
+      salesRow.innerHTML = `
+        <label style="color: #6a1b9a; font-size: 9px;">Sales</label>
+        <input type="text" value="${totalSales.toFixed(2)}" readonly style="background-color: #e1bee7; color: #6a1b9a; font-size: 9px; height: 20px; padding: 2px 4px; border: 1px solid #9c27b0;">
+      `;
+      container.appendChild(salesRow);
+      
+      // Expected amount row (very small)
+      const expectedRow = document.createElement("div");
+      expectedRow.className = "ha-pos-closing-amount";
+      expectedRow.style.background = "#e3f2fd";
+      expectedRow.style.border = "1px solid #2196f3";
+      expectedRow.style.padding = "3px 6px";
+      expectedRow.style.marginBottom = "3px";
+      expectedRow.innerHTML = `
+        <label style="color: #1976d2; font-size: 9px; font-weight: bold;">Expected</label>
+        <input type="text" id="expectedAmount" value="${expectedAmount.toFixed(2)}" readonly style="background-color: #bbdefb; color: #0d47a1; font-size: 9px; height: 20px; padding: 2px 4px; font-weight: bold; border: 1px solid #2196f3;">
+      `;
+      container.appendChild(expectedRow);
+      
       // Closing amount row (auto-calculated)
       const closingRow = document.createElement("div");
       closingRow.className = "ha-pos-closing-amount";
@@ -343,6 +406,17 @@
         <input type="text" id="closingAmount" value="0.00" readonly style="background-color: #f0f0f0;">
       `;
       container.appendChild(closingRow);
+      
+      // Difference row (very small)
+      const differenceRow = document.createElement("div");
+      differenceRow.className = "ha-pos-closing-amount";
+      differenceRow.style.marginTop = "3px";
+      differenceRow.style.padding = "3px 6px";
+      differenceRow.innerHTML = `
+        <label id="differenceLabel" style="font-weight: bold; font-size: 9px;">Difference</label>
+        <input type="text" id="differenceAmount" value="0.00" readonly style="font-weight: bold; font-size: 9px; height: 20px; padding: 2px 4px; background-color: #f0f0f0;">
+      `;
+      container.appendChild(differenceRow);
       
       // Calculate initial closing amount
       updateClosingAmount();
@@ -368,6 +442,42 @@
       const closingAmountInput = document.getElementById("closingAmount");
       if (closingAmountInput) {
         closingAmountInput.value = total.toFixed(2);
+      }
+      
+      // Calculate and display difference
+      const expectedAmountInput = document.getElementById("expectedAmount");
+      const differenceAmountInput = document.getElementById("differenceAmount");
+      const differenceLabel = document.getElementById("differenceLabel");
+      
+      if (expectedAmountInput && differenceAmountInput && differenceLabel) {
+        const expectedAmount = parseFloat(expectedAmountInput.value) || 0;
+        const difference = total - expectedAmount;
+        
+        differenceAmountInput.value = difference.toFixed(2);
+        
+        // Color code the difference
+        if (difference > 0) {
+          // Overage - show in green
+          differenceAmountInput.style.backgroundColor = "#c8e6c9";
+          differenceAmountInput.style.color = "#2e7d32";
+          differenceAmountInput.style.border = "1px solid #4caf50";
+          differenceLabel.style.color = "#2e7d32";
+          differenceLabel.textContent = "Diff (Over)";
+        } else if (difference < 0) {
+          // Shortage - show in red
+          differenceAmountInput.style.backgroundColor = "#ffcdd2";
+          differenceAmountInput.style.color = "#c62828";
+          differenceAmountInput.style.border = "1px solid #f44336";
+          differenceLabel.style.color = "#c62828";
+          differenceLabel.textContent = "Diff (Short)";
+        } else {
+          // Exact match - show in grey
+          differenceAmountInput.style.backgroundColor = "#e0e0e0";
+          differenceAmountInput.style.color = "#424242";
+          differenceAmountInput.style.border = "1px solid #9e9e9e";
+          differenceLabel.style.color = "#424242";
+          differenceLabel.textContent = "Diff (OK)";
+        }
       }
     }
 
@@ -398,6 +508,25 @@
     // }
 
     function openShiftPopup(message) {
+      // Check if Frappe is available
+      if (!window.frappe || typeof frappe.call !== 'function') {
+        console.error('Frappe is not loaded yet');
+        setTimeout(function() {
+          openShiftPopup(message);
+        }, 200);
+        return;
+      }
+      
+      // Refresh shift info from localStorage in case it changed
+      const shiftStorage = localStorage.getItem("havano_pos_shift");
+      if (shiftStorage) {
+        havano_pos_shift = JSON.parse(shiftStorage);
+        if(havano_pos_shift && havano_pos_shift.message && havano_pos_shift.message.length > 0){
+          shiftName = havano_pos_shift.message[0].name;
+          document.querySelector('.ha-pos-shift-name').textContent = shiftName;
+        }
+      }
+      
       // Load shift data first, then render
       loadShiftData(function() {
         renderShiftMethods();
@@ -411,6 +540,11 @@
     }
 
     function openShift(shiftName) {
+      if (!window.frappe || typeof frappe.call !== 'function') {
+        console.error('Frappe is not loaded');
+        return;
+      }
+      
       frappe.call({
         method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_shift.havano_pos_shift.open_shift",
         args: { shift_name: shiftName },
@@ -425,6 +559,11 @@
     }
 
     function closeShift(shiftName) {
+      if (!window.frappe || typeof frappe.call !== 'function') {
+        console.error('Frappe is not loaded');
+        return;
+      }
+      
       // Collect payment values from the left panel (only methods with entered values)
       const payments = [];
       document.querySelectorAll(".ha-pos-shift-management-method").forEach(row => {
@@ -438,12 +577,12 @@
         }
       });
 
-      console.log("Shift closing data:");
-      console.log("- Payment methods with values:", payments);
+      // console.log("Shift closing data:");
+      // console.log("- Payment methods with values:", payments);
       
       // Get closing amount input
       const closingAmount = parseFloat(document.getElementById("closingAmount").value) || 0;
-      console.log("- Total closing amount:", closingAmount);
+      // console.log("- Total closing amount:", closingAmount);
 
       // First, close the shift
       frappe.call({
@@ -455,7 +594,7 @@
         },
         callback: function(r) {
           if (r.message) {
-            console.log("Shift closed:", r.message);
+            // console.log("Shift closed:", r.message);
             
             // Then create payment entries for all sales invoices for today
             frappe.call({
@@ -465,19 +604,31 @@
               },
               callback: function(paymentResponse) {
                 if (paymentResponse.message) {
-                  console.log("Payment entries created:", paymentResponse.message);
+                  // console.log("Payment entries created:", paymentResponse.message);
                   showHaPopupCustom("Shift Closed, Submitted, and Payment Entries Created");
                   localStorage.removeItem("havano_pos_shift");
                   closeShiftPopup();
+                  // Force complete page reload from server
+                  setTimeout(function () {
+                    window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+                  }, 2 * 1000);
                 } else {
                   showHaPopupCustom("Shift Closed and Submitted but Error Creating Payment Entries");
+                  // Reload even if payment entries failed
+                  setTimeout(function () {
+                    window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+                  }, 2 * 1000);
                 }
               },
               error: function(error) {
-                console.error("Error creating payment entries:", error);
+                // console.error("Error creating payment entries:", error);
                 showHaPopupCustom("Shift Closed and Submitted but Error Creating Payment Entries");
                 localStorage.removeItem("havano_pos_shift");
                 closeShiftPopup();
+                // Reload even on error
+                setTimeout(function () {
+                  window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+                }, 2 * 1000);
               }
             });
           } else {

@@ -120,7 +120,7 @@ function selectItem(item, row) {
     const itemDescription = item.description || '';
     const isGiftItem = itemDescription.toLowerCase().includes('gift');
     if (itemRate === 0 && isGiftItem) {
-        frappe.show_alert(`Item "${item.item_name || item.name || 'Unknown Item'}" is a gift item and rate is empty.`);
+        // frappe.show_alert(`Item "${item.item_name || item.name || 'Unknown Item'}" is a gift item and rate is empty.`);
     }
     
     if (itemRate === 0 && !isGiftItem) {

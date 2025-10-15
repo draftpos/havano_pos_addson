@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"3Qe8eRsE6D\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Havano POS</span>\",\"col\":12}},{\"id\":\"ehakh3Ye_m\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Setting\",\"col\":3}},{\"id\":\"AtIh70sBsv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Havano Pos Shift\",\"col\":3}},{\"id\":\"kaIZNiYBml\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Payment Summary\",\"col\":3}},{\"id\":\"Nd_za0RLyd\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Invoice\",\"col\":3}},{\"id\":\"9RvKG7GEAL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Havano Pos Entry\",\"col\":3}},{\"id\":\"UDzC_7lZv5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"uu8p61TTSR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}}]",
+ "content": "[{\"id\":\"X4E2k1btDo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Page\",\"col\":3}},{\"id\":\"3Qe8eRsE6D\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Havano POS</span>\",\"col\":12}},{\"id\":\"ehakh3Ye_m\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Setting\",\"col\":3}},{\"id\":\"AtIh70sBsv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Havano Pos Shift\",\"col\":3}},{\"id\":\"kaIZNiYBml\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Payment Summary\",\"col\":3}},{\"id\":\"Nd_za0RLyd\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ha Pos Invoice\",\"col\":3}},{\"id\":\"9RvKG7GEAL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Havano Pos Entry\",\"col\":3}},{\"id\":\"UDzC_7lZv5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"uu8p61TTSR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}}]",
  "creation": "2025-09-28 19:21:46.160401",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "Havano POS",
  "links": [],
- "modified": "2025-10-05 10:45:22.935177",
+ "modified": "2025-10-12 10:02:03.556881",
  "modified_by": "Administrator",
  "module": "Havano Pos Addson",
  "name": "Havano POS",
@@ -23,8 +23,15 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 1.0,
+ "sequence_id": 2.0,
  "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "POS Page",
+   "type": "URL",
+   "url": "/havano-pos-touch-ui"
+  },
   {
    "color": "Grey",
    "doc_view": "List",

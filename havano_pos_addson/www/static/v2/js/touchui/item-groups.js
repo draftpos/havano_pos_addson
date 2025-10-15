@@ -1,34 +1,110 @@
 // Pagination variables for item groups
 let currentItemGroupsPage = 0;
-const ITEMS_PER_PAGE = 8;
+let ITEMS_PER_PAGE = 8; // Will be calculated dynamically
 let totalItemGroupsPages = 0;
+let originalItemGroups = []; // Store original groups before filtering
+let filteredItemGroups = []; // Store filtered groups based on search
 
 // Pagination variables for group items
 let currentGroupItemsPage = 0;
-const GROUP_ITEMS_PER_PAGE = 20; // Show more items per page since they're smaller
+let GROUP_ITEMS_PER_PAGE = 20; // Will be calculated dynamically
 let totalGroupItemsPages = 0;
 let allGroupItems = []; // Store all items for the current group
+
+// Calculate items per page based on screen size
+function calculateItemsPerPage() {
+    const itemGroupBtn = document.querySelector('.ha-item-group-btn');
+    const groupItemBtn = document.querySelector('.ha-group-item-btn');
+    
+    // Calculate for item groups (horizontal layout)
+    if (itemGroupsContainer) {
+        const containerWidth = itemGroupsContainer.offsetWidth || window.innerWidth;
+        const containerHeight = itemGroupsContainer.offsetHeight || 80; // Height of groups container
+        const itemWidth = 150; // Width of each group button
+        const itemHeight = 60; // Height of each group button
+        const padding = 20; // Container padding
+        const paginationWidth = 200; // Approximate pagination controls width
+        const gap = 1; // Gap between buttons
+        
+        // Calculate items per row considering width
+        const availableWidth = containerWidth - padding - paginationWidth;
+        const itemsPerRow = Math.floor(availableWidth / (itemWidth + gap));
+        
+        // Calculate how many rows fit in the container height
+        const availableHeight = containerHeight - 20; // Reserve for padding/margins
+        const rows = Math.max(1, Math.floor(availableHeight / (itemHeight + gap)));
+        
+        // Total items = rows × columns
+        const calculatedItems = itemsPerRow * rows;
+        ITEMS_PER_PAGE = Math.max(4, Math.min(calculatedItems, 12)); // Min 4, Max 12
+        
+    }
+    
+    // Calculate for group items (grid layout)
+    if (groupItemsContainer) {
+        const containerWidth = groupItemsContainer.offsetWidth || window.innerWidth;
+        const containerHeight = groupItemsContainer.offsetHeight || 400;
+        const itemWidth = 150; // Width of each item button (updated to match CSS)
+        const itemHeight = 60; // Min height of each item button (updated to match CSS)
+        const padding = 20;
+        const gap = 1; // Gap between items
+        
+        // Calculate items per row considering width and gaps
+        const itemsPerRow = Math.floor((containerWidth - padding) / (itemWidth + gap));
+        
+        // Calculate number of rows considering height and gaps
+        const availableHeight = containerHeight - 50; // Reserve 50px for pagination
+        const rows = Math.floor(availableHeight / (itemHeight + gap));
+        
+        // Total items = rows × columns
+        const calculatedItems = Math.max(1, itemsPerRow) * Math.max(1, rows);
+        GROUP_ITEMS_PER_PAGE = Math.max(10, Math.min(calculatedItems, 100)); // Min 10, Max 100
+        
+    }
+}
+
+// Recalculate on window resize
+window.addEventListener('resize', () => {
+    const wasGroupsPage = currentItemGroupsPage;
+    const wasItemsPage = currentGroupItemsPage;
+    
+    calculateItemsPerPage();
+    
+    // Recalculate total pages
+    if (itemGroups.length > 0) {
+        totalItemGroupsPages = Math.ceil(itemGroups.length / ITEMS_PER_PAGE);
+        currentItemGroupsPage = Math.min(wasGroupsPage, totalItemGroupsPages - 1);
+        displayItemGroupsWithPagination();
+    }
+    
+    if (allGroupItems.length > 0 && currentItemGroup) {
+        // Reload current page to adjust for new items per page
+        loadItemsByGroup(currentItemGroup, 0);
+    }
+});
 
 // Load item groups
 function loadItemGroups(callback) {
     // console.log('Loading item groups...');
     frappe.call({
-        method: "frappe.client.get_list",
-        args: {
-            doctype: "Item Group",
-            fields: ["name", "item_group_name"],
-            limit: 100
-        },
+        method: "havano_pos_addson.api.get_item_groups",
         callback: function(response) {
             // console.log('Item groups response:', response);
             if (response.message) {
-                itemGroups = response.message;
-                totalItemGroupsPages = Math.ceil(itemGroups.length / ITEMS_PER_PAGE);
-                currentItemGroupsPage = 0; // Reset to first page
-                // console.log('Item groups loaded:', itemGroups.length, 'groups');
-                // Ensure DOM is ready before displaying
+                originalItemGroups = response.message;
+                itemGroups = [...originalItemGroups];
+                filteredItemGroups = [...itemGroups];
+                
+                // Calculate items per page based on screen size
                 setTimeout(() => {
+                    calculateItemsPerPage();
+                    totalItemGroupsPages = Math.ceil(itemGroups.length / ITEMS_PER_PAGE);
+                    currentItemGroupsPage = 0; // Reset to first page
+                    // console.log('Item groups loaded:', itemGroups.length, 'groups');
                     displayItemGroupsWithPagination();
+                    
+                    // Setup search input event listener
+                    setupGroupSearchListener();
                 }, 100);
                 if (callback) callback();
             } else {
@@ -43,6 +119,42 @@ function loadItemGroups(callback) {
             if (callback) callback();
         }
     });
+}
+
+// Setup search input event listener
+function setupGroupSearchListener() {
+    const searchInput = document.getElementById('ha-group-search-input');
+    if (searchInput) {
+        // Add event listener for real-time search
+        searchInput.addEventListener('input', function(e) {
+            filterItemGroups(e.target.value);
+        });
+        
+        // Also support Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                filterItemGroups(e.target.value);
+            }
+        });
+    }
+}
+
+// Filter item groups based on search
+function filterItemGroups(searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') {
+        filteredItemGroups = [...originalItemGroups];
+    } else {
+        const search = searchTerm.toLowerCase().trim();
+        filteredItemGroups = originalItemGroups.filter(group => {
+            const groupName = (group.item_group_name || group.name || '').toLowerCase();
+            return groupName.includes(search);
+        });
+    }
+    
+    itemGroups = [...filteredItemGroups];
+    totalItemGroupsPages = Math.ceil(itemGroups.length / ITEMS_PER_PAGE);
+    currentItemGroupsPage = 0; // Reset to first page
+    displayItemGroupsWithPagination();
 }
 
 // Display item groups with pagination
@@ -69,6 +181,10 @@ function displayItemGroupsWithPagination() {
         // console.log('Item groups container is visible');
     }
     
+    // Create wrapper for pagination and groups (same row)
+    const paginationAndGroupsWrapper = document.createElement('div');
+    paginationAndGroupsWrapper.className = 'ha-pagination-and-groups-wrapper';
+    
     // Create pagination controls container
     const paginationContainer = document.createElement('div');
     paginationContainer.className = 'ha-pagination-container';
@@ -84,11 +200,6 @@ function displayItemGroupsWithPagination() {
             displayItemGroupsWithPagination();
         }
     });
-    
-    // Page info
-    const pageInfo = document.createElement('span');
-    pageInfo.className = 'ha-page-info';
-    pageInfo.textContent = `Page ${currentItemGroupsPage + 1} of ${totalItemGroupsPages}`;
     
     // Add page numbers if there are more than 3 pages
     const pageNumbersContainer = document.createElement('div');
@@ -124,12 +235,17 @@ function displayItemGroupsWithPagination() {
     
     // Add pagination controls
     paginationContainer.appendChild(prevBtn);
-    paginationContainer.appendChild(pageInfo);
     if (totalItemGroupsPages > 3) {
         paginationContainer.appendChild(pageNumbersContainer);
     }
     paginationContainer.appendChild(nextBtn);
-    itemGroupsContainer.appendChild(paginationContainer);
+    
+    // Add pagination to wrapper
+    paginationAndGroupsWrapper.appendChild(paginationContainer);
+    
+    // Create wrapper for group buttons
+    const groupsButtonsWrapper = document.createElement('div');
+    groupsButtonsWrapper.className = 'ha-groups-buttons-wrapper';
     
     // Display current page groups
     currentPageGroups.forEach(group => {
@@ -147,11 +263,17 @@ function displayItemGroupsWithPagination() {
             
             // Load items for this group
             currentItemGroup = group.name;
-            loadItemsByGroup(group.name);
+            loadItemsByGroup(group.name, 0);
         });
         
-        itemGroupsContainer.appendChild(groupBtn);
+        groupsButtonsWrapper.appendChild(groupBtn);
     });
+    
+    // Add groups to wrapper
+    paginationAndGroupsWrapper.appendChild(groupsButtonsWrapper);
+    
+    // Add the combined wrapper to container
+    itemGroupsContainer.appendChild(paginationAndGroupsWrapper);
 }
 
 // Go to specific page
@@ -205,25 +327,27 @@ function displayItemGroups(groups) {
     displayItemGroupsWithPagination();
 }
 
-// Load items by group
-function loadItemsByGroup(groupName) {
+// Load items by group using API with pagination
+function loadItemsByGroup(groupName, page = 0) {
     showLoading();
+    currentGroupItemsPage = page;
     
     frappe.call({
-        method: "frappe.client.get_list",
+        method: "havano_pos_addson.api.get_items_by_group",
         args: {
-            doctype: "Item",
-            fields: ["name", "item_name", "description", "stock_uom", "valuation_rate"],
-            filters: { item_group: groupName },
-            limit: 100
+            item_group: groupName,
+            page: page,
+            page_size: GROUP_ITEMS_PER_PAGE
         },
         callback: function(response) {
             hideLoading();
-            if (response.message) {
-                allGroupItems = response.message; // Store all items
-                totalGroupItemsPages = Math.ceil(allGroupItems.length / GROUP_ITEMS_PER_PAGE);
-                currentGroupItemsPage = 0; // Reset to first page
+            if (response.message && response.message.items) {
+                allGroupItems = response.message.items;
+                totalGroupItemsPages = response.message.total_pages;
+                currentGroupItemsPage = response.message.page;
                 displayGroupItemsWithPagination();
+            } else if (response.message && response.message.error) {
+                showToast('Error: ' + response.message.error, 'error');
             } else {
                 showToast('Failed to load items for this group', 'error');
             }
@@ -257,15 +381,40 @@ function displayGroupItemsWithPagination() {
         prevBtn.disabled = currentGroupItemsPage === 0;
         prevBtn.addEventListener('click', () => {
             if (currentGroupItemsPage > 0) {
-                currentGroupItemsPage--;
-                displayGroupItemsWithPagination();
+                loadItemsByGroup(currentItemGroup, currentGroupItemsPage - 1);
             }
         });
         
-        // Page info
-        const pageInfo = document.createElement('span');
-        pageInfo.className = 'ha-group-page-info';
-        pageInfo.textContent = `Page ${currentGroupItemsPage + 1} of ${totalGroupItemsPages}`;
+        // Add page numbers
+        const pageNumbersContainer = document.createElement('div');
+        pageNumbersContainer.className = 'ha-page-numbers';
+        
+        if (totalGroupItemsPages <= 5) {
+            // Show all pages if 5 or fewer
+            for (let i = 0; i < totalGroupItemsPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `ha-group-page-number-btn ${i === currentGroupItemsPage ? 'active' : ''}`;
+                pageBtn.textContent = i + 1;
+                pageBtn.addEventListener('click', () => {
+                    loadItemsByGroup(currentItemGroup, i);
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        } else {
+            // Show current page and neighbors if more than 5 pages
+            const startPage = Math.max(0, currentGroupItemsPage - 1);
+            const endPage = Math.min(totalGroupItemsPages - 1, currentGroupItemsPage + 1);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `ha-group-page-number-btn ${i === currentGroupItemsPage ? 'active' : ''}`;
+                pageBtn.textContent = i + 1;
+                pageBtn.addEventListener('click', () => {
+                    loadItemsByGroup(currentItemGroup, i);
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        }
         
         // Next button
         const nextBtn = document.createElement('button');
@@ -274,29 +423,23 @@ function displayGroupItemsWithPagination() {
         nextBtn.disabled = currentGroupItemsPage >= totalGroupItemsPages - 1;
         nextBtn.addEventListener('click', () => {
             if (currentGroupItemsPage < totalGroupItemsPages - 1) {
-                currentGroupItemsPage++;
-                displayGroupItemsWithPagination();
+                loadItemsByGroup(currentItemGroup, currentGroupItemsPage + 1);
             }
         });
         
         // Add pagination controls
         paginationContainer.appendChild(prevBtn);
-        paginationContainer.appendChild(pageInfo);
+        paginationContainer.appendChild(pageNumbersContainer);
         paginationContainer.appendChild(nextBtn);
         groupItemsContainer.appendChild(paginationContainer);
     }
     
-    // Calculate current page items
-    const startIndex = currentGroupItemsPage * GROUP_ITEMS_PER_PAGE;
-    const endIndex = startIndex + GROUP_ITEMS_PER_PAGE;
-    const currentPageItems = allGroupItems.slice(startIndex, endIndex);
-    
-    // Display current page items
-    currentPageItems.forEach(item => {
+    // Display items (no slicing needed, items are already paginated from API)
+    allGroupItems.forEach(item => {
         const itemBtn = document.createElement('div');
         itemBtn.className = 'ha-group-item-btn';
         itemBtn.innerHTML = `
-            <span class="ha-item-code-small item-code">${item.item_name}</span>
+            <span class="ha-item-code-small">${item.item_name}</span>
         `;
             
         itemBtn.addEventListener('click', () => {
@@ -337,7 +480,7 @@ function addItemToTable(item) {
     const itemDescription = item.description || '';
     const isGiftItem = itemDescription.toLowerCase().includes('gift');
     if (itemRate === 0 && isGiftItem) {
-        frappe.show_alert(`Item "${item.item_name || item.name || 'Unknown Item'}" is a gift item and rate is empty.`);
+        // frappe.show_alert(`Item "${item.item_name || item.name || 'Unknown Item'}" is a gift item and rate is empty.`);
     }
     if (itemRate === 0 && !isGiftItem) {
         // Show error message (only for non-gift items)

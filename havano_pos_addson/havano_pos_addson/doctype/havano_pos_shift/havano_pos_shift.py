@@ -9,6 +9,13 @@ class HavanoPOSShift(Document):
 
     def before_save(self):
         self.calculate_totals()
+        
+        # Calculate expected_amount if not already set
+        if not self.expected_amount:
+            opening_amt = flt(self.opening_amount or 0)
+            total_sales_amt = flt(self.total_sales or 0)
+            self.expected_amount = str(opening_amt + total_sales_amt)
+        
         self.calculate_difference()
 
     def calculate_totals(self):
@@ -37,8 +44,13 @@ class HavanoPOSShift(Document):
 
     def calculate_difference(self):
         """Calculate difference between expected closing and actual closing."""
-        expected = (self.opening_amount or 0) + sum(p.amount for p in self.payments)
-        closing = self.closing_amount or 0
+        # Use expected_amount if set, otherwise calculate it
+        if self.expected_amount:
+            expected = flt(self.expected_amount)
+        else:
+            expected = flt(self.opening_amount or 0) + flt(self.total_sales or 0)
+        
+        closing = flt(self.closing_amount or 0)
         self.difference = closing - expected
 
 
@@ -49,12 +61,17 @@ from frappe.utils import nowdate, flt
 
 @frappe.whitelist()
 def open_shift(openingAmount=None):
-    """Mark a shift as open and set opening amount."""
+    """Mark a shift as open and set opening amount for current user."""
+    
+    current_user = frappe.session.user
 
-    # Check if there is already an open shift
-    existing_open = frappe.db.exists("Havano POS Shift", {"status": "open"})
+    # Check if current user already has an open shift
+    existing_open = frappe.db.exists("Havano POS Shift", {
+        "status": "open",
+        "user": current_user
+    })
     if existing_open:
-        frappe.throw("You cannot open a new shift while another shift is still open.")
+        frappe.throw("You cannot open a new shift while you have another shift still open.")
 
     # Make sure openingAmount is safely converted to a number
     opening_amount_value = flt(openingAmount) if openingAmount else 0
@@ -62,6 +79,7 @@ def open_shift(openingAmount=None):
     # Create new shift document
     doc = frappe.new_doc("Havano POS Shift")
     doc.status = "open"
+    doc.user = current_user
     doc.opening_amount = opening_amount_value
     doc.shift_date = nowdate()
 
@@ -72,7 +90,8 @@ def open_shift(openingAmount=None):
     return {
         "name": doc.name,
         "status": doc.status,
-        "opening_amount": doc.opening_amount
+        "opening_amount": doc.opening_amount,
+        "user": doc.user
     }
 
 
@@ -81,18 +100,22 @@ def open_shift(openingAmount=None):
 @frappe.whitelist()
 def close_shift(shift_name: str, closing_amount: float = 0, payments: list | str = None):
     """Mark a shift as closed, save payments, calculate totals/difference, and submit the shift."""
-    print("closing shift data -------------------------")
-    print(shift_name)
-    print(closing_amount)
-    print(payments)
+    current_user = frappe.session.user
+    
+   
     if not frappe.db.exists("Havano POS Shift", shift_name):
         frappe.throw(f"Shift {shift_name} not found")
+
+    doc = frappe.get_doc("Havano POS Shift", shift_name)
+    
+    # Verify that the current user owns this shift
+    if doc.user != current_user:
+        frappe.throw(f"You cannot close this shift. It belongs to {doc.user}.")
 
     if isinstance(payments, str):
         import json
         payments = json.loads(payments)
 
-    doc = frappe.get_doc("Havano POS Shift", shift_name)
     doc.status = "closed"
 
     # Save closing amount
@@ -101,6 +124,11 @@ def close_shift(shift_name: str, closing_amount: float = 0, payments: list | str
 
     # Recalculate totals from POS entries (this sets payments table from actual sales)
     doc.calculate_totals()
+    
+    # Calculate expected amount (opening + total_sales)
+    opening_amt = flt(doc.opening_amount or 0)
+    total_sales_amt = flt(doc.total_sales or 0)
+    doc.expected_amount = str(opening_amt + total_sales_amt)
     
     # Reset shift_amount child table
     doc.set("shift_amount", [])
@@ -122,8 +150,10 @@ def close_shift(shift_name: str, closing_amount: float = 0, payments: list | str
         print(f"Added {len(doc.shift_amount)} rows to shift_amount table")
         print(f"Payments table has {len(doc.payments)} rows from POS entries")
 
-    # Calculate difference
+    # Calculate difference (closing_amount - expected_amount)
     doc.calculate_difference()
+    
+    print(f"Shift amounts - Opening: {doc.opening_amount}, Sales: {doc.total_sales}, Expected: {doc.expected_amount}, Closing: {doc.closing_amount}, Difference: {doc.difference}")
 
     # Save and submit the shift
     doc.save(ignore_permissions=True)

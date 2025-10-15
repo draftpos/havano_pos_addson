@@ -6,9 +6,10 @@ function checkOpenShift(callback) {
     args: {
       doctype: "Havano POS Shift",
       filters: {
-        status: "open"
+        status: "open",
+        user: frappe.session.user  // Filter by current user
       },
-      fields: ["name", "shift_date", "status"],
+      fields: ["name", "shift_date", "status", "user"],
       limit_page_length: 1
     },
     callback: function(r) {
@@ -16,7 +17,7 @@ function checkOpenShift(callback) {
         // console.log(r);
         localStorage.setItem("havano_pos_shift", JSON.stringify(r));
       if (!r.message || r.message.length === 0) {
-        // No open shift
+        // No open shift for current user
         // alert("Please open a shift first");
         haPosOpeningOpenPopup("Please open a shift first");
         if (callback) callback(false);

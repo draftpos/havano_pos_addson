@@ -1,16 +1,58 @@
+// Global variables for group filtering
+let originalItemGroups = [];
+let filteredItemGroups = [];
+let ITEMS_PER_PAGE = 100; // Non-touch UI shows all groups at once
+
+// Calculate items per page based on screen size
+function calculateItemsPerPage() {
+    // Non-touch UI typically has more screen space, keep it simple
+    if (groupItemsContainer) {
+        const containerWidth = groupItemsContainer.offsetWidth || window.innerWidth;
+        const containerHeight = groupItemsContainer.offsetHeight || 600;
+        const itemWidth = 150; // Width of each item button (updated to match CSS)
+        const itemHeight = 60; // Min height of each item button (updated to match CSS)
+        const padding = 20;
+        const gap = 1; // Gap between items
+        
+        // Calculate items per row considering width and gaps
+        const itemsPerRow = Math.floor((containerWidth - padding) / (itemWidth + gap));
+        
+        // Calculate number of rows considering height and gaps
+        const availableHeight = containerHeight - 50; // Reserve space for pagination
+        const rows = Math.floor(availableHeight / (itemHeight + gap));
+        
+        // Total items = rows × columns
+        const calculatedItems = Math.max(1, itemsPerRow) * Math.max(1, rows);
+        ITEMS_PER_PAGE = Math.max(20, Math.min(calculatedItems, 100));
+        
+        console.log(`Group Items Calculation (Non-Touch): ${itemsPerRow} cols × ${rows} rows = ${calculatedItems} items per page (using ${ITEMS_PER_PAGE})`);
+    }
+}
+
+// Recalculate on window resize
+window.addEventListener('resize', () => {
+    calculateItemsPerPage();
+});
+
 // Load item groups
 function loadItemGroups(callback) {
     frappe.call({
-        method: "frappe.client.get_list",
-        args: {
-            doctype: "Item Group",
-            fields: ["name", "item_group_name"],
-            limit: 100
-        },
+        method: "havano_pos_addson.api.get_item_groups",
         callback: function(response) {
             if (response.message) {
-                itemGroups = response.message;
-                displayItemGroups(itemGroups.slice(0, 8)); // Show first 8 groups
+                originalItemGroups = response.message;
+                itemGroups = [...originalItemGroups];
+                filteredItemGroups = [...itemGroups];
+                
+                // Calculate items per page based on screen size
+                setTimeout(() => {
+                    calculateItemsPerPage();
+                    displayItemGroups(itemGroups);
+                    
+                    // Setup search input event listener
+                    setupGroupSearchListener();
+                }, 100);
+                
                 if (callback) callback();
             } else {
                 showToast('Failed to load item groups', 'error');
@@ -24,9 +66,48 @@ function loadItemGroups(callback) {
     });
 }
 
+// Setup search input event listener
+function setupGroupSearchListener() {
+    const searchInput = document.getElementById('ha-group-search-input');
+    if (searchInput) {
+        // Add event listener for real-time search
+        searchInput.addEventListener('input', function(e) {
+            filterItemGroups(e.target.value);
+        });
+        
+        // Also support Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                filterItemGroups(e.target.value);
+            }
+        });
+    }
+}
+
+// Filter item groups based on search
+function filterItemGroups(searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') {
+        filteredItemGroups = [...originalItemGroups];
+    } else {
+        const search = searchTerm.toLowerCase().trim();
+        filteredItemGroups = originalItemGroups.filter(group => {
+            const groupName = (group.item_group_name || group.name || '').toLowerCase();
+            return groupName.includes(search);
+        });
+    }
+    
+    itemGroups = [...filteredItemGroups];
+    displayItemGroups(itemGroups);
+}
+
 // Display item groups
 function displayItemGroups(groups) {
     itemGroupsContainer.innerHTML = '';
+    
+    // Create wrapper for groups (non-touch UI doesn't need pagination in same row)
+    const groupsButtonsWrapper = document.createElement('div');
+    groupsButtonsWrapper.className = 'ha-groups-buttons-wrapper';
+    groupsButtonsWrapper.style.padding = '10px';
     
     groups.forEach(group => {
         const groupBtn = document.createElement('button');
@@ -46,37 +127,29 @@ function displayItemGroups(groups) {
             loadItemsByGroup(group.name);
         });
         
-        itemGroupsContainer.appendChild(groupBtn);
+        groupsButtonsWrapper.appendChild(groupBtn);
     });
     
-    // Add "More" button if there are more than 8 groups
-    if (itemGroups.length > 8) {
-        const moreBtn = document.createElement('button');
-        moreBtn.className = 'ha-item-group-btn';
-        moreBtn.textContent = 'More...';
-        moreBtn.addEventListener('click', () => {
-            displayItemGroups(itemGroups); // Show all groups
-        });
-        itemGroupsContainer.appendChild(moreBtn);
-    }
+    itemGroupsContainer.appendChild(groupsButtonsWrapper);
 }
 
-// Load items by group
-function loadItemsByGroup(groupName) {
+// Load items by group using API with pagination
+function loadItemsByGroup(groupName, page = 0) {
     showLoading();
     
     frappe.call({
-        method: "frappe.client.get_list",
+        method: "havano_pos_addson.api.get_items_by_group",
         args: {
-            doctype: "Item",
-            fields: ["name", "item_name", "description", "stock_uom", "valuation_rate"],
-            filters: { item_group: groupName },
-            limit: 100
+            item_group: groupName,
+            page: page,
+            page_size: ITEMS_PER_PAGE // Dynamic based on screen size
         },
         callback: function(response) {
             hideLoading();
-            if (response.message) {
-                displayGroupItems(response.message);
+            if (response.message && response.message.items) {
+                displayGroupItems(response.message.items);
+            } else if (response.message && response.message.error) {
+                showToast('Error: ' + response.message.error, 'error');
             } else {
                 showToast('Failed to load items for this group', 'error');
             }

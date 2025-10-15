@@ -6,12 +6,16 @@
  "field_order": [
   "shift_date",
   "opening_amount",
-  "closing_amount",
+  "actual_closing",
   "shift_number",
+  "user",
+  "closing_amount",
   "column_break_evfu",
   "shift_name",
   "difference",
   "total_invoices",
+  "total_sales",
+  "expected_amount",
   "status",
   "section_break_umqh",
   "payments",
@@ -37,9 +41,8 @@
   },
   {
    "fieldname": "closing_amount",
-   "fieldtype": "Float",
-   "label": "Actual Closing",
-   "precision": "2"
+   "fieldtype": "Data",
+   "label": "Closing Amount"
   },
   {
    "fieldname": "shift_number",
@@ -49,6 +52,14 @@
    "unique": 1
   },
   {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
    "fieldname": "shift_name",
    "fieldtype": "Data",
    "label": "Shift Name"
@@ -56,7 +67,7 @@
   {
    "fieldname": "difference",
    "fieldtype": "Float",
-   "label": "Difference",
+   "label": "Variance",
    "precision": "2",
    "read_only": 1
   },
@@ -102,11 +113,28 @@
    "fieldtype": "Table",
    "label": "Shift Amount",
    "options": "Havano Shifts Close"
+  },
+  {
+   "fieldname": "actual_closing",
+   "fieldtype": "Float",
+   "label": "Actual Closing",
+   "precision": "2"
+  },
+  {
+   "fieldname": "expected_amount",
+   "fieldtype": "Data",
+   "label": "Expected Amount (Opening + Total Sales)"
+  },
+  {
+   "fieldname": "total_sales",
+   "fieldtype": "Data",
+   "label": "Total Sales",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-01 16:32:07.122570",
+ "modified": "2025-10-12 18:43:39.443184",
  "modified_by": "Administrator",
  "module": "Havano Pos Addson",
  "name": "Havano POS Shift",

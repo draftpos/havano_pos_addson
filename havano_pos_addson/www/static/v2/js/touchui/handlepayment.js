@@ -526,6 +526,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (txt === 'Clear') btn.addEventListener('click', clearActiveInput);
       else if (txt === 'Back') btn.addEventListener('click', backspaceActiveInput);
       else if (txt === 'Cancel') btn.addEventListener('click', closePaymentPopup);
+      else if (txt === '.') btn.addEventListener('click', function() {
+        handleKeypadInput('.');
+      });
       // leave other buttons alone (e.g. numeric duplicates handled above)
     });
 

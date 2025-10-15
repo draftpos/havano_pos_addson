@@ -44,16 +44,89 @@ function loadPosSettings(callback) {
             limit: 2
         },
         callback: function(response) {
-            if (response.message) {
-                if (callback) callback(response.message);
+            if (response.message && response.message.length > 0) {
+                const settings = response.message[0];
+                
+                // Validate default customer
+                if (!settings.default_customer) {
+                    hideLoading();
+                    frappe.msgprint({
+                        title: __('POS Configuration Error'),
+                        indicator: 'red',
+                        message: __('Default Customer is not set in POS Settings. Please configure POS Settings before using POS.')
+                    });
+                    // Prevent POS from loading
+                    setTimeout(function() {
+                        window.location.href = '/app';
+                    }, 3000);
+                    return;
+                }
+                
+                // Validate default customer has price list
+                validateCustomerPriceList(settings, function(isValid) {
+                    if (isValid) {
+                        if (callback) callback(response.message);
+                    } else {
+                        hideLoading();
+                        frappe.msgprint({
+                            title: __('POS Configuration Error'),
+                            indicator: 'red',
+                            message: __('Default Customer does not have a Default Price List set. Please configure the customer before using POS.')
+                        });
+                        // Prevent POS from loading
+                        setTimeout(function() {
+                            window.location.href = '/app';
+                        }, 3000);
+                    }
+                });
             } else {
-                showToast('Failed to load POS settings', 'error');
-                if (callback) callback([]);
+                hideLoading();
+                frappe.msgprint({
+                    title: __('POS Configuration Error'),
+                    indicator: 'red',
+                    message: __('POS Settings not found. Please configure POS Settings before using POS.')
+                });
+                setTimeout(function() {
+                    window.location.href = '/app';
+                }, 3000);
             }
         },
         error: function(error) {
+            hideLoading();
             showToast('Error loading POS settings', 'error');
             if (callback) callback([]);
+        }
+    });
+}
+
+// Validate that customer has a default price list
+function validateCustomerPriceList(settings, callback) {
+    if (!settings.default_customer) {
+        if (callback) callback(false);
+        return;
+    }
+    
+    frappe.call({
+        method: "frappe.client.get",
+        args: {
+            doctype: "Customer",
+            name: settings.default_customer,
+            fields: ["name", "default_price_list"]
+        },
+        callback: function(response) {
+            if (response.message) {
+                const customer = response.message;
+                if (customer.default_price_list) {
+                    if (callback) callback(true);
+                } else {
+                    if (callback) callback(false);
+                }
+            } else {
+                if (callback) callback(false);
+            }
+        },
+        error: function(error) {
+            if (callback) callback(false);
         }
     });
 }

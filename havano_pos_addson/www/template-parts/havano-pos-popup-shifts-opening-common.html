@@ -381,9 +381,10 @@
         args: {
           doctype: "Havano POS Shift",
           filters: {
-            status: "open"
+            status: "open",
+            user: frappe.session.user  // Filter by current user
           },
-          fields: ["name", "shift_date", "status"],
+          fields: ["name", "shift_date", "status", "user"],
           limit_page_length: 1
         },
         callback: function(r) {
@@ -413,9 +414,17 @@
             // Enable the close button after successful shift opening
             enableCloseButton();
             haPosOpeningClosePopup();
-            setTimeout(function () {
-                window.location.reload();
-              }, 2 * 1000); 
+            
+            // Clear cache before reloading
+            frappe.call({
+              method: "frappe.sessions.clear",
+              callback: function() {
+                setTimeout(function () {
+                  // Force complete page reload from server
+                  window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+                }, 2 * 1000);
+              }
+            });
             // document.getElementById("ha-pos-opening-status").innerHTML =
             //   "Status: <span class='open'>Open</span>";
             // console.log("Shift opened:", r.message);

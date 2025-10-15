@@ -53,11 +53,26 @@
 </div>
 
 <div class="ha-total-add-button-container">
-    <button class="ha-add-item-btn" id="btnAddRow">
-        <i class="fas fa-plus me-2"></i>Add Item
-    </button>
     <div>
-        <span>Total</span>
-        <span class="ha-total-value" id="totalAmount">$0.00</span>
+        <button class="ha-add-item-btn" id="btnAddRow">
+            <i class="fas fa-plus me-2"></i>Add Item
+        </button>
+    </div>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div>
+            <span>Total</span>
+            <span class="ha-total-value" id="totalAmount">$0.00</span>
+        </div>
+        
+        <!-- Search Groups Input (Extreme Right) -->
+        <div class="ha-search-groups-wrapper" style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none;"></i>
+            <input type="text" 
+                   id="ha-group-search-input" 
+                   class="ha-group-search-input" 
+                   placeholder="Search groups..." 
+                   style="width: 200px; padding: 8px 32px 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; transition: all 0.3s ease;">
+        </div>
     </div>
 </div>

@@ -142,16 +142,66 @@ function saveSalesInvoice() {
 }
 
 
+// Function to check if user has an open shift
+function checkUserHasOpenShift() {
+    return new Promise((resolve, reject) => {
+        frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "Havano POS Shift",
+                filters: {
+                    status: "open",
+                    user: frappe.session.user
+                },
+                fields: ["name", "status"],
+                limit_page_length: 1
+            },
+            callback: function(r) {
+                if (r.message && r.message.length > 0) {
+                    resolve(true);
+                } else {
+                    reject("You must have an open shift to save payments. Please open a shift first.");
+                }
+            },
+            error: function(err) {
+                reject("Error checking shift status: " + (err.message || "Unknown error"));
+            }
+        });
+    });
+}
+
 // document.getElementById("ha-pos-savepaymentdata").addEventListener("click", saveSalesInvoice);
 
 document.getElementById("ha-pos-savepaymentdata")
   .addEventListener("click", function () {
-    saveSalesInvoice().then((invoiceName) => {
-        // alert(invoiceName);
-        closePaymentPopup();
-    }).catch(err => {
-        console.error("Failed to save invoice:", err);
-    });
+    // First check if user has an open shift
+    checkUserHasOpenShift()
+        .then(() => {
+            return saveSalesInvoice();
+        })
+        .then((invoiceName) => {
+            // alert(invoiceName);
+            closePaymentPopup();
+        })
+        .catch(err => {
+            console.error("Failed to save invoice:", err);
+            const errorMsg = err.toString();
+            
+            // Close payment modal
+            closePaymentPopup();
+            
+            // Show error messages
+            showToast(errorMsg, 'error');
+            frappe.show_alert({
+                message: errorMsg,
+                indicator: 'red'
+            }, 5);
+            
+            // Show open shift modal
+            if (typeof haPosOpeningOpenPopup === 'function') {
+                haPosOpeningOpenPopup("Please open a shift to continue");
+            }
+        });
 });
 
  

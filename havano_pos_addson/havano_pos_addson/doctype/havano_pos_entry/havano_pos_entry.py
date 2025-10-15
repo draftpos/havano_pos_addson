@@ -39,6 +39,8 @@ def save_pos_entries(payments):
         payments = json.loads(payments)
 
     results = []
+    shift_updates = {}  # Track total_sales per shift
+    
     for p in payments:
         # ✅ Basic validation
         if not p.get("shift_name"):
@@ -79,6 +81,31 @@ def save_pos_entries(payments):
         doc.submit()
         frappe.db.commit()
         results.append(doc.name)
+        
+        # Track base_amount for shift update
+        shift_name = p.get("shift_name")
+        if shift_name:
+            if shift_name not in shift_updates:
+                shift_updates[shift_name] = 0
+            shift_updates[shift_name] += float(base_amount)
+    
+    # Update shift total_sales
+    for shift_name, amount_to_add in shift_updates.items():
+        try:
+            shift_doc = frappe.get_doc("Havano POS Shift", shift_name)
+            current_total = float(shift_doc.total_sales or 0)
+            new_total = current_total + amount_to_add
+            shift_doc.total_sales = str(new_total)  # Convert to string for Data field type
+            
+            # Also update expected_amount
+            opening_amt = float(shift_doc.opening_amount or 0)
+            shift_doc.expected_amount = str(opening_amt + new_total)
+            
+            shift_doc.save(ignore_permissions=True)
+            frappe.db.commit()
+            print(f"Updated shift {shift_name} - total_sales: {new_total}, expected_amount: {shift_doc.expected_amount}")
+        except Exception as e:
+            print(f"Error updating shift {shift_name}: {str(e)}")
 
     return {"created": results}
 

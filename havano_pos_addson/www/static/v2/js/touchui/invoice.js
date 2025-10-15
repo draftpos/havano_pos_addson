@@ -1,5 +1,85 @@
+// Progress Bar Helper Functions
+function showProgressBar() {
+    const overlay = document.getElementById('ha-pos-progress-overlay');
+    const progressBar = document.getElementById('ha-pos-progress-bar');
+    const progressText = document.getElementById('ha-pos-progress-text');
+    
+    if (overlay) {
+        overlay.style.display = 'block';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = 'Saving invoice...';
+        
+        // Disable scrolling
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('Progress overlay not found');
+    }
+}
+
+function updateProgress(percentage, message) {
+    const progressBar = document.getElementById('ha-pos-progress-bar');
+    const progressText = document.getElementById('ha-pos-progress-text');
+    
+    if (progressBar) progressBar.style.width = percentage + '%';
+    if (progressText && message) progressText.textContent = message;
+}
+
+function hideProgressBar() {
+    const overlay = document.getElementById('ha-pos-progress-overlay');
+    
+    if (overlay) {
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 500);
+    }
+}
+
+// Print Invoice Function
+function printInvoice(invoiceName) {
+    return new Promise((resolve, reject) => {
+        if (!invoiceName) {
+            reject('No invoice name provided');
+            return;
+        }
+        
+        try {
+            updateProgress(90, 'Opening print preview...');
+            
+            // Build the print URL
+            const printUrl = `/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name=${encodeURIComponent(invoiceName)}&format=Standard&no_letterhead=0`;
+            
+            // Open in modal iframe
+            if (typeof window.openPrintModal === 'function') {
+                window.openPrintModal(printUrl);
+                updateProgress(100, 'Complete!');
+                
+                // Small delay to ensure modal opens
+                setTimeout(() => {
+                    resolve(invoiceName);
+                }, 500);
+            } else {
+                // Fallback to new window if modal function not available
+                const printWindow = window.open(printUrl, '_blank');
+                
+                if (printWindow) {
+                    updateProgress(100, 'Complete!');
+                    setTimeout(() => {
+                        resolve(invoiceName);
+                    }, 500);
+                } else {
+                    reject('Unable to open print preview. Please allow pop-ups.');
+                }
+            }
+        } catch (err) {
+            console.error('Print error:', err);
+            reject('Error opening print preview: ' + err.message);
+        }
+    });
+}
+
 // Save sales invoice
-function saveSalesInvoice() {
+function saveSalesInvoice(shouldPrint = false) {
     return new Promise((resolve, reject) => {
         const customerSelect = document.getElementById('customer');
         const priceListSelect = document.getElementById('pricelist');
@@ -37,9 +117,14 @@ function saveSalesInvoice() {
             return reject("No items added");
         }
 
-        showLoading();
-
-        // Create sales invoice
+        // Show progress bar instead of loading
+        if (shouldPrint) {
+            showProgressBar();
+            updateProgress(30, 'Creating invoice...');
+        } else {
+            showLoading();
+        }
+        
         frappe.call({
             method: "havano_pos_addson.havano_pos_addson.doctype.ha_pos_invoice.ha_pos_invoice.create_sales_invoice",
             args: {
@@ -48,32 +133,34 @@ function saveSalesInvoice() {
                 price_list: priceListSelect.value || undefined,
             },
             callback: function(response) {
-                hideLoading();
+                if (shouldPrint) {
+                    updateProgress(60, 'Processing...');
+                } else {
+                    hideLoading();
+                }
                 if (response && response.message) {
-                    // console.log("response.message ----------------------");
-                    // console.log(response.message);
-                    
                     // Check if response.message has the required properties
                     if (response.message.name) {
-                        frappe.show_alert(`${response.message.name} Invoice created successfully!`);
+                        // frappe.show_alert(`${response.message.name} Invoice created successfully!`);
 
                         const invoiceNumber = response.message.name;  // ✅ THIS is what we want to return
-                            //----------------------calling custom function to download the txt file-----------------
-                        console.log("downloading ------------------now------------------")
-                        frappe.call({
-                        method: "invoice_override_pos.sales_invoice_hooks.download_invoice_json",
-                        args: { invoice_name: invoiceNumber },
-                        callback: function(r) {
-                            if (r.message) {
-                                const blob = new Blob([JSON.stringify(r.message, null, 4)], { type: "text/plain" });
-                                const link = document.createElement("a");
-                                link.href = URL.createObjectURL(blob);
-                                link.download = invoiceNumber + ".txt";
-                                link.click();
-                            }
-                            }
-                        });
-                        //-----------------------end of custom function call------------------
+                        
+                        // Note: Txt file download disabled
+                        // If you need to re-enable txt file download, uncomment the code below:
+                        // frappe.call({
+                        //     method: "invoice_override_pos.sales_invoice_hooks.download_invoice_json",
+                        //     args: { invoice_name: invoiceNumber },
+                        //     callback: function(r) {
+                        //         if (r.message) {
+                        //             const blob = new Blob([JSON.stringify(r.message, null, 4)], { type: "text/plain" });
+                        //             const link = document.createElement("a");
+                        //             link.href = URL.createObjectURL(blob);
+                        //             link.download = invoiceNumber + ".txt";
+                        //             link.click();
+                        //         }
+                        //     }
+                        // });
+                        
                         const invoiceDate = response.message.posting_date;
                         const currency = response.message.currency || "USD";
                         
@@ -88,81 +175,17 @@ function saveSalesInvoice() {
                             shiftName = havano_pos_shift.message[0].name;
                         }
 
-                        // Collect payment data
+                        // Collect payment data - optimized
                         const payments = [];
-                        // console.log("Looking for payment elements...");
                         
-                        // Try multiple selectors to find payment elements
-                        const paymentSelectors = [
-                            ".ha-pos-payment-pop-method",
-                            ".ha-pos-payment-pop-method-input",
-                            ".payment-method-row",
-                            "[class*='payment']",
-                            ".payment-input"
-                        ];
-                        
-                        let paymentElements = [];
-                        for (const selector of paymentSelectors) {
-                            paymentElements = document.querySelectorAll(selector);
-                            if (paymentElements.length > 0) {
-                                // console.log(`Found payment elements with selector: ${selector}`, paymentElements.length);
-                                break;
-                            }
+                        // Direct query for payment inputs (fastest approach)
+                        let paymentElements = document.querySelectorAll('.ha-pos-payment-pop-method-input');
+                        if (paymentElements.length === 0) {
+                            paymentElements = document.querySelectorAll('.ha-pos-payment-pop-method');
                         }
                         
-                        if (paymentElements.length === 0) {
-                            // console.warn("No payment elements found. Checking for alternative payment structure...");
-                            
-                            // Alternative approach: look for any input fields in payment popup
-                            const paymentPopup = document.querySelector("#ha-pos-payment-popup, .ha-payment-popup, [id*='payment']");
-                            if (paymentPopup) {
-                                const inputs = paymentPopup.querySelectorAll("input[type='number'], input[type='text']");
-                                // console.log("Found inputs in payment popup:", inputs.length);
-                                
-                                inputs.forEach((input, index) => {
-                                    // Get the actual input value (what user entered)
-                                    const inputValue = parseFloat(input.value) || 0;
-                                    
-                                    if (inputValue > 0) {
-                                        // Try to find associated label or method name
-                                        let methodName = `Payment Method ${index + 1}`;
-                                        const label = input.closest('.form-group, .payment-row, .method-row')?.querySelector('label, .label, .method-name');
-                                        if (label) {
-                                            methodName = label.textContent.trim().replace(/^\d+\s*/, '');
-                                        }
-                                        
-                                        // Get currency from input data attribute
-                                        const paymentCurrency = input.getAttribute('data-currency') || currency;
-                                        
-                                        // Get base currency equivalent if available
-                                        const methodContainer = input.closest('.ha-pos-payment-pop-method');
-                                        let baseAmount = inputValue; // Default to input value
-                                        
-                                        if (methodContainer && paymentCurrency !== currency) {
-                                            const baseEquivDiv = methodContainer.querySelector('.ha-base-currency-equivalent');
-                                            if (baseEquivDiv) {
-                                                const baseEquivValue = baseEquivDiv.querySelector('.base-equiv-value');
-                                                if (baseEquivValue) {
-                                                    baseAmount = parseFloat(baseEquivValue.textContent) || inputValue;
-                                                }
-                                            }
-                                        }
-                                        
-                                        payments.push({
-                                            invoice_number: invoiceNumber,
-                                            invoice_date: invoiceDate,
-                                            payment_method: methodName,
-                                            amount: inputValue, // Amount in original currency
-                                            base_amount: baseAmount, // Amount in base currency
-                                            currency: paymentCurrency,
-                                            base_currency: baseCurrency,
-                                            shift_name: shiftName
-                                        });
-                                    }
-                                });
-                            }
-                        } else {
-                            // Original logic for found payment elements
+                        // Process payment elements
+                        if (paymentElements.length > 0) {
                             paymentElements.forEach(methodEl => {
                                 let inputEl, labelEl, methodName;
                                 
@@ -222,7 +245,6 @@ function saveSalesInvoice() {
                             });
                         }
                         
-                        // console.log("Collected payments:", payments);
                         
                         // If no payments found, create a default cash payment with total amount
                         if (payments.length === 0) {
@@ -242,43 +264,39 @@ function saveSalesInvoice() {
                             }
                         }
 
-                        // Save POS Entry records
-                        if (payments.length > 0) {
-                            // console.log("Saving POS Entries with payments:", payments);
-                            
-                            frappe.call({
-                                method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_entry.havano_pos_entry.save_pos_entries",
-                                args: { payments: payments },
-                                callback: function(r) {
-                                    // console.log("POS Entry response:", r);
-                                    if (r.message) {
-                                        // console.log("POS Entries saved successfully:", r.message);
-                                        frappe.show_alert(`POS Entry created successfully!`);
-                                    } else {
-                                        // console.error("No response message from POS Entry creation");
-                                        frappe.show_alert("Warning: POS Entry may not have been created", "warning");
-                                    }
-                                },
-                                error: function(err) {
-                                    // console.error("Error saving POS Entries:", err);
-                                    frappe.show_alert("Error creating POS Entry: " + (err.message || "Unknown error"), "error");
-                                }
-                            });
-                        } else {
-                            // console.warn("No payments found - skipping POS Entry creation");
-                            frappe.show_alert("Warning: No payment data found - POS Entry not created", "warning");
+                        // Update progress
+                        if (shouldPrint) {
+                            updateProgress(70, 'Finalizing...');
                         }
 
-                        // Reset form
-                        itemsTableBody.innerHTML = '';
-                        addNewRow();
-                        updateTotals();
-
-                        // ✅ Resolve invoice name so .then() can use it
+                        // ✅ Resolve invoice name immediately
                         resolve(invoiceNumber);
+                        
+                        // Save POS Entry records asynchronously (non-blocking)
+                        if (payments.length > 0) {
+                            setTimeout(() => {
+                                frappe.call({
+                                    method: "havano_pos_addson.havano_pos_addson.doctype.havano_pos_entry.havano_pos_entry.save_pos_entries",
+                                    args: { payments: payments },
+                                    async: true,
+                                    callback: function(r) {
+                                        if (r.message) {
+                                            // console.log("POS Entry saved successfully");
+                                        }
+                                    }
+                                });
+                            }, 0);
+                        }
+
+                        // Reset form asynchronously (non-blocking)
+                        setTimeout(() => {
+                            itemsTableBody.innerHTML = '';
+                            addNewRow();
+                            updateTotals();
+                        }, 100);
                     } else {
                         // console.error("Invalid response structure:", response.message);
-                        frappe.show_alert("Invoice created but with invalid response structure", "warning");
+                        // frappe.show_alert("Invoice created but with invalid response structure", "warning");
                         return reject("Invalid response structure");
                     }
                 } else {
@@ -286,7 +304,11 @@ function saveSalesInvoice() {
                 }
             },
             error: function(err) {
-                hideLoading();
+                if (shouldPrint) {
+                    hideProgressBar();
+                } else {
+                    hideLoading();
+                }
                 const msg = 'Error creating sales invoice: ' + (err.message || 'Unknown error');
                 showToast(msg, 'error');
                 reject(msg);
@@ -317,19 +339,99 @@ function clearEmptyPaymentMethodsDisplay() {
     });
 }
 
-// document.getElementById("ha-pos-savepaymentdata").addEventListener("click", saveSalesInvoice);
+// Function to check if user has an open shift
+function checkUserHasOpenShift() {
+    return new Promise((resolve, reject) => {
+        frappe.call({
+            method: "frappe.client.get_list",
+            args: {
+                doctype: "Havano POS Shift",
+                filters: {
+                    status: "open",
+                    user: frappe.session.user
+                },
+                fields: ["name", "status"],
+                limit_page_length: 1
+            },
+            callback: function(r) {
+                if (r.message && r.message.length > 0) {
+                    resolve(true);
+                } else {
+                    reject("You must have an open shift to save payments. Please open a shift first.");
+                }
+            },
+            error: function(err) {
+                reject("Error checking shift status: " + (err.message || "Unknown error"));
+            }
+        });
+    });
+}
 
+// Save and Print Function
+function saveAndPrintInvoice() {
+    // First check if user has an open shift
+    checkUserHasOpenShift()
+        .then(() => {
+            // Clear <b> values for empty payment methods before saving
+            clearEmptyPaymentMethodsDisplay();
+            
+            // Save with print flag
+            return saveSalesInvoice(true);
+        })
+        .then((invoiceName) => {
+            // Print the invoice
+            return printInvoice(invoiceName);
+        })
+        .then((invoiceName) => {
+            // Hide progress bar and close popup
+            hideProgressBar();
+            closePaymentPopup();
+            // frappe.show_alert(`Invoice ${invoiceName} saved and printed successfully!`, 'green');
+        })
+        .catch(err => {
+            console.error("Failed to save/print invoice:", err);
+            const errorMsg = err.toString();
+            
+            // Hide progress bar
+            hideProgressBar();
+            
+            // Close payment modal
+            closePaymentPopup();
+            
+            // Show error messages
+            showToast(errorMsg, 'error');
+            // frappe.show_alert({
+            //     message: errorMsg,
+            //     indicator: 'red'
+            // }, 5);
+            
+            // Show open shift modal if needed
+            if (typeof haPosOpeningOpenPopup === 'function' && errorMsg.includes('shift')) {
+                haPosOpeningOpenPopup("Please open a shift to continue");
+            }
+        });
+}
+
+// Save button event listener - Save and Print
 document.getElementById("ha-pos-savepaymentdata")
   .addEventListener("click", function () {
-    // Clear <b> values for empty payment methods before saving
-    clearEmptyPaymentMethodsDisplay();
-    
-    saveSalesInvoice().then((invoiceName) => {
-        // alert(invoiceName);
-        closePaymentPopup();
-    }).catch(err => {
-        console.error("Failed to save invoice:", err);
-    });
+    // console.log('Save button clicked - will save and print');
+    // Call the same function as F3
+    saveAndPrintInvoice();
+});
+
+// F3 Key Handler - Save and Print
+document.addEventListener('keydown', function(e) {
+    // F3 key
+    if (e.key === 'F3') {
+        e.preventDefault();
+        
+        // Check if payment popup is open
+        const paymentOverlay = document.getElementById('paymentOverlay');
+        if (paymentOverlay && paymentOverlay.style.display === 'flex') {
+            saveAndPrintInvoice();
+        }
+    }
 });
 
  

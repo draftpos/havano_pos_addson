@@ -37,3 +37,76 @@ def search_items(search_term=None):
     )
     return items
 
+
+@frappe.whitelist()
+def get_item_groups():
+    """Get all item groups that contain at least one item (regardless of having subgroups)"""
+    # Get all item groups with their item count
+    item_groups = frappe.db.sql("""
+        SELECT 
+            ig.name,
+            ig.item_group_name,
+            (SELECT COUNT(*) 
+             FROM `tabItem` i 
+             WHERE i.item_group = ig.name 
+             AND i.disabled = 0) as item_count
+        FROM `tabItem Group` ig
+        ORDER BY ig.item_group_name
+    """, as_dict=True)
+    
+    # Filter to only include groups that have at least one item
+    # Include groups even if they have subgroups
+    filtered_groups = [
+        {
+            "name": group.name,
+            "item_group_name": group.item_group_name
+        }
+        for group in item_groups
+        if group.item_count > 0
+    ]
+    
+    return filtered_groups
+
+@frappe.whitelist()
+def get_items_by_group(item_group=None, page=0, page_size=20):
+    """Get items by item group with pagination"""
+    try:
+        page = int(page)
+        page_size = int(page_size)
+        start = page * page_size
+        
+        filters = {"disabled": 0}
+        
+        if item_group:
+            filters["item_group"] = item_group
+        
+        # Get total count
+        total_count = frappe.db.count("Item", filters=filters)
+        
+        # Get items with pagination
+        items = frappe.get_all("Item",
+            fields=["name", "item_name", "description", "stock_uom", "valuation_rate", "item_group"],
+            filters=filters,
+            order_by="item_name",
+            start=start,
+            page_length=page_size
+        )
+        
+        return {
+            "items": items,
+            "total_count": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total_count + page_size - 1) // page_size if page_size > 0 else 0
+        }
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Get Items By Group Error")
+        return {
+            "items": [],
+            "total_count": 0,
+            "page": 0,
+            "page_size": page_size,
+            "total_pages": 0,
+            "error": str(e)
+        }
+

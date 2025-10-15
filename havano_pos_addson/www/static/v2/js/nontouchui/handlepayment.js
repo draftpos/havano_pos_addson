@@ -71,7 +71,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!inputEl || inputEl.id === 'sub_total') return;
     const container = inputEl.closest('.ha-pos-payment-method-base-currency');
     const bEl = container ? container.querySelector('b') : null;
-    if (bEl) bEl.textContent = ((parseFloat(inputEl.value) || 0)).toFixed(2);
+    if (!bEl) return;
+    
+    let inputValue = parseFloat(inputEl.value) || 0;
+    const totalAmount = getTotalAmount();
+    
+    // Calculate sum of OTHER payments (excluding current input)
+    let sumOtherPayments = 0;
+    overlay.querySelectorAll('.ha-pos-payment-pop-method-input').forEach(input => {
+      if (input.id === 'sub_total') return;
+      if (input === inputEl) return; // Skip current input
+      sumOtherPayments += parseFloat(input.value) || 0;
+    });
+    
+    // Calculate max allowed for current input
+    const maxAllowed = totalAmount - sumOtherPayments;
+    
+    // If input exceeds maximum, cap it
+    if (inputValue > maxAllowed && maxAllowed >= 0) {
+      inputValue = maxAllowed;
+      inputEl.value = maxAllowed.toFixed(2);
+      console.log(`Payment capped to ${maxAllowed.toFixed(2)} (max allowed)`);
+    }
+    
+    // Update display
+    bEl.textContent = inputValue.toFixed(2);
   }
 
   // --------------------------
@@ -149,6 +173,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (txt === 'Clear') btn.addEventListener('click', clearActiveInput);
       else if (txt === 'Back') btn.addEventListener('click', backspaceActiveInput);
       else if (txt === 'Cancel') btn.addEventListener('click', closePaymentPopup);
+      else if (txt === '.') btn.addEventListener('click', function() {
+        handleKeypadInput('.');
+      });
       // leave other buttons alone (e.g. numeric duplicates handled above)
     });
 

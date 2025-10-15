@@ -91,8 +91,17 @@ function updateTotals() {
         total += parseFloat(cell.value) || 0;
     });
     
-    totalAmount.textContent = `$${total.toFixed(2)}`;
-    subTotal.value = total.toFixed(2);
+    // Update total amount display - with fallback to direct query if cached element is null
+    const totalAmountElement = totalAmount || document.getElementById('totalAmount');
+    if (totalAmountElement) {
+        totalAmountElement.textContent = `$${total.toFixed(2)}`;
+    }
+    
+    // Update subtotal field - with fallback
+    const subTotalElement = subTotal || document.getElementById('sub_total');
+    if (subTotalElement) {
+        subTotalElement.value = total.toFixed(2);
+    }
 }
 
 // Handle function keys

@@ -341,9 +341,9 @@ function bindEvents() {
         if (confirm('Are you sure you want to logout?')) {
             // Show loading message
             if (typeof frappe !== 'undefined' && frappe.show_alert) {
-                frappe.show_alert('Logging out...', 'info');
+                // frappe.show_alert('Logging out...', 'info');
             } else {
-                alert('Logging out...');
+                // alert('Logging out...');
             }
             
             // Clear any cached data first

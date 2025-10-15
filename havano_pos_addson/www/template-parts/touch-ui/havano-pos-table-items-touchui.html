@@ -83,10 +83,20 @@
         <div class="ha-total-section">
             <div class="ha-total-breakdown">
                 
-                <div class="ha-total-row ha-total-final">
+                <!-- <div class="ha-total-row ha-total-final">
                     <span class="ha-total-label">Total:</span>
                     <span class="ha-total-value" id="totalAmount">$0.00</span>
-                </div>
+                </div> -->
+            </div>
+            
+            <!-- Search Groups Input (Extreme Right) -->
+            <div class="ha-search-groups-wrapper" style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none;"></i>
+                <input type="text" 
+                       id="ha-group-search-input" 
+                       class="ha-group-search-input" 
+                       placeholder="Search groups..." 
+                       style="width: 200px; padding: 8px 32px 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; transition: all 0.3s ease;">
             </div>
         </div>
     </div>
@@ -417,6 +427,24 @@
 
 .ha-total-section {
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.ha-search-groups-wrapper {
+    position: relative;
+}
+
+.ha-group-search-input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+    outline: none;
+}
+
+.ha-group-search-input:hover {
+    border-color: #aaa !important;
 }
 
 .ha-total-row {
