@@ -8,6 +8,7 @@
   "ha_pos_settings_on",
   "ha_on_pres_enter",
   "default_customer",
+  "cost_center",
   "column_break_efar",
   "default_price_list",
   "default_payment_method",
@@ -67,10 +68,16 @@
   {
    "fieldname": "section_break_sjjd",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "links": [],
- "modified": "2025-09-29 21:39:00.893702",
+ "modified": "2026-01-15 13:05:58.899727",
  "modified_by": "Administrator",
  "module": "Havano Pos Addson",
  "name": "HA POS Setting",
